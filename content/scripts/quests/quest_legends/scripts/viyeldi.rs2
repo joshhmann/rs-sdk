@@ -56,7 +56,7 @@ if(%legends_progress >= ^legends_defeated_nezikchened_water) { // confirm this
 }
 if(inv_total(worn, deathdagger) > 0) {
     inv_setslot(worn, ^wearpos_rhand, deathdaggerdone, 1);
-    ~update_bas;
+    ~update_all(deathdagger);
     @stab_viyeldi;
 }
 ~chatnpc("<p,neutral>Adventurer, I am already deceased, and therefore impervious to your attacks. Still, I can tell when I'm not wanted...");
