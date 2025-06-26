@@ -1,3 +1,5 @@
+.DS_Store
+
 # since these are generated for the server only, we don't have to share them
 pack/script.pack
 pack/param.pack
