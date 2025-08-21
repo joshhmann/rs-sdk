@@ -72,7 +72,7 @@ if(~obj_gettotal(holy_grail) > 0) {
 }
 inv_add(inv, holy_grail, 1); // no space check
 
-[opheld1,magic_gold_feather]
+[opheld1,magic_golden_feather]
 if(%grail_progress ! ^grail_finding_percival) {
     ~displaymessage(^dm_default);
     return;

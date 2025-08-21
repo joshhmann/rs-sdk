@@ -108,9 +108,9 @@ if(last_useitem = rottenapples) {
 
 [oploc1,bionursescupboardopen]
 mes("You search the cupboard...");
-if(~obj_gettotal(doctors_gown) = 0 & %biohazard_progress >= ^biohazard_poisoned_stew) {
-    mes("and find a <lowercase(oc_name(doctors_gown))>.");
-    inv_add(inv, doctors_gown, 1);
+if(~obj_gettotal(doctor_gown) = 0 & %biohazard_progress >= ^biohazard_poisoned_stew) {
+    mes("and find a <lowercase(oc_name(doctor_gown))>.");
+    inv_add(inv, doctor_gown, 1);
     return;
 }
 mes("but you find nothing of interest.");

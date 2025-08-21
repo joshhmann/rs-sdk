@@ -135,10 +135,10 @@ if(%lumberyard_fence_used > map_clock) {
 %lumberyard_fence_used = calc(map_clock + 3);
 ~agility_exactmove(human_walk_style, 0, 2, $start_coord, $end_coord, 0, 60, $dir, true);
 
-[opheldu,doogle_leaves]
+[opheldu,doogleleaves]
 if(last_useitem = raw_sardine) {
     ~mesbox("You rub the doogle leaves over the sardine.");
-    inv_del(inv, doogle_leaves, 1);
+    inv_del(inv, doogleleaves, 1);
     inv_del(inv, raw_sardine, 1);
     inv_add(inv, seasoned_sardine, 1);
     return;
@@ -151,10 +151,10 @@ if (last_useitem = raw_chompy) {
 ~displaymessage(^dm_default);
 
 [opheldu,raw_sardine]
-if(last_useitem = doogle_leaves) {
+if(last_useitem = doogleleaves) {
     ~mesbox("You rub the doogle leaves over the sardine."); //mesbox is before item
     inv_del(inv, raw_sardine, 1);
-    inv_del(inv, doogle_leaves, 1);
+    inv_del(inv, doogleleaves, 1);
     inv_add(inv, seasoned_sardine, 1);
     return;
 }
