@@ -1,14 +1,14 @@
 [fletch_bow_table]
-column=log,obj
+column=log,obj,INDEXED,REQUIRED
 column=shafts,int
-column=objchoices,namedobj,namedobj
-column=shortbow,namedobj,int,int
-column=longbow,namedobj,int,int
+column=objchoices,namedobj,namedobj,LIST
+column=shortbow,namedobj,int,int,LIST
+column=longbow,namedobj,int,int,LIST
 
 [fletching_table]
-column=item,obj
+column=item,obj,INDEXED,REQUIRED
 column=metal,string
-column=product,namedobj,int
+column=product,namedobj,int,LIST
 column=level,int
 column=experience,int
 column=skill_anim,seq

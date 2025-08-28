@@ -1,5 +1,5 @@
 [prayers]
-column=prayer,int
+column=prayer,int,INDEXED,REQUIRED
 column=prayer_deactivate,int
 column=members,int
 column=name,string
