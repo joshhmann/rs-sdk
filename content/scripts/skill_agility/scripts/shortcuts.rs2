@@ -111,7 +111,7 @@ if(~get_island_rope_var >= map_clock) {
 ~set_island_rope_var(calc(map_clock + 4));
 if($dist > 0) {
     if(loc_type = loc_2323) {
-        if (%run = ^player_run_off) {
+        if (%option_run = ^player_run_off) {
             p_delay(sub($dist, 1));
         } else {
             p_delay(max(0, sub(divide($dist, 2), 1)));

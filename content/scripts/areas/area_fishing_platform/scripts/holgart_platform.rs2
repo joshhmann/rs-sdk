@@ -1,5 +1,5 @@
 [opnpc1,holgartplatform]
-switch_int(%seaslug_progress) {
+switch_int(%seaslugquest) {
     case ^seaslug_spoken_kennith : @holgart_something_strange;
     case ^seaslug_saved_kennith : @holgart_kid_shore;
     case default : @holgartplatform_standard;
@@ -23,7 +23,7 @@ switch_int(~p_choice2("No, I'm going to stay a while.", 1, "Okay, let's go back.
 ~chatnpc("<p,confused>You're telling me, none of the sailors seem to remember who I am.");
 ~chatplayer("<p,confused>Apparently Kennith's father left for help a couple of days ago.");
 ~chatnpc("<p,confused>That's a worry, no-one's heard from him on shore.|Come on, we'd better go look for him.");
-%seaslug_progress = ^seaslug_sailed_kent;
+%seaslugquest = ^seaslug_sailed_kent;
 ~board_fishing_platform_to_island;
 
 [label,holgart_kid_shore]

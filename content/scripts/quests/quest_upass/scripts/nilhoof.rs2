@@ -1,5 +1,5 @@
 [opnpc1,upassdwarf1] //nilhoof
-switch_int(%upass_progress) {
+switch_int(%upass) {
     case ^upass_entered_main_area :
         ~chatnpc("<p,shock>Back away! Back away! ....Wait. ...You're human!");
         ~chatplayer("<p,happy>That's right, I'm on a quest for King Lathas. We need to find a way through these caverns.");
@@ -16,7 +16,7 @@ switch_int(%upass_progress) {
         inv_add(inv, meat_pie, 2);
         inv_add(inv, meat_pizza, 1);
         p_delay(2); // 3 ticks
-        %upass_progress = ^upass_spoken_nilhoof;
+        %upass = ^upass_spoken_nilhoof;
         ~chatplayer("<p,happy>Thanks <nc_name(upassdwarf1)>, take care.");
     case ^upass_spoken_nilhoof :
         ~chatplayer("<p,happy>Hello <nc_name(upassdwarf1)>.");

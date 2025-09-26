@@ -1,5 +1,5 @@
 [opnpc1,tracker1]
-switch_int(%tree_progress) {
+switch_int(%treequest) {
     case ^tree_not_started, ^tree_started, ^tree_given_logs_montai :
         ~chatplayer("<p,neutral>Hello.");
         ~chatnpc("<p,angry>I can't talk now.|Can't you see we're trying to win a battle here?");
@@ -31,7 +31,7 @@ if (npc_range(coord) > 2) {
     p_aprange(2);
     return;
 }
-switch_int(%tree_progress) {
+switch_int(%treequest) {
     case ^tree_not_started, ^tree_started :
         ~chatplayer("<p,neutral>Hello.");
         ~chatnpc("<p,shifty>I can't talk now.|If the guards catch me I'll be dead gnome meat.");
@@ -62,7 +62,7 @@ switch_int(%tree_progress) {
 }
 
 [opnpc1,tracker3]
-switch_int(%tree_progress) {
+switch_int(%treequest) {
     case ^tree_not_started, ^tree_started :
         ~chatplayer("<p,neutral>Hello.");
         ~chatnpc("<p,angry>I can't talk now.|Can't you see we're trying to win a battle here?");

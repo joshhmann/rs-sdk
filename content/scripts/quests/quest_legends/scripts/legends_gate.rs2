@@ -10,7 +10,7 @@ def_boolean $entering = ~check_axis(coord, loc_coord, loc_angle);
 npc_findallany(coord, 14, 0);
 while (npc_findnext = true) {
     if (npc_category = legends_guard) {
-        if (%legends_progress = ^legends_not_started) {
+        if (%legendsquest = ^legends_not_started) {
             if ($entering = false) {
                 // Leave, then a guard speaks to you
                 ~open_and_close_double_door2(~check_axis(coord, loc_coord, loc_angle), $side, grate_open);
@@ -22,7 +22,7 @@ while (npc_findnext = true) {
             return;
         }
         else {
-            if (%legends_progress = ^legends_complete) {
+            if (%legendsquest = ^legends_complete) {
                 // The "attention" message was later removed when entering via the gate, it doesn't happen in OSRS unless
                 // you talk to the guard directly. But it can be seen in old videos
                 // https://youtu.be/Na7_bVfAosM?t=27
@@ -43,6 +43,6 @@ while (npc_findnext = true) {
     }
 }
 // Fallback in case the guards can't be found
-if (%legends_progress > ^legends_not_started) {
+if (%legendsquest > ^legends_not_started) {
     ~open_and_close_double_door2(~check_axis(coord, loc_coord, loc_angle), $side, grate_open);
 }

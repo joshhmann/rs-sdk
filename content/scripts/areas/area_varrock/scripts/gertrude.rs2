@@ -1,6 +1,6 @@
 //most linebreaks in the quest are guessed (added for 2004 flair) based off rsc dialogue breaks
 [opnpc1,gertrude]
-switch_int (%fluffs_progress) {
+switch_int (%fluffs) {
     case ^fluffs_not_started :
         ~chatplayer("<p,happy>Hello, are you okay?");
         ~chatnpc("<p,angry>Do I look ok?|Those kids drive me crazy.");
@@ -50,7 +50,7 @@ switch_int (%fluffs_progress) {
         ~chatnpc("<p,happy>Here you go, look after her and thank you again!");
         ~mesbox("Gertrude gives you a kitten.");
         if_close;
-        %fluffs_progress = ^fluffs_complete;
+        %fluffs = ^fluffs_complete;
         ~gertrude_give_cat;
         p_delay(3);
         mes("... and some food!");
@@ -106,8 +106,8 @@ switch_int (%fluffs_progress) {
 def_int $option = ~p_choice3("Well, I suppose I could.", 1, "What's in it for me?", 2, "Sorry, I'm too busy to play pet rescue.", 3);
 if($option = 1) {
     ~chatplayer("<p,neutral>Well, I suppose I could.");
-    %fluffs_progress = ^fluffs_started;
-    ~send_quest_progress(questlist:fluffs, %fluffs_progress, ^fluffs_complete);
+    %fluffs = ^fluffs_started;
+    ~send_quest_progress(questlist:fluffs, %fluffs, ^fluffs_complete);
     ~chatnpc("<p,happy>Really? Thank you so much!|I really have no idea where she could be!");
     ~chatnpc("<p,neutral>I think my sons, Shilop and Wilough, saw the cat last.|They'll be out in the market place.");
     ~chatplayer("<p,happy>Alright then, I'll see what I can do.");

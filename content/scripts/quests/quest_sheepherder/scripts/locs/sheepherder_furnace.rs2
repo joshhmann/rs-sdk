@@ -20,5 +20,5 @@ if (last_useitem = sheepbonesa) {
     inv_del(inv, last_useitem, 1);
     p_delay(3);
     mes("The remains burn to dust.");
-    %sheepherder_disposal = setbit_range_toint(%sheepherder_disposal, 6, $starting_bit, calc($starting_bit + 2));
+    %sheepherdervar = setbit_range_toint(%sheepherdervar, 6, $starting_bit, calc($starting_bit + 2));
 }

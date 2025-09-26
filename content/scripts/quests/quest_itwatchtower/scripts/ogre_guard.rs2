@@ -41,7 +41,7 @@ if(last_useitem = gold_bar) {
 [opnpc1,ogre_guard2] @ogre_guard2_dialogue;
 
 [label,ogre_guard2_dialogue]
-if(%itwatchtower_progress >= ^itwatchtower_given_relic) {
+if(%itwatchtower >= ^itwatchtower_given_relic) {
     ~chatnpc("<p,neutral>It's the small creature;|you may pass.");
     return;
 }
@@ -61,7 +61,7 @@ p_teleport(^gutanoth_hill);
 ~chatnpc("<p,quiz>Well, what proof of friendship did you bring?");
 if(inv_total(inv, ogrerelic) > 0) {
     ~chatplayer("<p,happy>I have a relic from a chieftan!");
-    %itwatchtower_progress = ^itwatchtower_given_relic;
+    %itwatchtower = ^itwatchtower_given_relic;
     ~chatnpc("<p,happy>It's got the statue of Dalgroth.|Welcome to Gu'Tanoth,|friend of the ogres.");
     if(loc_find(0_39_47_8_54, ogreguardgate2) = true) @enter_gutanoth(movecoord(loc_coord, -1, 0, 0));
     return;
@@ -72,7 +72,7 @@ mes("The guard pushes you back down the hill.");
 p_teleport(^gutanoth_hill);
 
 [opnpcu,ogre_guard2]
-if(%itwatchtower_progress >= ^itwatchtower_given_relic) {
+if(%itwatchtower >= ^itwatchtower_given_relic) {
     ~chatnpc("<p,neutral>Don't need anything from you, creature."); // RS3
     return;
 }

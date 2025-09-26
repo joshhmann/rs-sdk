@@ -1,5 +1,5 @@
 [proc,set_sail](string $place_name, string $start_mes, coord $destination, int $map_route, int $delay)
-%boat_takeoff = $map_route;
+%journey_number = $map_route;
 
 // todo: should com_0 be set to "You sail to <$place_name>."?
 if_openmain(ship_journey);

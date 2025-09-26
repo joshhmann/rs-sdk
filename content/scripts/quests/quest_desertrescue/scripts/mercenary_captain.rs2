@@ -1,10 +1,10 @@
 [opnpc1,desertminingcaptain]
-if(%desertrescue_progress >= ^desertrescue_killed_capt) {
+if(%desertrescue >= ^desertrescue_killed_capt) {
     if(inv_total(inv, metal_key) = 0) { // only inv in osrs as well
         @approach_merc_capt;
     }
     ~chatnpc("<p,angry>Move along now... we've had enough of your sort!");
-} else if(%desertrescue_progress <= ^desertrescue_not_started | %desertrescue_progress >= ^desertrescue_killed_capt) {
+} else if(%desertrescue <= ^desertrescue_not_started | %desertrescue >= ^desertrescue_killed_capt) {
     ~chatnpc("<p,angry>Move along now... we've had enough of your sort!");
 } else {
     @approach_merc_capt;
@@ -12,7 +12,7 @@ if(%desertrescue_progress >= ^desertrescue_killed_capt) {
 
 [label,approach_merc_capt]
 ~mesbox("You approach the Mercenary Captain.");
-if(%desertrescue_progress = ^desertrescue_started) %desertrescue_progress = ^desertrescue_approached_captain;
+if(%desertrescue = ^desertrescue_started) %desertrescue = ^desertrescue_approached_captain;
 if(testbit(%desertrescue_map_mechanisms, ^desertrescue_spoke_al_shabim) = ^true) {
     @multi4("Wow! A real captain!", mercenary_capt_realcapt, "You there!", mercenary_capt_you, "Hey ugly!", mercenary_capt_ugly, "I've some information for you about Al Zaba Bhasim", merc_capt_alzaba);
 }
@@ -203,7 +203,7 @@ obj_add(npc_coord, npc_param(death_drop), 1, ^lootdrop_duration);
 [queue,defeat_merc_capt]
 // https://web.archive.org/web/20050204075401/http://www.runehq.com/cacheguides/viewquestguide00356.htm auto-added to inv before rework as well it seems
 mes("You kill the captain!");
-if(%desertrescue_progress = ^desertrescue_approached_captain) %desertrescue_progress = ^desertrescue_killed_capt;
+if(%desertrescue = ^desertrescue_approached_captain) %desertrescue = ^desertrescue_killed_capt;
 if(inv_total(inv, metal_key) > 0) return;
 if(inv_total(bank, metal_key) > 0) { 
     mes("After killing the captain, you remember that you stored a mining gate key in your"); // did this exist originally?
@@ -216,7 +216,7 @@ inv_add(inv, metal_key, 1);
 ~objbox(metal_key, "The mercenary captain drops a metal key on the floor.|You quickly grab the key and add it to your inventory.", 250, 0, 0);
 
 [proc,mercenary_capt_attack](boolean $npct)(boolean)
-if(%npc_attacking_uid = uid | %desertrescue_progress >= ^desertrescue_killed_capt) {
+if(%npc_attacking_uid = uid | %desertrescue >= ^desertrescue_killed_capt) {
     return (true);
 }
 if($npct = true) { 

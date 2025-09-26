@@ -84,12 +84,12 @@ if_close;
 if (p_finduid(uid) = true) {
     switch_int(~p_choice4("Join Phoenix", 1, "Join Blackarm", 2, "Tele Phoenix", 3, "Tele Blackarm", 4)) {
         case 1 :
-            %phoenixgang_progress = ^phoenixgang_complete;
-            %blackarmgang_progress = ^blackarmgang_not_started;
+            %phoenixgang = ^phoenixgang_complete;
+            %blackarmgang = ^blackarmgang_not_started;
             mes("Joined Phoneix gang");
         case 2 :
-            %phoenixgang_progress = ^phoenixgang_not_started;
-            %blackarmgang_progress = ^blackarmgang_complete;
+            %phoenixgang = ^phoenixgang_not_started;
+            %blackarmgang = ^blackarmgang_complete;
             mes("Joined Blackarm gang");
         case 3 :
             p_telejump(0_50_152_46_54);
@@ -103,15 +103,15 @@ if (p_finduid(uid) = true) {
 [debugproc,hero]
 if_close;
 if (p_finduid(uid) = true) {
-  switch_int(~p_choice4_header("Start Heros Quest", 1, "Teleports", 2, "Get Items", 3, "Complete Heros Quest", 4, "Hero progress: <tostring(%hero_progress)>")) {
+  switch_int(~p_choice4_header("Start Heros Quest", 1, "Teleports", 2, "Get Items", 3, "Complete Heros Quest", 4, "Hero progress: <tostring(%heroquest)>")) {
     case 1 :
       switch_int(~p_choice2_header("Phoenix", 1, "Blackarm", 2, "Choose a gang")) {
         case 1 :
-          %blackarmgang_progress = ^blackarmgang_not_started;
-          %phoenixgang_progress = ^phoenixgang_complete;
+          %blackarmgang = ^blackarmgang_not_started;
+          %phoenixgang = ^phoenixgang_complete;
         case 2 :
-          %blackarmgang_progress = ^blackarmgang_complete;
-          %phoenixgang_progress = ^phoenixgang_not_started;
+          %blackarmgang = ^blackarmgang_complete;
+          %phoenixgang = ^phoenixgang_not_started;
           inv_add(inv, black_platebody, 1);
           inv_add(inv, black_platelegs, 1);
           inv_add(inv, black_full_helm, 1);
@@ -122,18 +122,18 @@ if (p_finduid(uid) = true) {
       inv_add(inv, fishing_bait, 1);
       inv_add(inv, tinderbox, 1);
       inv_add(inv, logs, 1);
-      %questpoints = 55;
-      %hero_progress = 0;
-      ~send_quest_progress(questlist:hero, %hero_progress, ^hero_complete);
-      %dragon_progress = ^dragon_complete;
-      %zanaris_progress = ^zanaris_complete;
-      %arthur_progress = ^arthur_complete;
+      %qp = 55;
+      %heroquest = 0;
+      ~send_quest_progress(questlist:hero, %heroquest, ^hero_complete);
+      %dragonquest = ^dragon_complete;
+      %zanaris = ^zanaris_complete;
+      %arthur = ^arthur_complete;
       p_telejump(0_45_54_24_53);
       mes("Use ::hero further to teleport to quest locations or get required items.");
     case 2 :
       def_int $choice = -1;
       def_int $gang_teles;
-      if (%phoenixgang_progress >= ^phoenixgang_complete) {
+      if (%phoenixgang >= ^phoenixgang_complete) {
         $gang_teles = -3;
       } else {
         $gang_teles = -2;
@@ -232,8 +232,8 @@ if(p_finduid(uid) = false) {
 
 // Dragon Slayer
 [debugproc,dragslay]
-mes("Progress: <tostring(%dragon_progress)>.");
-mes("Planks: <tostring(%dragon_planks)>.");
+mes("Progress: <tostring(%dragonquest)>.");
+mes("Planks: <tostring(%dragonquestvar)>.");
 mes("Ned Hired: <tostring(%dragon_ned_hired)>.");
 mes("Oracle: <tostring(%dragon_oracle)>.");
 mes("Goblin: <tostring(%dragon_goblin)>.");
@@ -244,14 +244,14 @@ mes("Wall: <tostring(%dragon_wall)>.");
 if_close;
 if (p_finduid(uid) = true) {
     p_telejump(0_49_52_55_36);
-    %questpoints = 32;
-    %dragon_progress = 0;
+    %qp = 32;
+    %dragonquest = 0;
     %dragon_ned_hired = 0;
     %dragon_oracle = 0;
     %dragon_wall = 0;
     %dragon_shield = 0;
     %dragon_goblin = 0;
-    %dragon_planks = 0;
+    %dragonquestvar = 0;
 } else {
     @please_finish;
 }

@@ -1,5 +1,5 @@
 [opnpc1,sir_ceril_carnillean]
-switch_int(%hazeelcult_progress) {
+switch_int(%hazeelcultquest) {
     case ^hazeelcult_not_started :
         // OSRS changed this dialogue quite a bit in 2023 (of course), using wiki/RSC + the linked video as reference
         ~chatplayer("<p,neutral>Hello there.");
@@ -25,8 +25,8 @@ switch_int(%hazeelcult_progress) {
                         ~chatplayer("<p,quiz>How do you know that?");
                         ~chatnpc("<p,neutral>My old butler, Higson, once followed them to their hideout there. Unfortunately the next night he died in his sleep.");
                         ~chatplayer("<p,shock>That's awful!");
-                        %hazeelcult_progress = ^hazeelcult_started;
-                        ~send_quest_progress(questlist:hazeelcult, %hazeelcult_progress, ^hazeelcult_complete);
+                        %hazeelcultquest = ^hazeelcult_started;
+                        ~send_quest_progress(questlist:hazeelcult, %hazeelcultquest, ^hazeelcult_complete);
                         ~chatnpc("<p,neutral>No, it's ok. A replacement arrived the next day. He's been great - cooks an excellent broth!");
                         ~chatplayer("<p,neutral>Ok. I'll see what I can do.");
                 }

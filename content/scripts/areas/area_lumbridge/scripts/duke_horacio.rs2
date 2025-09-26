@@ -1,7 +1,7 @@
 [opnpc1,duke_of_lumbridge]
 ~chatnpc("<p,neutral>Greetings. Welcome to my castle.");
 
-if ((%dragon_shield = ^quest_dragon_knows_about_shield | %dragon_progress >= ^dragon_complete) & inv_total(inv, antidragonbreathshield) < 1 & inv_total(worn, antidragonbreathshield) < 1) {
+if ((%dragon_shield = ^quest_dragon_knows_about_shield | %dragonquest >= ^dragon_complete) & inv_total(inv, antidragonbreathshield) < 1 & inv_total(worn, antidragonbreathshield) < 1) {
     @multi3("I seek a shield that will protect me from the dragon's breath.", duke_of_lumbridge_shield, "Have you any quests for me?", ~duke_handle_rune_mysteries, "Where can I find money?", duke_of_lumbridge_money);
 } else {
     @multi2("Have you any quests for me?", ~duke_handle_rune_mysteries, "Where can I find money?", duke_of_lumbridge_money);
@@ -11,8 +11,8 @@ if ((%dragon_shield = ^quest_dragon_knows_about_shield | %dragon_progress >= ^dr
 @duke_of_lumbridge_money;
 
 [proc,duke_handle_rune_mysteries]()(label)
-if (%runemysteries_progress = ^runemysteries_not_started) return(duke_rune_mysteries_start);
-else if (%runemysteries_progress = ^runemysteries_complete) return(duke_rune_mysteries_complete);
+if (%runemysteries = ^runemysteries_not_started) return(duke_rune_mysteries_start);
+else if (%runemysteries = ^runemysteries_complete) return(duke_rune_mysteries_complete);
 else return (duke_rune_mysteries_in_progress);
 
 [label,duke_of_lumbridge_money]
@@ -27,8 +27,8 @@ else return (duke_rune_mysteries_in_progress);
 def_int $option = ~p_choice2("Sure, no problem.", 1, "Not right now.", 2);
 if ($option = 1) {
     ~chatplayer("<p,happy>Sure, no problem.");
-    %runemysteries_progress = ^runemysteries_started;
-    ~send_quest_progress(questlist:runemysteries, %runemysteries_progress, ^runemysteries_complete);
+    %runemysteries = ^runemysteries_started;
+    ~send_quest_progress(questlist:runemysteries, %runemysteries, ^runemysteries_complete);
     ~chatnpc("<p,happy>Thank you very much, stranger. I am sure the head wizard will reward you for such an interesting find.");
     // https://youtu.be/khWXGF8spNs?t=40, inv space check prob added later during OSRS (chisel dialogue doesn't have anything related)
     ~mesbox("The Duke hands you an @blu@air talisman.");

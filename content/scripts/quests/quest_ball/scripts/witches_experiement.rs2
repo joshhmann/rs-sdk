@@ -41,7 +41,7 @@ if(npc_findhero = ^true) { // this doesn't if_close or strongqueue, just regular
 
 [queue,queue_defeat_witches_experiment] @defeat_witches_experiment;
 [label,defeat_witches_experiment]
-if(%ball_progress < ^ball_defeated_experiment) {
-    %ball_progress = ^ball_defeated_experiment;
+if(%ballquest < ^ball_defeated_experiment) {
+    %ballquest = ^ball_defeated_experiment;
 }
 mes("You finally kill the shapeshifter once and for all.");

@@ -32,19 +32,19 @@ switch_int(random(3)) {
 }
 
 [opheld1,bloated_toad]
-if (%chompybird_progress < ^chompybird_shown_toad) {
+if (%chompybird < ^chompybird_shown_toad) {
     ~objbox(bloated_toad,"You're not sure where Rantz told you to place the bloated toad. You decide to wait and ask him where to place it.", 250, 0, divide(^objbox_height, 2));
     return;
 }
 
-if(%chompybird_progress < ^chompybird_complete) {
+if(%chompybird < ^chompybird_complete) {
     if (inzone(0_41_46_7_18, 0_41_46_15_27, coord) = false) {
         mes("This is too far away for Rantz to shoot the chompy bird.");
         return;
     }
 }
 
-if(%chompybird_progress >= ^chompybird_complete) {
+if(%chompybird >= ^chompybird_complete) {
     if (inzone(0_41_46_7_18, 0_41_46_15_27, coord) = true) {
         mes("Rantz doesn't like it when you chompy hunt on his turf.");
         mes("But you can hunt for chompys in the rest of the ogre area.");
@@ -64,8 +64,8 @@ if(npc_findexact(coord, bloated_toad) = true) {
 anim(human_pickupfloor, 0);
 inv_del(inv, bloated_toad, 1);
 
-if (%chompybird_progress = ^chompybird_shown_toad) {
-    %chompybird_progress = ^chompybird_dropped_toad;
+if (%chompybird = ^chompybird_shown_toad) {
+    %chompybird = ^chompybird_dropped_toad;
 }
 
 if (p_finduid(uid) = true) {

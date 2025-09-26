@@ -1,5 +1,5 @@
 [opnpc1,caleb_fitzharmon]
-switch_int(%crest_progress) {
+switch_int(%crestquest) {
     case ^crest_not_started : @caleb_fitzharmon_prequest;
     case ^crest_spoken_dimintheis : @caleb_fitzharmon_start;
     case ^crest_spoken_caleb : @caleb_fitzharmon_fish;
@@ -33,10 +33,10 @@ switch_int(%crest_progress) {
 ~chatnpc("<p,sad>returning to him with an incomplete crest... We each went our seperate ways many years past, none of us seeing our father or willing to give up our fragments.");
 // If the player doesn't have Caleb's piece yet, the dialogue ends here
 // https://youtu.be/e8btuenT4nE?t=167
-if (%crest_progress = ^crest_caleb_piece) {
+if (%crestquest = ^crest_caleb_piece) {
     ~chatplayer("<p,quiz>So do you know where I could find any of your brothers?");
     ~chatnpc("<p,neutral>Well, we haven't really kept in touch... what with the dispute over the crest and all... I did hear from my brother Avan a while ago though..");
-    %crest_progress = ^crest_caleb_where;
+    %crestquest = ^crest_caleb_where;
     ~chatnpc("<p,neutral>He said he was on some kind of search for treasure, or gold, or something out in the desert. You might want to ask around there for him.");
     ~chatnpc("<p,neutral>Avan always did have expensive tastes however. You may find he is not prepared to hand over his crest piece to you as easily as I have.");
 }
@@ -51,13 +51,13 @@ if (%crest_progress = ^crest_caleb_piece) {
 ~chatnpc("<p,neutral>I require the following cooked fish: Swordfish, Bass, Tuna, Salmon and Shrimp.");
 def_int $op = ~p_choice2("Ok, I will get those.", 1, "Why don't you just give me the crest?", 2);
 if ($op = 1) {
-    %crest_progress = ^crest_spoken_caleb;
+    %crestquest = ^crest_spoken_caleb;
     ~chatplayer("<p,neutral>Ok, I will get those.");
     ~chatnpc("<p,happy>You will? It would help me a lot!");
 }
 else {
     ~chatplayer("<p,quiz>Why don't you just give me the crest?");
-    %crest_progress = ^crest_spoken_caleb;
+    %crestquest = ^crest_spoken_caleb;
     ~chatnpc("<p,angry>It's a valuable family heirloom. I think the least you can do is prove you're worthy of it before I hand it over.");
 }
 
@@ -70,7 +70,7 @@ if (inv_total(inv, swordfish) >= 1 &
     inv_total(inv, shrimp) >= 1) {
         ~chatplayer("<p,neutral>Got them all with me.");
         ~mesbox("You exchange the fish for Caleb's piece of the crest.");
-        %crest_progress = ^crest_caleb_piece;
+        %crestquest = ^crest_caleb_piece;
         inv_del(inv, swordfish, 1);
         inv_del(inv, bass, 1);
         inv_del(inv, tuna, 1);

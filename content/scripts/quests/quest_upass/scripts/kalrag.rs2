@@ -13,7 +13,7 @@ while (npc_huntnext = true) {
     }
 }
 mes("Kalrag slumps to the floor...");
-if(%upass_progress = ^upass_found_doll) {
+if(%upass = ^upass_found_doll) {
     p_delay(1);
     mes("poison flows from the corpse over the soil.");
     p_delay(1);

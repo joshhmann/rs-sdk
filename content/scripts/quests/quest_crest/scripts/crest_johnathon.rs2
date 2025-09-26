@@ -1,9 +1,9 @@
 [opnpc1,johnathon_fitzharmon]
-if (%crest_progress < ^crest_avan_piece) {
+if (%crestquest < ^crest_avan_piece) {
     ~chatnpc("<p,sad>I am so very tired... Leave me be... to rest...");
 }
 else {
-    switch_int(%crest_progress) {
+    switch_int(%crestquest) {
         case ^crest_avan_piece : @johnathon_fitzharmon_intro;
         case ^crest_spoken_johnathon : @johnathon_fitzharmon_spider;
         case ^crest_cured_johnathon : @johnathon_fitzharmon_postcure;
@@ -15,11 +15,11 @@ else {
 // https://runescape.wiki/w/Update:This_Week_In_RuneScape_-_07/09/20#Patch_Notes
 // https://oldschool.runescape.wiki/w/Family_Crest?oldid=3908008, should be only standard antipoison originally
 if (last_useitem = 1doseantipoison | last_useitem = 2doseantipoison | last_useitem = 3doseantipoison | last_useitem = 4doseantipoison) {
-    if (%crest_progress >= ^crest_cured_johnathon) {
+    if (%crestquest >= ^crest_cured_johnathon) {
         ~chatnpc("<p,neutral>I'm feeling alright now, thanks.");
-    } else if (%crest_progress = ^crest_spoken_johnathon) {   
+    } else if (%crestquest = ^crest_spoken_johnathon) {   
         inv_del(inv, last_useitem, 1);
-        %crest_progress = ^crest_cured_johnathon;
+        %crestquest = ^crest_cured_johnathon;
         @johnathon_fitzharmon_cured;
     } else {
         ~chatplayer("<p,confused>Why would I do that?");
@@ -32,7 +32,7 @@ if (last_useitem = 1doseantipoison | last_useitem = 2doseantipoison | last_useit
 ~chatplayer("<p,neutral>Greetings. Would you happen to be Johnathon Fitzharmon?");
 ~chatnpc("<p,sad>That... I am...");
 ~chatplayer("<p,neutral>I am here to retrieve your fragment of the Fitzharmon family crest.");
-%crest_progress = ^crest_spoken_johnathon;
+%crestquest = ^crest_spoken_johnathon;
 ~chatnpc("<p,neutral>The.. poison.. it is all.. too much... My head... will not... stop spinning...");
 ~mesbox("Sweat is pouring down Johnathons' face.");
 

@@ -2,12 +2,12 @@
 mes("Welcome to RuneScape.");
 cam_reset;
 
-%music_mode = 1; // set to auto on login
-if (%game_brightness = 0) {
+%musicplay = 1; // set to auto on login
+if (%option_brightness = 0) {
     // sane defaults for game controls
-    %game_brightness = 2;
-    %music_volume = 2;
-    %sound_volume = 2;
+    %option_brightness = 2;
+    %option_music = 2;
+    %option_sounds = 2;
 }
 
 // register the soft timer that handles replenishing stats
@@ -49,7 +49,7 @@ if(inzone(movecoord(^grandtree_jail_coord, 0, 0, -2), movecoord(^grandtree_jail_
     ~grandtree_spawn_charlie;
 }
 
-if (%tutorial_progress < ^tutorial_complete & ~in_tutorial_island(coord) = true) {
+if (%tutorial < ^tutorial_complete & ~in_tutorial_island(coord) = true) {
     ~update_bas;
     @start_tutorial;
 }

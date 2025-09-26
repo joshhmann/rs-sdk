@@ -4,7 +4,7 @@ if($entering = false) {
     ~open_and_close_door2(loc_param(next_loc_stage), ~check_axis(coord, loc_coord, loc_angle), door_open);
     return;
 }
-if(map_members = ^false | %biohazard_progress < ^biohazard_spoken_chemist) {
+if(map_members = ^false | %biohazard < ^biohazard_spoken_chemist) {
     ~chatplayer("<p,neutral>That's someone's bedroom.|I'm not going in there without a reason.");
     return;
 }
@@ -30,12 +30,12 @@ if(npc_find(coord, mournerwatchtower, 5, 0) = true) {
 }
 
 [oplocu,loc_2067]
-if(%biohazard_progress = ^biohazard_spoken_jerico & last_useitem = birdfeed) {
+if(%biohazard = ^biohazard_spoken_jerico & last_useitem = birdfeed) {
     // https://web.archive.org/web/20060111205550im_/http://www.runeweb.net/fireball/Biohazard%20Images/biohazard8.PNG
     inv_del(inv, birdfeed, 1);
     mes("You throw a hand full of seeds onto the watch tower");
     p_delay(2);
-    %biohazard_progress = ^biohazard_used_birdfeed;
+    %biohazard = ^biohazard_used_birdfeed;
     mes("The mourners do not seem to notice");
     return;
 } 
@@ -44,11 +44,11 @@ if(%biohazard_progress = ^biohazard_spoken_jerico & last_useitem = birdfeed) {
 [oploc1,jericoscupboardopen]
 // https://youtu.be/_ZNalEQB70o?si=aEyFbzV255lYgoNI&t=208
 ~objbox(birdfeed, "The cupboard is full of birdfeed.", 250, 0, divide(^objbox_height, 2));
-if(%biohazard_progress < ^biohazard_spoken_jerico) {
+if(%biohazard < ^biohazard_spoken_jerico) {
     ~chatplayer("<p,neutral>I guess pigeons really love this stuff.");
     return;
 }
-if(inv_total(inv, birdfeed) > 0 | %biohazard_progress >= ^biohazard_used_birdfeed) {
+if(inv_total(inv, birdfeed) > 0 | %biohazard >= ^biohazard_used_birdfeed) {
     ~chatplayer("<p,neutral>I don't need any more birdfeed.");
     return;
 }
@@ -61,11 +61,11 @@ inv_add(inv, birdfeed, 1);
 
 
 [opheld1,pigeons]
-if(%biohazard_progress = ^biohazard_used_birdfeed & inzone(0_39_51_63_35, 0_40_51_5_43, coord) = true) {
+if(%biohazard = ^biohazard_used_birdfeed & inzone(0_39_51_63_35, 0_40_51_5_43, coord) = true) {
     mes("The pigeons fly towards the watch tower");
     inv_del(inv, pigeons, 1);
     inv_add(inv, pigeoncage, 1);
-    %biohazard_progress = ^biohazard_released_pigeons;
+    %biohazard = ^biohazard_released_pigeons;
     ~coord_projectile(coord, 0_39_51_63_39, biopigeon_launch, 16, 130, 25, 20, 21, 10, 20);
     ~coord_projectile(coord, 0_40_51_0_40, biopigeon_launch, 16, 125, 15, 20, 31, 10, 20);
     ~coord_projectile(coord, 0_40_51_1_41, biopigeon_launch, 16, 120, 5, 20, 41, 10, 20);
@@ -87,7 +87,7 @@ if (loc_find(0_39_51_62_3, bioladderwall) = true) {
     // Temp note: dur updated
     loc_change(bioladder, 5);
 }
-if(%biohazard_progress = ^biohazard_released_pigeons) %biohazard_progress = ^biohazard_climbed_ladder;
+if(%biohazard = ^biohazard_released_pigeons) %biohazard = ^biohazard_climbed_ladder;
 p_delay(3); // 4t
 p_teleport($dest);
 mes("and drop down on the other side.");
@@ -97,8 +97,8 @@ if(last_useitem = rottenapples) {
     mes("You place the rotten apple in the pot...");
     inv_del(inv, rottenapples, 1);
     p_delay(3);
-    if(%biohazard_progress = ^biohazard_climbed_ladder) {
-        %biohazard_progress = ^biohazard_poisoned_stew;
+    if(%biohazard = ^biohazard_climbed_ladder) {
+        %biohazard = ^biohazard_poisoned_stew;
         mes("and it quickly dissolves into the stew.");
         p_delay(2);
     }
@@ -108,7 +108,7 @@ if(last_useitem = rottenapples) {
 
 [oploc1,bionursescupboardopen]
 mes("You search the cupboard...");
-if(~obj_gettotal(doctor_gown) = 0 & %biohazard_progress >= ^biohazard_poisoned_stew) {
+if(~obj_gettotal(doctor_gown) = 0 & %biohazard >= ^biohazard_poisoned_stew) {
     mes("and find a <lowercase(oc_name(doctor_gown))>.");
     inv_add(inv, doctor_gown, 1);
     return;
@@ -151,16 +151,16 @@ if(loc_find($loc_coord, $loc_type) = true) {
 [oploc1,mournercrateup]
 mes("You search the crate.");
 p_delay(3);
-if(~obj_gettotal(distillator) > 0 | %biohazard_progress > ^biohazard_found_distillator) {
+if(~obj_gettotal(distillator) > 0 | %biohazard > ^biohazard_found_distillator) {
     mes("It's empty.");
     return;
 }
-if(%biohazard_progress = ^biohazard_poisoned_stew) %biohazard_progress = ^biohazard_found_distillator;
+if(%biohazard = ^biohazard_poisoned_stew) %biohazard = ^biohazard_found_distillator;
 inv_add(inv, distillator, 1);
 mes("and find Elena's distillator.");
 
 [queue,quest_biohazard_complete]
 stat_advance(thieving, 12500);
-%biohazard_progress = ^biohazard_complete;
+%biohazard = ^biohazard_complete;
 session_log(^log_adventure, "Quest complete: Biohazard");
 ~send_quest_complete(questlist:biohazard, distillator, 250, ^biohazard_questpoints, "You have completed the\\nBiohazard Quest!");

@@ -36,7 +36,7 @@ switch_int ($option) {
 [oploc1,lathastraining_gater] @open_combat_training_gate(^right);
 
 [label,open_combat_training_gate](int $side)
-if(%biohazard_progress < ^biohazard_complete) {
+if(%biohazard < ^biohazard_complete) {
     ~chatnpc_specific(nc_name(lathastrainer1), lathastrainer1, "<p,neutral>This is a restricted area.|You can only enter under the authority of King Lathas.");
     return;
 }

@@ -19,7 +19,7 @@
 //mes(~coord_tostring(loc_coord));
 switch_coord (loc_coord) {
     case 2_46_52_40_8 : // falador castle sir vyvin room
-        if(%squire_progress >= 5) {
+        if(%squire >= 5) {
                 // Vyvin will stop you (if he can!) from searching the cupboard after this point of the quest
                 // regardless of whether you have the portrait or not, but also not before it
                 if(~vyvin_distracted = false) {

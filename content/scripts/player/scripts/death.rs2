@@ -8,7 +8,7 @@ p_delay(3);
 %death = ^false;
 
 [queue,player_death]
-if (.finduid(%duelpartner) = true & ~.in_duel_arena(.coord) = true) {
+if (.finduid(%duel2accept) = true & ~.in_duel_arena(.coord) = true) {
     @player_death_duel;
 }
 ~player_death;
@@ -50,7 +50,7 @@ if (staffmodlevel > 1 & map_production = true) { return; }
 def_boolean $skulled = false;
 if (%pk_skull > 0) { $skulled = true; }
 def_boolean $protecting_item = false;
-if (%prayer_protectitems = ^true) { $protecting_item = true; }
+if (%prayer8 = ^true) { $protecting_item = true; }
 inv_clear(deathkeep);
 
 if($skulled = false) {
@@ -97,7 +97,7 @@ if (staffmodlevel > 1 & map_production = true) { return; }
 def_boolean $skulled = false;
 if (%pk_skull > 0) { $skulled = true; }
 def_boolean $protecting_item = false;
-if (%prayer_protectitems = ^true) { $protecting_item = true; }
+if (%prayer8 = ^true) { $protecting_item = true; }
 inv_clear(deathkeep);
 
 if($skulled = false) {

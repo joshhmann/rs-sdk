@@ -68,13 +68,13 @@
 
 [if_button,combat_staff_2:auto_toggle]
 if_close;
-if (%attackstyle_magic = 0) {
+if (%lastcastspell = 0) {
     mes("You need to choose a spell first."); // https://youtu.be/Mo6AcO4rg4A?t=69
     return;
 }
 if (p_finduid(uid) = true) {
     p_clearpendingaction; // https://www.youtube.com/watch?v=P_QzMzpaA04&t=12s
-    %attackstyle_magic = togglebit(%attackstyle_magic, 0);
+    %lastcastspell = togglebit(%lastcastspell, 0);
     return;
 }
 
@@ -82,11 +82,11 @@ if (p_finduid(uid) = true) {
 if_close;
 if (p_finduid(uid) = true) {
     p_clearpendingaction;
-    %attackstyle = $style;
+    %com_mode = $style;
     ~player_combat_stat;
     return;
 }
-%attackstyle = %attackstyle; // resync varp
+%com_mode = %com_mode; // resync varp
 
 // updates the attack style tab depending on the
 // weapon currently equipped or not by the player

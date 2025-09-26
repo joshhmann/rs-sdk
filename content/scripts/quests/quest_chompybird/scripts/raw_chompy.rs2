@@ -22,9 +22,9 @@ if (last_useitem ! raw_chompy) {
     return;
 }
 
-if (%chompybird_progress < ^chompybird_told_to_cook_chompy) {
+if (%chompybird < ^chompybird_told_to_cook_chompy) {
     if(npc_find(coord, rantz, 10, 0) = true) { // range from osrs
-        if(%chompybird_progress = ^chompybird_player_killed_chompy) {
+        if(%chompybird = ^chompybird_player_killed_chompy) {
             ~chatnpc("<p,quiz>Hey, what' you's doin?");
             @rantz_show_chompy;
         }
@@ -34,11 +34,11 @@ if (%chompybird_progress < ^chompybird_told_to_cook_chompy) {
     }
     return;
 }
-if (%chompybird_progress = ^chompybird_told_to_cook_chompy) {
+if (%chompybird = ^chompybird_told_to_cook_chompy) {
     @cook_chompy_quest;
 }
 
-if (%chompybird_progress = ^chompybird_chompy_cooked) {
+if (%chompybird = ^chompybird_chompy_cooked) {
     // todo what if the player no longer has the original chompy? Does it still auto-hand in?
     if(inv_total(inv, cooked_s_chompy) = 0) {
         @cook_chompy_quest;
@@ -49,7 +49,7 @@ if (%chompybird_progress = ^chompybird_chompy_cooked) {
     return;
 }
 
-if(%chompybird_progress = ^chompybird_complete) {
+if(%chompybird = ^chompybird_complete) {
     @cook_chompy_offquest;
 }
 
@@ -192,7 +192,7 @@ p_delay(2);
 def_boolean $passes_roll = stat_random(cooking, 200, 255);
 if ($passes_roll = true) {
     mes("You add the other ingredients and cook the food.");
-    %chompybird_progress = ^chompybird_chompy_cooked;
+    %chompybird = ^chompybird_chompy_cooked;
     ~delete_chompy_ingredients($rantz_ingredient, $bugs_ingredient, $fycie_ingredient);
     // Temp note: dur updated
     loc_change(chompybird_spitroast_cooked, 5);

@@ -1,7 +1,7 @@
 [opnpc1,ranging_guild_competition_judge]
-if(%target1 = 11) {
+if(%targetcount = 11) {
     @ranging_guild_competition_judge_reward_pts;
-} else if(%target1 >= 1 & %target1 < 11) {
+} else if(%targetcount >= 1 & %targetcount < 11) {
     ~chatnpc("<p,happy>Hello again, do you need reminding of the rules?");
     if(inv_total(inv, bronze_arrow) = 0 & inv_total(worn, bronze_arrow) = 0) {
         // https://www.youtube.com/watch?v=U7A6tezhTzQ
@@ -21,11 +21,11 @@ if(%target1 = 11) {
         case 3 :
             def_string $encourage = "";
             // based on pts/round, wiki info is inaccurate
-            def_int $denom = calc(%target1 - 1);
+            def_int $denom = calc(%targetcount - 1);
             if($denom = 0) {
                 $encourage = "You haven't started yet.";
             } else {
-                def_int $ratio = calc(%target2 / (%target1 - 1));
+                def_int $ratio = calc(%targetscore / (%targetcount - 1));
                 if ($ratio = 100) {
                     $encourage = "Amazing, don't falter now.";
                 } else if ($ratio > 50 & $ratio < 100) {
@@ -36,7 +36,7 @@ if(%target1 = 11) {
                     $encourage = "Not bad, keep going.";
                 }
             }
-            ~chatnpc("<p,happy>So far your score is: <tostring(%target2)>. <$encourage>");
+            ~chatnpc("<p,happy>So far your score is: <tostring(%targetscore)>. <$encourage>");
     }
 } else {
     ~chatnpc("<p,happy>Hello there, would you like to take part in the archery competition? It only costs 200 coins to enter.");
@@ -65,7 +65,7 @@ if(inv_total(inv, coins) < 200) {
 mes("You pay the judge and he gives you 10 bronze arrows.");
 inv_del(inv, coins, 200);
 inv_add(inv, bronze_arrow, 10);
-%target1 = 1;
+%targetcount = 1;
 
 [label,ranging_guild_competition_judge_rules]
 ~chatplayer("<p,quiz>What are the rules?");
@@ -77,10 +77,10 @@ inv_add(inv, bronze_arrow, 10);
 [label,ranging_guild_competition_judge_no] ~chatplayer("<p,neutral>No thanks.");
 
 [label,ranging_guild_competition_judge_reward_pts]
-%target2 = calc(%target2 / 10);
-def_int $token_count = %target2; // this is what osrs does
-%target2 = 0;
-%target1 = 0;
+%targetscore = calc(%targetscore / 10);
+def_int $token_count = %targetscore; // this is what osrs does
+%targetscore = 0;
+%targetcount = 0;
 inv_add(inv, archery_ticket, $token_count);
 ~chatnpc("<p,happy>Well done. Your score is: <tostring(calc($token_count * 10))>.|For that score you will receive <tostring($token_count)> Archery Coupons.");
 

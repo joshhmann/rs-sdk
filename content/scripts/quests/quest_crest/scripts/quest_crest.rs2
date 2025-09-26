@@ -3,7 +3,7 @@
 // RS 2008 (full) https://www.youtube.com/watch?v=RFff1NoOGDo
 
 [queue,crest_complete]
-%crest_progress = ^crest_complete;
+%crestquest = ^crest_complete;
 // resets this var after completion (choronozon needs to be hit with all 4 blasts to kill again, gold door is always unlocked but lever puzzle resets)
 %crest_spells_levers_gauntlets = 0;
 inv_add(inv, steel_gauntlets, 1);
@@ -77,7 +77,7 @@ else {
 
 // Opens if north lever is up, south lever is down, and the north room lever is up
 [oploc1,famcrest_doori2h1]
-if (%crest_progress = ^crest_complete | (testbit(%crest_spells_levers_gauntlets, ^crest_north_lever) = ^true &
+if (%crestquest = ^crest_complete | (testbit(%crest_spells_levers_gauntlets, ^crest_north_lever) = ^true &
     testbit(%crest_spells_levers_gauntlets, ^crest_south_lever) = ^false &
     testbit(%crest_spells_levers_gauntlets, ^crest_north_room_lever) = ^true)) {
     ~open_and_close_door2(famcrest_doorh2i2, ~check_axis(coord, loc_coord, loc_angle), door_open);

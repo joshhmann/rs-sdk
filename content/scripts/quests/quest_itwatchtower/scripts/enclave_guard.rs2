@@ -1,12 +1,12 @@
 [opnpc1,enclave_guard]
-if(%itwatchtower_progress < ^itwatchtower_skavid_crystal) {
+if(%itwatchtower < ^itwatchtower_skavid_crystal) {
     ~chatnpc("<p,bored>Stop bothering me, minion!");
     return;
 }
 ~chatnpc("<p,quiz>What do you want?");
  switch_int(~p_choice2("I want to go in there.", 1, "I want to rid the world of ogres.", 2)) {
     case 1 :
-        if(%itwatchtower_progress >= ^itwatchtower_complete) {
+        if(%itwatchtower >= ^itwatchtower_complete) {
             mes("The guard looks at you suspiciously...");
             mes("You run past while the guard is thinking...");
             @enter_skavid_cave;
@@ -23,12 +23,12 @@ if(%itwatchtower_progress < ^itwatchtower_skavid_crystal) {
 
 [opnpcu,enclave_guard]
 if(last_useitem = nightshade) {
-    if(%itwatchtower_progress < ^itwatchtower_skavid_crystal) {
+    if(%itwatchtower < ^itwatchtower_skavid_crystal) {
         ~chatplayer("<p,neutral>I think I had better deal with those skavids first...");
         return;
     }
     inv_del(inv, nightshade, 1);
-    if(%itwatchtower_progress = ^itwatchtower_skavid_crystal) %itwatchtower_progress = ^itwatchtower_fed_nightshade;
+    if(%itwatchtower = ^itwatchtower_skavid_crystal) %itwatchtower = ^itwatchtower_fed_nightshade;
     // https://web.archive.org/web/20041126094839im_/http://img26.imageshack.us/img26/1742/enclaveguard.jpg
     ~chatnpc("<p,shock>What is this!!!|Arrrrgh! I cannot stand this plant!|Ahhh, it burns! It burns!!!");
     mes("You run past the guard while he's busy.");

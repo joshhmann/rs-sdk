@@ -1,35 +1,35 @@
 // NOTE: seqs+sounds for vine/fungus probably added later (seq 2094-2097) assuming no p_delay if there's no animation (unless they re-used some anim)
 // loc's with animations also have arrivedelay, probably not the case originally
 [oploc2,snake_vine_full]
-if(%junglepotion_progress < ^junglepotion_get_snake_weed) {
+if(%junglepotion < ^junglepotion_get_snake_weed) {
 	mes("Unfortunately, you find nothing of interest.");
 	return;
 }
 ~junglepotion_pick_herb("vine", unidentified_snake_weed, snake_vine_empty);
 
 [oploc2,ardrigal_palm_full]
-if(%junglepotion_progress < ^junglepotion_get_ardrigal) {
+if(%junglepotion < ^junglepotion_get_ardrigal) {
 	mes("You find nothing of significance.");
 	return;
 }
 ~junglepotion_pick_herb("palm", unidentified_ardrigal, ardrigal_palm_empty);
 
 [oploc2,sito_soil_full]
-if(%junglepotion_progress < ^junglepotion_get_sito_foil) {
+if(%junglepotion < ^junglepotion_get_sito_foil) {
 	mes("You find nothing of significance.");
 	return;
 }
 ~junglepotion_pick_herb("scorched earth", unidentified_sito_foil, sito_soil_empty);
 
 [oploc2,volencia_moss_rock_full]
-if(%junglepotion_progress < ^junglepotion_get_volencia_moss) {
+if(%junglepotion < ^junglepotion_get_volencia_moss) {
 	mes("You find nothing of significance.");
 	return;
 }
 ~junglepotion_pick_herb("rock", unidentified_volencia_moss, volencia_moss_rock_empty);
 
 [oploc2,rogues_purse_cave_full]
-if(%junglepotion_progress < ^junglepotion_get_rogues_purse) {
+if(%junglepotion < ^junglepotion_get_rogues_purse) {
 	mes("Unfortunately, you find nothing of interest.");
 	return;
 }
@@ -56,11 +56,11 @@ if(inv_freespace(inv) = 0) {
 	return;
 }
 switch_namedobj($unid) {
-	case unidentified_rogues_purse : if (%junglepotion_progress = ^junglepotion_get_rogues_purse) %junglepotion_progress = ^junglepotion_found_rogues_purse;
-	case unidentified_volencia_moss : if (%junglepotion_progress = ^junglepotion_get_volencia_moss) %junglepotion_progress = ^junglepotion_found_volencia_moss;
-	case unidentified_sito_foil : if (%junglepotion_progress = ^junglepotion_get_sito_foil) %junglepotion_progress = ^junglepotion_found_sito_foil;
-	case unidentified_ardrigal : if (%junglepotion_progress = ^junglepotion_get_ardrigal) %junglepotion_progress = ^junglepotion_found_ardrigal;
-	case unidentified_snake_weed : if (%junglepotion_progress = ^junglepotion_get_snake_weed) %junglepotion_progress = ^junglepotion_found_snake_weed;
+	case unidentified_rogues_purse : if (%junglepotion = ^junglepotion_get_rogues_purse) %junglepotion = ^junglepotion_found_rogues_purse;
+	case unidentified_volencia_moss : if (%junglepotion = ^junglepotion_get_volencia_moss) %junglepotion = ^junglepotion_found_volencia_moss;
+	case unidentified_sito_foil : if (%junglepotion = ^junglepotion_get_sito_foil) %junglepotion = ^junglepotion_found_sito_foil;
+	case unidentified_ardrigal : if (%junglepotion = ^junglepotion_get_ardrigal) %junglepotion = ^junglepotion_found_ardrigal;
+	case unidentified_snake_weed : if (%junglepotion = ^junglepotion_get_snake_weed) %junglepotion = ^junglepotion_found_snake_weed;
 }
 inv_add(inv, $unid, 1);
 if ($loc ! null) {
@@ -70,7 +70,7 @@ if ($loc ! null) {
 ~objbox($unid, "You find a herb.", 250, 0, divide(^objbox_height, 2));
 
 [queue,junglepotion_quest_complete]
-%junglepotion_progress = ^junglepotion_complete;
+%junglepotion = ^junglepotion_complete;
 stat_advance(herblore, 7750);
 session_log(^log_adventure, "Quest complete: Jungle Potion");
 ~send_quest_complete(questlist:junglepotion, marentill, 220, ^junglepotion_questpoints, "You have completed the\\nJungle Potion Quest!");

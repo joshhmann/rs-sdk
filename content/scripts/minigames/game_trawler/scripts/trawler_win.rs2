@@ -41,7 +41,7 @@ if (~inzone_coord_pair_table(trawler_game_zones, coord) = false) {
     return;
 }
 mes("Murphy turns the boat towards shore.");
-%boat_takeoff = 12;
+%journey_number = 12;
 %trawler = ^trawler_finished;
 midi_jingle(^sailing_journey_jingle, ^sailing_journey_jingle_millis);
 if_openmain(ship_journey);

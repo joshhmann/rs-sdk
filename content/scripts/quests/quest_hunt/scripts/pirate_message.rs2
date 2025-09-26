@@ -21,7 +21,7 @@ inv_del(inv, chest_key, 1);
 inv_add(inv, piratemessage, 1);
 
 [opheld1,piratemessage]
-if (%hunt_progress = 2) {
-    %hunt_progress = 3;
+if (%hunt = 2) {
+    %hunt = 3;
 }
 @scroll_pirate_message;

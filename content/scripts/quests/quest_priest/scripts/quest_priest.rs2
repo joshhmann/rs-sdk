@@ -26,7 +26,7 @@ p_delay(0);
 loc_change(shutghostcoffin, 300);
 
 [proc,check_restlessghost_spawn]
-if(%priest_progress = ^priest_complete) { // Don't send ghost if the quest is complete
+if(%prieststart = ^priest_complete) { // Don't send ghost if the quest is complete
     return;
 }
 if (npc_find(loc_coord, ghostx, 4, 0) = false) {
@@ -35,23 +35,23 @@ if (npc_find(loc_coord, ghostx, 4, 0) = false) {
 
 [oploc2,restless_ghost_altar]
 ~check_restlessghost_spawn;
-if (%priest_progress = ^priest_complete) {
+if (%prieststart = ^priest_complete) {
     ~mesbox("Theres a nice and complete skeleton in here!");
-} else if (%priest_progress >= ^priest_started) {
+} else if (%prieststart >= ^priest_started) {
     ~mesbox("There's a skeleton without a skull in here.");
 } else {
     mes("You search the coffin and find some human remains.");
 }
 
 [oplocu,shutghostcoffin]
-if (last_useitem = ghostskull & %priest_progress = ^priest_obtained_skull) {
+if (last_useitem = ghostskull & %prieststart = ^priest_obtained_skull) {
     ~mesbox("Maybe I should open it first.");
     return;
 }
 ~displaymessage(^dm_default);
 
 [oplocu,restless_ghost_altar]
-if (last_useitem = ghostskull & %priest_progress = ^priest_obtained_skull) {
+if (last_useitem = ghostskull & %prieststart = ^priest_obtained_skull) {
     ~mesbox("You put the skull in the coffin.");
     inv_del(inv, ghostskull, 1);
     if(npc_find(coord, ghostx, 4, 0) = true) {
@@ -70,9 +70,9 @@ if(inv_total(inv, ghostskull) > 0 | inv_total(bank, ghostskull) > 0) {
     ~mesbox("You already have the Ghost's skull.");
     return;
 }
-if (%priest_progress = ^priest_spoken_ghost | %priest_progress = ^priest_obtained_skull) {
+if (%prieststart = ^priest_spoken_ghost | %prieststart = ^priest_obtained_skull) {
     def_coord $skeleton_spawnpoint = 0_48_149_48_29;
-    %priest_progress = ^priest_obtained_skull;
+    %prieststart = ^priest_obtained_skull;
     npc_add($skeleton_spawnpoint, skull_skeleton, 500);
     ~npc_retaliate(0);
     mes("Out of nowhere a skeleton appears!");
@@ -92,7 +92,7 @@ if ($choice = 1) {
 if_close;
 
 [queue,priest_quest_complete]
-%priest_progress = ^priest_complete;
+%prieststart = ^priest_complete;
 session_log(^log_adventure, "Quest complete: The Restless Ghost");
 ~send_quest_complete(questlist:priest, ghostskull, 220, ^priest_questpoints, "You have completed the\\nRestless Ghost Quest!");
 stat_advance(prayer, 11250);

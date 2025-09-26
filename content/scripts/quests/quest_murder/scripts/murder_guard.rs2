@@ -1,5 +1,5 @@
 [opnpc1,murderguard]
-switch_int(%murder_progress) { 
+switch_int(%murderquest) { 
     case ^murder_not_started :
         ~chatplayer("<p,neutral>What's going on here?");
         ~chatnpc("<p,sad>Oh, it's terrible! Lord Sinclair has been murdered and we don't have any clues as to who or why. We're totally baffled!");
@@ -8,9 +8,9 @@ switch_int(%murder_progress) {
         switch_int(~p_choice2("Sure, I'll help.", 1, "You should do your own dirty work.", 2)) {
             case 1 :
                 ~chatplayer("<p,happy>Sure, I'll help!");
-                %murder_progress = ^murder_started;
-                %murder_murderer_id = ~random_range(1,6);
-                ~send_quest_progress(questlist:murder, %murder_progress, ^murder_complete);
+                %murderquest = ^murder_started;
+                %murdersus = ~random_range(1,6);
+                ~send_quest_progress(questlist:murder, %murderquest, ^murder_complete);
                 ~chatnpc("<p,happy>Thanks a lot!");
                 @murderguard_help;
             case 2 :
@@ -122,7 +122,7 @@ p_delay(3);
 [label,murderguard_poisonproof]
 ~chatplayer("<p,confused>I have proof that <~murder_get_murderer_name> is lying about the poison.");
 ~chatnpc("<p,neutral>Oh really? How did you get that?");
-switch_int(%murder_murderer_id) {
+switch_int(%murdersus) {
     case 5 : ~mesbox("You tell the guard about the mosquitos at the <~murder_get_poisoned_loc_name>."); // RSC
     case 6 : ~mesbox("You tell the guard about the tarnished <~murder_get_poisoned_loc_name>."); // RSC again
     case default : ~mesbox("You tell the guard about the <~murder_get_poisoned_loc_name>.");
@@ -152,7 +152,7 @@ switch_int(%murder_murderer_id) {
 queue(murder_quest_complete, 0);
 
 [proc,murder_get_poisoned_loc_name]()(string)
-switch_int(%murder_murderer_id) {
+switch_int(%murdersus) {
     case 2 : return ("beehive");
     case 3 : return ("drain");
     case 4 : return ("spiders nest");
@@ -162,13 +162,13 @@ switch_int(%murder_murderer_id) {
 }
 
 [proc,murder_get_murderer_pronoun]()(string)
-switch_int(%murder_murderer_id) {
+switch_int(%murdersus) {
     case 2,4,6 : return ("him");
     case default : return ("her");
 }
 
 [proc,murder_get_murderer_pronoun2]()(string)
-switch_int(%murder_murderer_id) {
+switch_int(%murdersus) {
     case 2,4,6 : return ("his");
     case default : return ("her");
 }

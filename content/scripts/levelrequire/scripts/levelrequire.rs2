@@ -106,7 +106,7 @@ if (~levelrequire_zanaris_quest = false) {
 @levelrequire_attack_caps($level, $slot);
 
 [proc,levelrequire_dragon_slayer_quest]()(boolean)
-if (%dragon_progress < ^dragon_complete) {
+if (%dragonquest < ^dragon_complete) {
     mes("You have not earned the right to wear this yet.");
     mes("You need to complete the Dragon Slayer quest first."); // todo confirm for 2004
     return(false);
@@ -114,7 +114,7 @@ if (%dragon_progress < ^dragon_complete) {
 return(true);
 
 [proc,levelrequire_heroes_quest]()(boolean)
-if (%hero_progress < ^hero_complete) {
+if (%heroquest < ^hero_complete) {
     mes("You have not earned the right to wield this yet.");
     mes("You need to complete the Heroes' Guild entry quest."); // todo confirm for 2004
     return(false);
@@ -122,7 +122,7 @@ if (%hero_progress < ^hero_complete) {
 return(true);
 
 [proc,levelrequire_legends_quest]()(boolean)
-if (%legends_progress < ^legends_complete) {
+if (%legendsquest < ^legends_complete) {
     mes("You have not earned the right to wear this yet.");
     mes("You need to complete the Legends' Quest."); // todo confirm for 2004
     return(false);
@@ -130,7 +130,7 @@ if (%legends_progress < ^legends_complete) {
 return(true);
 
 [proc,levelrequire_zanaris_quest]()(boolean)
-if (%zanaris_progress < ^zanaris_complete) {
+if (%zanaris < ^zanaris_complete) {
     mes("You have not earned the right to wear this yet.");
     mes("You need to complete the Lost City of Zanaris Quest."); // todo confirm for 2004
     return(false);

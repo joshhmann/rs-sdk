@@ -1,6 +1,6 @@
 [opnpc1,zanarisleprechaun]
 ~chatnpc("<p,angry>Ay yer big elephant! Yer've caught me, to be sure! What would an elephant like yer be wanting wid ol' Shamus then?");
-switch_int(%zanaris_progress) {
+switch_int(%zanaris) {
     case ^zanaris_not_started :
         ~chatplayer("<p,confused>I'm not sure.");
         ~chatnpc("<p,neutral>Well you'll have to be catchin' me again when yer are, elephant!");
@@ -43,7 +43,7 @@ switch_int(%zanaris_progress) {
 ~chatnpc("<p,neutral>Dramenwood staffs are crafted from branches of the Dramen tree, so they are. I hear there's a Dramen tree over on the island of Entrana in a cave");
 ~chatnpc("<p,neutral>or some such. There would probably be a good place for an elephant like yer to be starting looking I reckon.");
 ~chatnpc("<p,neutral>The monks are running a ship from Port Sarim to Entrana, I hear too. Now leave me alone yer elephant!");
-%zanaris_progress = ^zanaris_spoken_shamus;
+%zanaris = ^zanaris_spoken_shamus;
 @remove_zanarisleprechaun;
 
 [label,remove_zanarisleprechaun]

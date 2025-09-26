@@ -12,8 +12,8 @@ if(npc_findhero = ^true) {
 if (inzone(^arena_lower_coord, ^arena_upper_coord, coord) = true) @defeat_arena_scorpion;
 
 [label,defeat_arena_scorpion]
-if(%arena_progress = ^arena_sent_jail) {
-    %arena_progress = ^arena_defeated_scorpion;
+if(%arenaquest = ^arena_sent_jail) {
+    %arenaquest = ^arena_defeated_scorpion;
     if (npc_find(movecoord(coord, 8, 0, 0), general_khazard, 15, 0) = false) {
         return;
     }

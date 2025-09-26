@@ -12,8 +12,8 @@ if(npc_findhero = ^true) {
 if (inzone(^arena_lower_coord, ^arena_upper_coord, coord) = true) @defeat_arena_ogre;
 
 [label,defeat_arena_ogre]
-if(%arena_progress = ^arena_entered_ogre_fight) {
-    %arena_progress = ^arena_defeated_ogre;
+if(%arenaquest = ^arena_entered_ogre_fight) {
+    %arenaquest = ^arena_defeated_ogre;
     if (npc_find(movecoord(coord, 8, 0, 0), justin_servil, 15, 0) = false) {
         return;
     }

@@ -8,7 +8,7 @@ if(testbit(%bioerrand, ^chancy_given) = ^true) {
     ~chatnpc("<p,neutral>Look, I've got your vial but I'm not taking two.|I always like to play the percentages.");
     return;
 }
-if(%biohazard_progress = ^biohazard_spoken_chemist) {
+if(%biohazard = ^biohazard_spoken_chemist) {
     ~chatplayer("<p,neutral>Hello, I've got a vial for you to take to Varrock.");
     ~chatnpc("<p,shock>Tssch... that chemist asks for a lot for the wages he pays.");
     ~chatplayer("<p,neutral>Maybe you should ask him for more money.");

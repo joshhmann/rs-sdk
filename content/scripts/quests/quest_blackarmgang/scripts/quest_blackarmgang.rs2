@@ -1,5 +1,5 @@
 [oploc2,questbookcase] // palace bookcase
-if(%phoenixgang_progress ! 1) {
+if(%phoenixgang ! 1) {
     mes("A large collection of books.");
     return;
 }
@@ -14,15 +14,15 @@ inv_add(inv, the_shield_of_arrav, 1);
 [oploc1,phoenixdoor]
 // 1 tile away from player
 def_boolean $leaving = ~check_axis(coord, loc_coord, loc_angle);
-if(%phoenixgang_progress >= ^phoenixgang_joined | $leaving = true) {
+if(%phoenixgang >= ^phoenixgang_joined | $leaving = true) {
     ~open_hideout_door($leaving, "The door automatically opens for you.");
     return;
 }
 if (npc_find(coord, straven, 1, 0) = true) {
-    if(%blackarmgang_progress >= ^blackarmgang_joined) {
+    if(%blackarmgang >= ^blackarmgang_joined) {
         @straven_blackarmdog;
     }
-    if(%phoenixgang_progress = ^phoenixgang_spoken_straven) {
+    if(%phoenixgang = ^phoenixgang_spoken_straven) {
         @straven_mission;
     } 
     @straven_cant_enter;
@@ -33,7 +33,7 @@ mes("The door is securely locked.");
 
 [oploc1,phoenixopenchest]
 ~mesbox("You search the chest.");
-if(%phoenixgang_progress = ^phoenixgang_complete | inv_total(inv, arravshield1) > 0 | inv_total(bank, arravshield1) > 0) {
+if(%phoenixgang = ^phoenixgang_complete | inv_total(inv, arravshield1) > 0 | inv_total(bank, arravshield1) > 0) {
     ~mesbox("The chest is empty.");
     return;
 }
@@ -98,7 +98,7 @@ if (inv_itemspace(inv, obj_type, obj_count, inv_size(inv)) = false) {
 
 [oploc1,blackarmdoor]
 def_boolean $leaving = ~check_axis(coord, loc_coord, loc_angle);
-if(%blackarmgang_progress >= ^blackarmgang_joined) {
+if(%blackarmgang >= ^blackarmgang_joined) {
     ~open_hideout_door($leaving, "You hear heavy bolts being drawn back as the door is unlocked.");
     return;
 }
@@ -108,7 +108,7 @@ mes("This door seems to be locked from the inside.");
 [oploc1,blackarmcupboardopen] @close_cupboard(~cupboards_use_message);
 
 [oploc2,blackarmcupboardopen]
-if(%blackarmgang_progress = ^blackarmgang_complete | inv_total(inv, arravshield2) > 0 | inv_total(bank, arravshield2) > 0) {
+if(%blackarmgang = ^blackarmgang_complete | inv_total(inv, arravshield2) > 0 | inv_total(bank, arravshield2) > 0) {
     ~mesbox("The cupboard is bare.");
     return;
 }
@@ -116,11 +116,11 @@ if(%blackarmgang_progress = ^blackarmgang_complete | inv_total(inv, arravshield2
 inv_add(inv, arravshield2, 1);
 
 [queue,blackarmgang_quest_complete]
-if(%phoenixgang_progress = ^phoenixgang_joined) {
-    %phoenixgang_progress = ^phoenixgang_complete;
+if(%phoenixgang = ^phoenixgang_joined) {
+    %phoenixgang = ^phoenixgang_complete;
     session_log(^log_adventure, "Quest complete: Shield of Arrav (Phoenix Gang)");
 } else {
-    %blackarmgang_progress = ^blackarmgang_complete;
+    %blackarmgang = ^blackarmgang_complete;
     session_log(^log_adventure, "Quest complete: Shield of Arrav (Black Arm Gang)");
 }
 ~send_quest_complete(questlist:blackarmgang, coins, 250, ^blackarmgang_questpoints, "You have completed the\\nShield of Arrav Quest!");

@@ -101,7 +101,7 @@ if (~waterfall_can_enter_glarials_tomb() = false) {
     mes("The stone slab slides back revealing a ladder down.");
     p_delay(2);
     p_teleport(0_39_153_58_52);
-    if(%waterfall_progress = ^waterfall_opened_book_on_baxtorian) %waterfall_progress = ^waterfall_entered_glarial_tomb;
+    if(%waterfall_quest = ^waterfall_opened_book_on_baxtorian) %waterfall_quest = ^waterfall_entered_glarial_tomb;
     mes("You climb down to an undergound passage.");
 }
 
@@ -136,7 +136,7 @@ if (inv_total(inv, glarials_amulet_waterfall_quest) > 0) { // no bank or worn ch
 
 // waterfall_raft
 [oploc1,lograft_waterfall_quest]
-switch_int (%waterfall_progress) {
+switch_int (%waterfall_quest) {
     case ^waterfall_not_started : ~mesbox("You're not sure if the raft is safe to use.|Best to leave it alone.");
     case default :
         // https://youtu.be/HQEpeWAUMbI?t=113
@@ -149,7 +149,7 @@ switch_int (%waterfall_progress) {
         p_delay(2);
         mes("You crash into a small land mound");
         p_delay(2);
-        if (%waterfall_progress = ^waterfall_started) {
+        if (%waterfall_quest = ^waterfall_started) {
             // Forced Hudon Dialogue
             if (npc_find(movecoord(coord, -1, 0, 0), hudon_waterfall_quest, 5, 0) = true) {
                 ~chatplayer("<p,neutral>Hello son, are you okay? You need help?");
@@ -159,7 +159,7 @@ switch_int (%waterfall_progress) {
                 ~chatplayer("<p,neutral>Where is this treasure you talk of?");
                 ~chatnpc("<p,neutral>Just because I'm small doesn't mean I'm dumb! If I told you, you would take it all for yourself.");
                 ~chatplayer("<p,neutral>Maybe I could help.");
-                %waterfall_progress = ^waterfall_spoken_to_hudon;
+                %waterfall_quest = ^waterfall_spoken_to_hudon;
                 ~chatnpc("<p,neutral>I'm fine alone.");
                 mes("Hudon is refusing to leave the waterfall");
                 return;
@@ -250,8 +250,8 @@ mes("The door begins to open.");
 p_delay(2);
 if(inv_total(worn, glarials_amulet_waterfall_quest) > 0 | inv_total(inv, glarials_amulet_waterfall_quest) > 0) {
     mes("You walk through the door.");
-    if(%waterfall_progress = ^waterfall_entered_glarial_tomb) {
-        %waterfall_progress = ^waterfall_entered_waterfall;
+    if(%waterfall_quest = ^waterfall_entered_glarial_tomb) {
+        %waterfall_quest = ^waterfall_entered_waterfall;
     }
     p_teleport(0_40_154_15_5);
     return;
@@ -284,7 +284,7 @@ p_teleport(^waterfall_fail_coord);
 [oploc1,bookcase_waterfall_quest]
 mes("You search the books...");
 p_delay(2);
-switch_int (%waterfall_progress) {
+switch_int (%waterfall_quest) {
     case ^waterfall_not_started, ^waterfall_started : mes("You find nothing of interest.");
     case default :
         if (inv_total(inv, baxtorian_book_waterfall_quest) > 0) { // no bank check
@@ -300,7 +300,7 @@ switch_int (%waterfall_progress) {
 //https://youtu.be/D80JSlBEC6I?si=llkZ6l1gSEvJWmRV&t=247
 mes("You search the crate");
 p_delay(2);
-switch_int (%waterfall_progress) {
+switch_int (%waterfall_quest) {
     case ^waterfall_not_started, ^waterfall_started, ^waterfall_spoken_to_hudon : mes("You find nothing of interest.");
     case default :
         if (inv_total(inv, golrie_key_waterfall_quest) > 0) { // no bank check
@@ -325,7 +325,7 @@ if($is_outside = false) {
         mes("Golrie has locked himself in.");
         return;
     }
-    if(%waterfall_progress <= ^waterfall_opened_book_on_baxtorian & inv_total(inv, golrie_key_waterfall_quest) = 0) {
+    if(%waterfall_quest <= ^waterfall_opened_book_on_baxtorian & inv_total(inv, golrie_key_waterfall_quest) = 0) {
         if (npc_find(movecoord(coord, 0, 0, 2), golrie_waterfall_quest, 5, 0) = true) {
             @waterfall_golrie_door_dialogue;
         }
@@ -379,9 +379,9 @@ if(last_useitem = baxtorian_key_waterfall_quest) {
     mes("You open the door and walk through.");
     ~open_and_close_door(baxtorian_door_2_open_waterfall_quest, ~check_axis(coord, loc_coord, loc_angle), false);
     if(loc_coord = 0_40_154_6_46) {
-        if(%waterfall_progress = ^waterfall_entered_waterfall) {
-            %waterfall_progress = ^waterfall_entered_puzzle_room;
-        } else if(%waterfall_progress >= ^waterfall_placed_amulet) {
+        if(%waterfall_quest = ^waterfall_entered_waterfall) {
+            %waterfall_quest = ^waterfall_entered_puzzle_room;
+        } else if(%waterfall_quest >= ^waterfall_placed_amulet) {
             p_delay(1);
             p_teleport(^waterfall_raised_room_door_coord);
         }
@@ -396,7 +396,7 @@ if(last_useitem = baxtorian_key_waterfall_quest) {
 [oplocu,statue_queen_waterfall_quest]
 def_obj $useitem = last_useitem;
 p_delay(0); // always 1t delay before this interaction (NOT ARRIVEDELAY)
-if($useitem = glarials_amulet_waterfall_quest & %waterfall_progress = ^waterfall_entered_puzzle_room) { 
+if($useitem = glarials_amulet_waterfall_quest & %waterfall_quest = ^waterfall_entered_puzzle_room) { 
     //https://www.youtube.com/watch?v=uFkwFEKgNRc
     mes("You place the amulet around the neck of the statue.");
     if(getbit_range(%waterfall_golrie_and_puzzle, 1, 18) = calc(pow(2, 18) - 1)) {
@@ -407,7 +407,7 @@ if($useitem = glarials_amulet_waterfall_quest & %waterfall_progress = ^waterfall
         inv_del(inv, glarials_amulet_waterfall_quest, 1);
         p_teleport(0_40_154_43_58);
         // sound_synth -> rumbling
-        %waterfall_progress = ^waterfall_placed_amulet;
+        %waterfall_quest = ^waterfall_placed_amulet;
         return;
     }
     mes("You hear a loud rumble...");
@@ -424,7 +424,7 @@ if($useitem = glarials_amulet_waterfall_quest & %waterfall_progress = ^waterfall
 
 //https://www.youtube.com/watch?v=b8aojMS0VDI&t=480s, https://www.youtube.com/watch?v=qfmXXQ68pis&t=344s
 [oploc1,baxtorian_chalice_waterfall_quest]
-if(%waterfall_progress = ^waterfall_complete) {
+if(%waterfall_quest = ^waterfall_complete) {
     mes("The chalice only contains some old ashes."); // mesbox in osrs
     return;
 }
@@ -444,7 +444,7 @@ p_teleport(^waterfall_fail_coord);
 
 [oplocu,baxtorian_chalice_waterfall_quest]
 if(last_useitem = glarials_urn_full_waterfall_quest) {
-    if(%waterfall_progress = ^waterfall_complete) {
+    if(%waterfall_quest = ^waterfall_complete) {
         mes("The chalice only contains some old ashes."); // mesbox in osrs
         return;
     }
@@ -469,7 +469,7 @@ if(last_useitem = glarials_urn_full_waterfall_quest) {
 ~displaymessage(^dm_default);
 
 [queue,waterfall_quest_complete]
-%waterfall_progress = ^waterfall_complete;
+%waterfall_quest = ^waterfall_complete;
 inv_add(inv, diamond, 2);
 inv_add(inv, gold_bar, 2);
 inv_add(inv, mithril_seed, 40);

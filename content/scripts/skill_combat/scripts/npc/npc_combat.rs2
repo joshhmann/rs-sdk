@@ -119,7 +119,7 @@ if (~player_autocast_enabled = false & ~inzone_coord_pair_table(mage_arena, coor
     return(false);
 }
 
-if(npc_type = general_khazard & %arena_progress < ^arena_freed_servils) {
+if(npc_type = general_khazard & %arenaquest < ^arena_freed_servils) {
     mes("I don't have time. I'm here to rescue Sir Servil and Jeremy.");
     return (false);
 }
@@ -137,7 +137,7 @@ if(npc_type = ikov_lucien2) {
 } 
 
 if(npc_type = gorad & (~obj_gettotal(ogretooth) > 0 | getbit_range(%itwatchtower_bits, ^itwatchtower_spoken_grew, ^itwatchtower_helped_grew) ! 1)) {
-    if(%itwatchtower_progress = ^itwatchtower_complete) return (true);
+    if(%itwatchtower = ^itwatchtower_complete) return (true);
     if(getbit_range(%itwatchtower_bits, ^itwatchtower_spoken_grew, ^itwatchtower_helped_grew) < 1) {
         mes("You don't need to fight him now.");
     } else {
@@ -156,7 +156,7 @@ if(npc_type = ikov_firewarrior & (inv_total(worn, ice_arrow) = 0 | %damagetype !
 }
 
 if (npc_type = delrith) {
-    if (%demon_progress >= ^demon_complete) {
+    if (%demonstart >= ^demon_complete) {
         mes("You've already done that quest.");
         return(false);
     }
@@ -170,7 +170,7 @@ if (npc_type = delrith) {
     }
 }
 if (npc_type = count_draynor) {
-    if (%vampire_progress = ^vampire_complete) {
+    if (%vampire = ^vampire_complete) {
         mes("You've done enough vampire slaying.");
         return(false);
     }
@@ -197,7 +197,7 @@ if (npc_category = battle_mage & %magearena < ^mage_arena_complete) {
     mes("You are not ready to fight the battle mages.");
     return(false);
 }
-if(npc_type = general_khazard & %arena_progress < ^arena_freed_servils) {
+if(npc_type = general_khazard & %arenaquest < ^arena_freed_servils) {
     mes("I don't have time. I'm here to rescue Sir Servil and Jeremy.");
     return (false);
 }
@@ -205,7 +205,7 @@ if(npc_type = ikov_lucien2) {
     return (~lucien_attack);
 }
 if(npc_type = gorad & (~obj_gettotal(ogretooth) > 0 | getbit_range(%itwatchtower_bits, ^itwatchtower_spoken_grew, ^itwatchtower_helped_grew) ! 1)) {
-    if(getbit_range(%itwatchtower_bits, ^itwatchtower_spoken_grew, ^itwatchtower_helped_grew) ! 1 | %itwatchtower_progress >= ^itwatchtower_complete) {
+    if(getbit_range(%itwatchtower_bits, ^itwatchtower_spoken_grew, ^itwatchtower_helped_grew) ! 1 | %itwatchtower >= ^itwatchtower_complete) {
         mes("You don't need to fight him now.");
     } else {
         mes("You have already got his tooth.");
@@ -238,12 +238,12 @@ if (npc_type = chompy_bird) {
     mes("Magic simply won't affect this beast!");
     return(false);
 }
-if (%vampire_progress = ^vampire_complete & npc_type = count_draynor) {
+if (%vampire = ^vampire_complete & npc_type = count_draynor) {
     mes("You've done enough vampire slaying.");
     return(false);
 }
 if (npc_type = delrith) {
-    if (%demon_progress >= ^demon_complete) {
+    if (%demonstart >= ^demon_complete) {
         mes("You've already done that quest.");
         return(false);
     }
@@ -257,7 +257,7 @@ if (npc_type = delrith) {
     }
 }
 if (npc_type = count_draynor) {
-    if (%vampire_progress = ^vampire_complete) {
+    if (%vampire = ^vampire_complete) {
         mes("You've done enough vampire slaying.");
         return(false);
     }

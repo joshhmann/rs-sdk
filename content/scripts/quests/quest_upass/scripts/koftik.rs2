@@ -1,9 +1,9 @@
 // outside underground pass
 [opnpc1,caveguide1]
-if(%upass_progress = ^upass_not_started & testbit(%upass_map_mechanisms, ^upass_started_bit) = ^true) {
+if(%upass = ^upass_not_started & testbit(%upass_map_mechanisms, ^upass_started_bit) = ^true) {
     @koftik_first_dialogue;
 }
-switch_int(%upass_progress) {
+switch_int(%upass) {
     case ^upass_complete :
         ~chatplayer("<p,quiz>Hello Koftik.");
         ~chatnpc("<p,happy>Hello Adventurer, how's things?");
@@ -40,7 +40,7 @@ switch_int(%upass_progress) {
 ~chatnpc("<p,shock>These caves are different... They're filled with the spirit of Zamorak!");
 ~chatnpc("<p,neutral>You can feel it as you wind your way round the stalagmites.. an icy chill that penetrates the very fabric of your being...");
 ~chatnpc("<p,neutral>Not so many travellers come down here these days, ...but there are some who are still foolhardy enough."); // intentional comma
-%upass_progress = ^upass_spoken_koftik;
+%upass = ^upass_spoken_koftik;
 switch_int(~p_choice2("I'll take my chances.", 1, "Tell me more...", 2)) {
     case 1 :
         ~chatplayer("<p,bored>I'll take my chances.");
@@ -56,7 +56,7 @@ switch_int(~p_choice2("I'll take my chances.", 1, "Tell me more...", 2)) {
 
 // before the bridge in area 1
 [opnpc1,caveguide2]
-switch_int(%upass_progress) {
+switch_int(%upass) {
     case ^upass_defeated_iban :
         ~chatplayer("<p,happy>Thanks for getting me out Koftik.");
         ~chatnpc("<p,happy>Always a pleasure squire.");
@@ -97,7 +97,7 @@ switch_int(%upass_progress) {
 
 // before the bridge in area 1
 [opnpc1,caveguide3]
-switch_int(%upass_progress) {
+switch_int(%upass) {
     case ^upass_defeated_iban, ^upass_complete :
         ~chatplayer("<p,quiz>Hello Koftik.");
         ~chatnpc("<p,happy>Hello, how's things?");
@@ -114,7 +114,7 @@ switch_int(%upass_progress) {
 
 [opnpc1,caveguide4]
 // guessing, need to confirm by getting someone midquest to spawn this one in
-if(%upass_progress >= ^upass_defeated_iban) {
+if(%upass >= ^upass_defeated_iban) {
     ~chatplayer("<p,quiz>Hello Koftik.");
     ~chatnpc("<p,happy>Hello, how's things?"); // no adventurer when i checked by grid
     ~chatplayer("<p,happy>Not bad, yourself?");

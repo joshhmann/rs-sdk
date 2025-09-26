@@ -27,6 +27,6 @@ if(npc_findhero = ^true) {
 }
 
 [queue,queue_defeat_fire_warrior] 
-if(%ikov_progress = ^ikov_pulled_lever) {
-    %ikov_progress = ^ikov_defeated_fire_warrior;
+if(%ikov = ^ikov_pulled_lever) {
+    %ikov = ^ikov_defeated_fire_warrior;
 }

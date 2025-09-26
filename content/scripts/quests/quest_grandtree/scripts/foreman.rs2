@@ -1,5 +1,5 @@
 [opnpc1,grandtree_foreman]
-if((%grandtree_progress ! ^grandtree_released_prison & %grandtree_progress ! ^grandtree_obtained_lumber_order) | ~obj_gettotal(grandtree_order) > 0) {
+if((%grandtree ! ^grandtree_released_prison & %grandtree ! ^grandtree_obtained_lumber_order) | ~obj_gettotal(grandtree_order) > 0) {
     ~mesbox("The foreman is too busy to talk.");
     return;
 }
@@ -107,7 +107,7 @@ if(inv_freespace(inv) = 0) {
     ~chatnpc("It seems you can't carry anymore. Come back when you have some space.");
     return;
 }
-if(%grandtree_progress = ^grandtree_released_prison) %grandtree_progress = ^grandtree_obtained_lumber_order;
+if(%grandtree = ^grandtree_released_prison) %grandtree = ^grandtree_obtained_lumber_order;
 inv_add(inv, grandtree_order, 1);
 ~objbox(grandtree_order, "The foreman has given you the lumber order.", 250, 0, 0);
 ~chatplayer("<p,neutral>OK. I'll head off and give this order to Glough.");
@@ -121,7 +121,7 @@ npc_setmode(opplayer2);
 gosub(npc_death);
 if(npc_findhero = ^true) {
     // queued, no if_close
-    if((%grandtree_progress = ^grandtree_released_prison | %grandtree_progress = ^grandtree_obtained_lumber_order) & ~obj_gettotal(grandtree_order) = 0) {
+    if((%grandtree = ^grandtree_released_prison | %grandtree = ^grandtree_obtained_lumber_order) & ~obj_gettotal(grandtree_order) = 0) {
         queue(queue_defeat_grandtree_foreman, 0, npc_uid);
     }
     obj_add(npc_coord, bones, 1, ^lootdrop_duration); // this isn't queued, the lumber order is
@@ -129,7 +129,7 @@ if(npc_findhero = ^true) {
 
 [queue,queue_defeat_grandtree_foreman](npc_uid $npc)
 if(npc_finduid($npc) = true) {
-    if(%grandtree_progress = ^grandtree_released_prison) %grandtree_progress = ^grandtree_obtained_lumber_order;
+    if(%grandtree = ^grandtree_released_prison) %grandtree = ^grandtree_obtained_lumber_order;
     mes("The foreman drops a piece of paper as he dies.");
     obj_add(npc_coord, grandtree_order, 1, ^lootdrop_duration);
 }

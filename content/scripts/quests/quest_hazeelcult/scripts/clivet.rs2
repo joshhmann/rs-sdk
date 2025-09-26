@@ -1,5 +1,5 @@
 [opnpc1,clivet_hazeel_cultist]
-switch_int(%hazeelcult_progress) {
+switch_int(%hazeelcultquest) {
     case ^hazeelcult_not_started :
         ~chatplayer("<p,neutral>Hello there.");
         ~chatnpc("<p,shifty>What do you want adventurer?");
@@ -15,7 +15,7 @@ switch_int(%hazeelcult_progress) {
         ~chatplayer("<p,angry>Sir Ceril Carnillean is a man of honour!");
         ~chatnpc("<p,neutral>Is he now? Is he REALLY? There is a lot more to the Carnilleans than meets the eye you fool...");
         ~chatnpc("<p,angry>And none of it is honourable.");
-        %hazeelcult_progress = ^hazeelcult_spoken_clivet;
+        %hazeelcultquest = ^hazeelcult_spoken_clivet;
         @multi2("What do you mean?", clivet_hazeel_cultist_what_do_you_mean, "I've heard enough of your rubbish.", clivet_hazeel_cultist_rubbish);
     case ^hazeelcult_spoken_clivet :
         ~chatplayer("<p,neutral>Hello.");
@@ -115,7 +115,7 @@ switch_int(~p_choice2("You're crazy, I'd never help you.", 1, "So what would I h
                 ~chatnpc("<p,neutral>Here. Take this poison. Pour it into their food, and once the deed is done, return here and speak to me once more.");
                 inv_add(inv, poison, 1);
                 %hazeelcult_side = ^hazeelcult_evilside;
-                %hazeelcult_progress = ^hazeelcult_clivet_decision;
+                %hazeelcultquest = ^hazeelcult_clivet_decision;
         }
 }
 
@@ -128,6 +128,6 @@ switch_int(~p_choice2("You're crazy, I'd never help you.", 1, "So what would I h
 ~chatnpc("<p,neutral>Then you are a fool. Go back to your small minded mundane little life; you will never know the glories you could have tasted as one of us!");
 ~mesbox("The man jumps onto the raft and pushes off down into the sewer system.");
 %hazeelcult_side = ^hazeelcult_goodside;
-%hazeelcult_progress = ^hazeelcult_clivet_decision;
+%hazeelcultquest = ^hazeelcult_clivet_decision;
 npc_del;
 mes("Clivet: You'll never find us...");

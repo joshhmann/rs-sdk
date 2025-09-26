@@ -147,7 +147,7 @@ inv_add(inv, dagger_wolfbane, 1);
 [label,drezel_anything_interesting]
 ~chatplayer("<p,quiz>Is there anything else interesting to do around here?");
 // ToDo: Re-enable check for The Restless Ghost quest in pre-req for Nature Spirit.
-if (%priestperil >= ^priestperil_complete /*& %priest_progress >= ^priest_complete*/) {
+if (%priestperil >= ^priestperil_complete /*& %prieststart >= ^priest_complete*/) {
     @drezel_start_druidspirit;
 } else {
     ~chatnpc("<p,neutral>Well... I don't think so. There's not much to do in that place.");

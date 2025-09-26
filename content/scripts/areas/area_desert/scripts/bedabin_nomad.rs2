@@ -23,7 +23,7 @@ while($op ! null) {
 
 [proc,bedabin_options]()(int)
 def_int $op;
-if(%desertrescue_progress = ^desertrescue_finding_pineapple) {
+if(%desertrescue = ^desertrescue_finding_pineapple) {
     $op = ~p_choice5("What is this place?", 1, "Do you know where I could get a tenti pineapple?", 4, "Where is the Shantay Pass?", 2, "What do you have to sell?", 3, "Okay, thanks", null);
 } else {
     $op = ~p_choice4("What is this place?", 1, "Where is the Shantay Pass?", 2, "What do you have to sell?", 3, "Okay, thanks", null);

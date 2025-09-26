@@ -1,8 +1,8 @@
 [debugproc,mc]
-if (%mcannon_coord ! null) {
-    mes(tostring(coordx(%mcannon_coord)));
+if (%ownedmcannon ! null) {
+    mes(tostring(coordx(%ownedmcannon)));
 }
-mes(tostring(%mcannon_stage));
+mes(tostring(%dropcannon));
 
 [debugproc,givemc]
 inv_add(inv, twpart1, 1);
@@ -23,24 +23,24 @@ if (p_finduid(uid) = true) {
 if (p_finduid(uid) = false) {
     return;
 }
-if (%mcannon_coord = null | loc_find(%mcannon_coord, dwarf_multicannon1) = true) {
+if (%ownedmcannon = null | loc_find(%ownedmcannon, dwarf_multicannon1) = true) {
     ~chatnpc_specific("Nulodion", nulodion, "<p,sad>Oh dear, I'm only allowed to replace cannons|that were stolen in action.|I'm sorry but you'll have to buy a new set.");
     return;
 }
-if (%mcannon_coord ! null) {
-    if (loc_find(%mcannon_coord, multicannon_base) = true) {
+if (%ownedmcannon ! null) {
+    if (loc_find(%ownedmcannon, multicannon_base) = true) {
         ~chatnpc_specific("Nulodion", nulodion, "<p,confused>Hmmm. I think you'll find the base still happily parked on the spot where you put it."); // osrs
         ~chatplayer("<p,confused>Oh, is it still there? I thought I'd lost it.");
         ~chatnpc_specific("Nulodion", nulodion, "<p,laugh>Ha ha ha, what a muddle-headed numpty you are!");
         ~chatplayer("<p,angry>...");
         return;
-    } else if (loc_find(%mcannon_coord, multicannon_stand) = true) {
+    } else if (loc_find(%ownedmcannon, multicannon_stand) = true) {
         ~chatnpc_specific("Nulodion", nulodion, "<p,confused>Hmmm. I think you'll find the base and stand still happily parked on the spot where you put them."); // osrs
         ~chatplayer("<p,confused>Oh, is it still there? I thought I'd lost it.");
         ~chatnpc_specific("Nulodion", nulodion, "<p,laugh>Ha ha ha, what a muddle-headed numpty you are!");
         ~chatplayer("<p,angry>...");
         return;
-    } else if (loc_find(%mcannon_coord, multicannon_barrels) = true) {
+    } else if (loc_find(%ownedmcannon, multicannon_barrels) = true) {
         ~chatnpc_specific("Nulodion", nulodion, "<p,confused>Hmmm. I think you'll find most of the cannon still happily parked on the spot where you put it."); // osrs
         ~chatplayer("<p,confused>Oh, is it still there? I thought I'd lost it.");
         ~chatnpc_specific("Nulodion", nulodion, "<p,laugh>Ha ha ha, what a muddle-headed numpty you are!");

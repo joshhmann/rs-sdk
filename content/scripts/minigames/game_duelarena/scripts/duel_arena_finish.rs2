@@ -6,7 +6,7 @@ if (~in_duel_arena(coord) = true & %duelstatus < ^duelstatus_lost) {
     clearqueue(duel_finish);
     queue(duel_finish, 0);
 
-    if (%duelstatus = ^duelstatus_lost & .finduid(%duelpartner) = true) {
+    if (%duelstatus = ^duelstatus_lost & .finduid(%duel2accept) = true) {
         session_log(^log_moderator, "Lost a duel against <.name>");
         .if_close;
         .%duelstatus = ^duelstatus_victory;
@@ -24,7 +24,7 @@ mes("Oh dear you are dead!");
 
 
 [queue,duel_finish]
-if (.finduid(%duelpartner) = true) {
+if (.finduid(%duel2accept) = true) {
     if (%duelstatus = ^duelstatus_victory) {
         if_settext(duel_win:com_91, "You are victorious!");
         mes("Well done! You have defeated <.displayname>!");
@@ -85,7 +85,7 @@ clearqueue(player_death);
 hint_stop;
 ~sa_reset;
 %duelstatus = ^duelstatus_reset;
-%duelpartner = null;
+%duel2accept = null;
 
 [if_close,duel_win]
 if (~moveallinv_itemspace(duelwinnings, inv) = false) {

@@ -22,7 +22,7 @@ if(last_useitem = witches_doorkey | $leaving = true) {
 ~displaymessage(^dm_default);
 
 [label,open_witch_house_door](boolean $leaving)
-if($leaving ! true & (%ball_progress < ^ball_started | %ball_progress = ^ball_complete)) {
+if($leaving ! true & (%ballquest < ^ball_started | %ballquest = ^ball_complete)) {
     ~chatplayer("<p,neutral>It would be rude to break into this house.");
     return;
 }
@@ -69,8 +69,8 @@ if(~obj_gettotal(magnet) > 0) {
     return;
 }
 ~mesbox("You find a magnet in the cupboard.");
-if(%ball_progress = ^ball_started) {
-    %ball_progress = ^ball_found_magnet;
+if(%ballquest = ^ball_started) {
+    %ballquest = ^ball_found_magnet;
 }
 inv_add(inv, magnet, 1);
 
@@ -101,14 +101,14 @@ sound_synth(put_down, 0, 0);
 
 [opnpcu,witchrat]
 if(last_useitem = magnet) {
-    if(%ball_progress >= ^ball_unlocked_mousedoor) {
+    if(%ballquest >= ^ball_unlocked_mousedoor) {
         mes("You have already unlocked this door.");
         return;
-    } else if(%ball_progress < ^ball_found_magnet) {
+    } else if(%ballquest < ^ball_found_magnet) {
         ~mesbox("This doesn't seem to be the right magnet to open this door...");
         return;
     }
-    %ball_progress = ^ball_unlocked_mousedoor;
+    %ballquest = ^ball_unlocked_mousedoor;
     inv_del(inv, magnet, 1);
     npc_del;
     ~mesbox("You attach the magnet to the mouse's harness. The mouse finishes the cheese and runs back into its hole. You hear some odd noises from inside the walls. There is a strange whirring noise from above the door frame.");
@@ -117,7 +117,7 @@ if(last_useitem = magnet) {
 ~displaymessage(^dm_default);
 
 [oploc1,witchbackdoor]
-if(%ball_progress < ^ball_unlocked_mousedoor) {
+if(%ballquest < ^ball_unlocked_mousedoor) {
     ~mesbox("This door is locked.");
     ~chatplayer("<p,confused>Strange... I can't see any kind of lock or handle to open this door...");
     return;
@@ -125,7 +125,7 @@ if(%ball_progress < ^ball_unlocked_mousedoor) {
 ~open_and_close_door2(poordoor, ~check_axis(coord, loc_coord, loc_angle), door_open);
 
 [oploc1,witchsheddoor]
-if(%ball_progress >= ^ball_defeated_experiment) {
+if(%ballquest >= ^ball_defeated_experiment) {
     ~open_and_close_door2(desertdoor_inactive, ~check_axis(coord, loc_coord, loc_angle), door_open);
     return;
 }
@@ -169,12 +169,12 @@ if(~obj_gettotal(witches_shedkey) > 0) { // checks bank
 inv_add(inv, witches_shedkey, 1);
 
 [opobj3,ball]
-if(%ball_progress = ^ball_complete) {
+if(%ballquest = ^ball_complete) {
     mes("Another ball! The witch must have found another one. You decide to leave this one");
     mes("here.");
     return;
 }
-if(%ball_progress = ^ball_defeated_experiment) {
+if(%ballquest = ^ball_defeated_experiment) {
     if(inv_total(inv, ball) > 0) { // doesn't check bank
         mes("You already have the boys ball...");
         return;
@@ -197,7 +197,7 @@ mes("A shapeshifter appears, and knocks you back from the ball!");
 
 [queue,ball_quest_complete]
 // https://web.archive.org/web/20060908030634im_/http://www.runeweb.net/fireball/Witchs%20House%20Images/Witch3.PNG
-%ball_progress = ^ball_complete;
+%ballquest = ^ball_complete;
 inv_del(inv, ball, 1);
 stat_advance(hitpoints, 63250);
 session_log(^log_adventure, "Quest complete: Witches House");

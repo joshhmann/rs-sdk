@@ -6,7 +6,7 @@ if(map_members = ^false) { // RS3
     ~chatnpc("<p,neutral>Never mind! Good day to you, sir.");
     return;
 }
-switch_int (%zanaris_progress) {
+switch_int (%zanaris) {
     case ^zanaris_not_started :
         ~chatplayer("<p,quiz>Why are all of you standing around here?");
         ~chatnpc("<p,happy>Hahaha you dare talk to a mighty wizard such as myself? I bet you can't even cast windstrike yet amateur!");

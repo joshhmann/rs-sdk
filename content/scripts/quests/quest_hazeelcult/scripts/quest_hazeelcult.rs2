@@ -70,7 +70,7 @@ if(loc_type = sewervalve3) {
 ~mesbox("You turn the large metal valve to the right. Beneath your feet you can hear the sudden sound of rushing water from the sewer.");
 
 [oploc1,loc_2854]
-if(%hazeelcult_progress >= ^hazeelcult_finished_side_task & %hazeelcult_progress < ^hazeelcult_complete & %hazeelcult_side = ^hazeelcult_evilside) {
+if(%hazeelcultquest >= ^hazeelcult_finished_side_task & %hazeelcultquest < ^hazeelcult_complete & %hazeelcult_side = ^hazeelcult_evilside) {
     mes("There is something odd about the wall here.");
     mes("You find a secret passageway.");
     ~open_and_close_door2(loc_2855, ~check_axis(coord, loc_coord, loc_angle), door_open);
@@ -82,7 +82,7 @@ mes("You can hear there is a hollow behind this wall."); // from rs3
 [oploc2,hazeelcbopen] @close_cupboard(~cupboards_use_message);
 
 [oploc1,hazeelcbopen]
-if(%hazeelcult_progress = ^hazeelcult_given_armour_or_scroll & %hazeelcult_side = ^hazeelcult_goodside) {
+if(%hazeelcultquest = ^hazeelcult_given_armour_or_scroll & %hazeelcult_side = ^hazeelcult_goodside) {
     ~mesbox("You search the cupboard thoroughly. You find a bottle of poison and a mysterious amulet. You pass your discovery on to Ceril.");
     ~chatplayer("<p,angry>Ceril!");
     if (npc_find(coord, sir_ceril_carnillean, 6, 0) = false) { 
@@ -141,8 +141,8 @@ if(inv_total(inv, hazeel_scroll) > 0) {
 }
 ~mesbox("Inside the chest you find the Scroll of Hazeel."); 
 inv_add(inv, hazeel_scroll, 1);
-if(%hazeelcult_progress = ^hazeelcult_finished_side_task & %hazeelcult_side = ^hazeelcult_evilside) {
-    %hazeelcult_progress = ^hazeelcult_given_armour_or_scroll;
+if(%hazeelcultquest = ^hazeelcult_finished_side_task & %hazeelcult_side = ^hazeelcult_evilside) {
+    %hazeelcultquest = ^hazeelcult_given_armour_or_scroll;
 }
 
 [oploc2,carnilleanopenchest] ~close_chest(loc_2856);
@@ -158,7 +158,7 @@ inv_add(inv, carnilleanchestkey, 1);
 // todo: confirm this interface, earliest image we have is of the early 2005 quest interface
 [queue,hazeelcult_fake_complete]
 inv_add(inv, coins, 5);
-%hazeelcult_progress = ^hazeelcult_given_armour_or_scroll;
+%hazeelcultquest = ^hazeelcult_given_armour_or_scroll;
 midi_jingle(^death_jingle, ^death_jingle_millis);
 if_settext(questscroll:com_3, "You have... kind of...\\ncompleted the Hazeel Cult Quest!");
 if_settext(questscroll:com_9, "5");
@@ -167,7 +167,7 @@ if_setobject(questscroll:com_4, coins, 250);
 if_openmain(questscroll);
 
 [queue,hazeelcult_quest_complete]
-%hazeelcult_progress = ^hazeelcult_complete;
+%hazeelcultquest = ^hazeelcult_complete;
 inv_del(inv, hazeel_scroll, 1);
 stat_advance(thieving, 15000);
 inv_add(inv, coins, 2000);

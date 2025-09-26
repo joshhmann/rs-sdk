@@ -30,6 +30,6 @@ obj_add(npc_coord, npc_param(death_drop), 1, ^lootdrop_duration);
 obj_add(npc_coord, zamrobebottom, 1, ^lootdrop_duration);
 obj_add(npc_coord, zamrobetop, 1, ^lootdrop_duration);
 
-if(%upass_progress = ^upass_complete & ~obj_gettotal(ibanstaff) = 0 & ~obj_gettotal(brokenibanstaff) = 0) {
+if(%upass = ^upass_complete & ~obj_gettotal(ibanstaff) = 0 & ~obj_gettotal(brokenibanstaff) = 0) {
     obj_add(npc_coord, brokenibanstaff, 1, ^lootdrop_duration);
 }

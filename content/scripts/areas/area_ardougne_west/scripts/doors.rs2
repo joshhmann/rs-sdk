@@ -16,14 +16,14 @@ if(~check_axis(coord, loc_coord, loc_angle) = false) {
 [oploc1,ardougnewalldoor_right] @west_ardougne_open_city_doors;
 
 [oploc1,bravekdoorshut]
-switch_int(%elena_progress) {
+switch_int(%elenaquest) {
     case ^quest_elena_spoke_to_clerk, ^quest_elena_spoke_to_bravek, ^quest_elena_spoke_cured_bravek, ^quest_elena_freed_elena, ^elena_complete, ^elena_complete_read_scroll : @bravek_enter_room;
     case default : @bravek_go_away_im_busy;
 }
 
 [label,west_ardougne_open_city_doors]
 mes("You pull on the large wooden doors...");
-if(%biohazard_progress = ^biohazard_complete) {
+if(%biohazard = ^biohazard_complete) {
     def_coord $loc_coord = loc_coord;
     mes("...You open them and walk through.");
     if(loc_find(0_39_51_62_36, ardougnewalldoor_right) = true) {
@@ -54,7 +54,7 @@ p_delay(1);
 mes("...But they will not open.");
 
 [label,west_ardougne_mourner_headquarters_doors]
-switch_int(%biohazard_progress) {
+switch_int(%biohazard) {
     case ^biohazard_poisoned_stew, ^biohazard_found_distillator :
         if(inv_total(worn, doctor_gown) > 0) {
             ~chatnpc_specific(nc_name(mourner_armed), mourner_armed, "<p,neutral>In you go doc.");

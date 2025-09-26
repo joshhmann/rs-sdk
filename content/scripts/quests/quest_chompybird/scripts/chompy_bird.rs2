@@ -41,8 +41,8 @@ npc_sethuntmode(chompybird);
 //      might not be necessary though
 
 if (p_finduid(%quest_chompybird_baiter) = true) {
-    if (%chompybird_progress = ^chompybird_dropped_toad) {
-        %chompybird_progress = ^chompybird_chompy_ate_toad;
+    if (%chompybird = ^chompybird_dropped_toad) {
+        %chompybird = ^chompybird_chompy_ate_toad;
     }
 }
 
@@ -176,11 +176,11 @@ gosub(npc_death);
 npc_add(npc_coord, chompybird_dead, 100);
 
 [queue,chompybird_kill]
-if (%chompybird_progress = ^chompybird_rantz_gave_player_bow) {
-    %chompybird_progress = ^chompybird_player_killed_chompy;
+if (%chompybird = ^chompybird_rantz_gave_player_bow) {
+    %chompybird = ^chompybird_player_killed_chompy;
     return;
 }
-if(%chompybird_progress < ^chompybird_complete | %chompybird_kills >= 100000) { 
+if(%chompybird < ^chompybird_complete | %chompybird_kills >= 100000) { 
     return; 
 }
 // https://youtu.be/7ze4YEvQwHM?si=AYdN3zfe62SP4emb&t=215

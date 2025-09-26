@@ -9,14 +9,14 @@ if(%bankinsert = 1) {
 } else {
     inv_movetoslot(bank, bank, last_slot, last_targetslot);
 }
-[if_button,bank_main:com_94] %bank_noted = 0;
-[if_button,bank_main:com_93] %bank_noted = 1;
+[if_button,bank_main:com_94] %bankcert = 0;
+[if_button,bank_main:com_93] %bankcert = 1;
 [if_button,bank_main:com_99] %bankinsert = 0;
 [if_button,bank_main:com_100] %bankinsert = 1;
 [if_close,bank_main] @closebank;
 
 [label,openbank]
-%bank_noted = 0;
+%bankcert = 0;
 ~reorganize_inv(bank);
 inv_transmit(inv, bank_side:inv);
 inv_transmit(bank, bank_main:inv);
@@ -52,11 +52,11 @@ if ($requested_number < $number) $number = $requested_number;
 
 [proc,bank_withdraw_request](inv $inv, obj $obj, int $amount, int $slot)
 def_obj $cert_or_uncert = oc_uncert($obj);
-if (%bank_noted ! 0) {
+if (%bankcert ! 0) {
     $cert_or_uncert = oc_cert($obj);
 }
 
-if (%bank_noted = ^true & oc_cert($obj) = $obj) {
+if (%bankcert = ^true & oc_cert($obj) = $obj) {
     mes("This item can not be withdrawn as a note."); // 2005
 }
 
@@ -78,7 +78,7 @@ def_int $overflow = inv_itemspace2($inv, $cert_or_uncert, $amount, inv_size($inv
 def_int $withdraw = sub($amount, $overflow);
 if ($withdraw > 0) {
     session_log(^log_moderator, "Withdrew <oc_debugname($obj)> x<tostring($withdraw)> from bank");
-    switch_int (%bank_noted) {
+    switch_int (%bankcert) {
         case 0 : inv_moveitem_uncert(bank, $inv, $obj, $withdraw);
         case default : inv_moveitem_cert(bank, $inv, $obj, $withdraw);
     }

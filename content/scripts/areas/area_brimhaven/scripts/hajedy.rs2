@@ -14,7 +14,7 @@ if(inv_total(inv, trail_clue_medium_anagram005) > 0) {
     return;
 }
 // https://youtu.be/q7wrja-4s4A?si=rjWL42YDxEM1p2KW&t=286
-if(%zombiequeen_progress < ^zombiequeen_complete) {
+if(%zombiequeen < ^zombiequeen_complete) {
     ~chatnpc("<p,sad>We used to run cart trips down to Shilo Village in south Karamja. Since the troubles we had we've had to stop them though, too many people got killed.");
     return;
 }
@@ -23,7 +23,7 @@ if(%zombiequeen_progress < ^zombiequeen_complete) {
 @brimhavencartdriver_dialogue;
 
 [label,brimhavencartdriver_dialogue]
-if(%zombiequeen_progress < ^zombiequeen_complete) {
+if(%zombiequeen < ^zombiequeen_complete) {
     ~chatnpc("<p,sad>We used to run cart trips down to Shilo Village in south Karamja. Since the troubles we had we've had to stop them though, too many people got killed.");
     return;
 }

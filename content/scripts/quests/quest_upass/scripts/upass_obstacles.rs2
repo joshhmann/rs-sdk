@@ -323,7 +323,7 @@ if(%upass_area2_pipe_used >= map_clock) {
 %upass_area2_pipe_used = calc(map_clock + 6);
 ~agility_exactmove(human_doublepipesqueeze, 30, 5, coord, movecoord(coord, calc(3 * $mod), 0, 0), 30, 126, $dir, true);
 mes("You crawl through the pipe.");
-if(%upass_progress >= ^upass_killed_unicorn) {
+if(%upass >= ^upass_killed_unicorn) {
     p_telejump(movecoord(coord, calc(26*$mod), 0, 0));
 } else {
     p_telejump(movecoord(coord, $mod, 0, 0));

@@ -1,5 +1,5 @@
 [label,teleport_to_essence_mine](coord $tele_back_coord)
-if(%runemysteries_progress < ^runemysteries_complete) {
+if(%runemysteries < ^runemysteries_complete) {
     // https://www.youtube.com/watch?v=E6fjnTE5vl8&t=189s
     mes("You need to have completed the Rune Mysteries Quest to use this feature.");
     return;

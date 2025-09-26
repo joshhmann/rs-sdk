@@ -1,13 +1,13 @@
 [opnpc1,foresters_bartender]
 ~chatnpc("<p,happy>Good morning, what would you like?");
-if(testbit(%barcrawl_progress, ^forestersarms_index) = ^false & inv_total(inv, barcrawl_card) > 0) {
+if(testbit(%barcrawl, ^forestersarms_index) = ^false & inv_total(inv, barcrawl_card) > 0) {
     @multi4("What do you have?", foresters_bartender_what_have, "Beer please.", foresters_bartender_beer, "I'm doing Alfred Grimhand's Barcrawl.", forestersarms_barcrawl, "I don't really want anything thanks.", foresters_bartender_thanks);
 } else {
     @multi3("What do you have?", foresters_bartender_what_have, "Beer please.", foresters_bartender_beer, "I don't really want anything thanks.", foresters_bartender_thanks);
 }
 
 [opnpcu,foresters_bartender]
-if(testbit(%barcrawl_progress, ^forestersarms_index) = ^false & last_useitem = barcrawl_card) {
+if(testbit(%barcrawl, ^forestersarms_index) = ^false & last_useitem = barcrawl_card) {
     @forestersarms_barcrawl;
 }
 
@@ -66,5 +66,5 @@ stat_sub(fletching, 5, 5);
 stat_sub(firemaking, 5, 5);
 mes("The room seems to be swaying.");
 p_delay(2);
-%barcrawl_progress = setbit(%barcrawl_progress, ^forestersarms_index);
+%barcrawl = setbit(%barcrawl, ^forestersarms_index);
 mes("The bartender scrawls his signature on your card.");

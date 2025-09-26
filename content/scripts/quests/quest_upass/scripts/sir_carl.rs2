@@ -10,7 +10,7 @@ if(inv_total(inv, paladinbadge2) = 0) {
 ~paladin_drops;
 
 [opnpc1,upass_paladin2]
-if(%upass_progress >= ^upass_entered_main_area) {
+if(%upass >= ^upass_entered_main_area) {
     @upass_paladin_after_killed;
 }
 ~chatplayer("<p,neutral>Hello there.");

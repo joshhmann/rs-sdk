@@ -49,7 +49,7 @@ anim(human_pickuptable, 0);
 ~mesbox("You pack a banana into the crate.");
 
 [label,banana_crate_pack_rum]
-if (%hunt_progress ! 1) {
+if (%hunt ! 1) {
     mes("I see no reason to do that.");
 } else if (%crate_rum = 2) {
     mes("There is already some rum in Wydin's store, I should go and get that first.");

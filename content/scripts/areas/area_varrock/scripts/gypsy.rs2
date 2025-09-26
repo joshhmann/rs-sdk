@@ -1,7 +1,7 @@
 [opnpc1,aris]
-if (%demon_progress = ^demon_not_started) {
+if (%demonstart = ^demon_not_started) {
     @demon_slayer_not_started_aris;
-} else if (%demon_progress = ^demon_talked_aris) {
+} else if (%demonstart = ^demon_talked_aris) {
     ~chatnpc("<p,neutral>How goes the quest?");
     ~chatplayer("<p,happy>I'm still working on it.");
     ~chatnpc("<p,happy>Well if you need any advice I'm always here, young one.");
@@ -16,7 +16,7 @@ if (%demon_progress = ^demon_not_started) {
     } else if ($option = 4) {
         @demon_slayer_aris_stop_calling_me_that;
     }
-} else if (%demon_progress < ^demon_silverlight) {
+} else if (%demonstart < ^demon_silverlight) {
 
     ~chatnpc("<p,neutral>How goes the quest?");
     ~chatplayer("<p,happy>I have found Sir Prysin. Unfortunately, I haven't got the sword yet. He made it complicated for me!");
@@ -28,7 +28,7 @@ if (%demon_progress = ^demon_not_started) {
     } else {
         @demon_slayer_aris_press_on_with_it;
     }
-} else  if(%demon_progress = ^demon_silverlight){
+} else  if(%demonstart = ^demon_silverlight){
         ~chatnpc("<p,neutral>How goes the quest?");
         ~chatplayer("<p,happy>I have the sword now.|I just need to kill the demon, I think.");
         ~chatnpc("<p,happy>Yep, that's right.");
@@ -42,7 +42,7 @@ if (%demon_progress = ^demon_not_started) {
             ~chatplayer("<p,quiz>Where can I find the demon?");
             ~chatnpc("<p,neutral>Just head south and you should find the stone circle just outside the city gate.");
         }
-} else if (%demon_progress = ^demon_complete) {
+} else if (%demonstart = ^demon_complete) {
     ~chatnpc("<p,neutral>Greetings young one.");
     ~chatnpc("<p,happy>You're a hero now. That was a good bit of demonslaying.");
     def_int $option = ~p_choice3("How do you know I killed it?", 1, "Thanks.", 2, "Stop calling me that!", 3);
@@ -100,7 +100,7 @@ if ($option = 1) {
 }
 
 [label,demon_slayer_aris_how_old_are_you]
-if (%demon_progress = ^demon_not_started){
+if (%demonstart = ^demon_not_started){
     @demon_slayer_aris_how_old_are_you_pre_quest;
 }
 else{
@@ -235,8 +235,8 @@ if ($option = 1) {
 ~chatnpc("<p,happy>By reciting the correct magical incantation, and thrusting Silverlight into Delrith while he was newly summoned, Wally was able to imprison Delrith in the stone block in the centre of the circle.");
 ~chatnpc("<p,sad>Delrith will come forth from the stone circle again.");
 ~chatnpc("<p,sad>I would imagine an evil sorcerer is already starting on the rituals to summon Delrith as we speak.");
-%demon_progress = ^demon_talked_aris;
-~send_quest_progress(questlist:demon, %demon_progress, ^demon_complete);
+%demonstart = ^demon_talked_aris;
+~send_quest_progress(questlist:demon, %demonstart, ^demon_complete);
 @demon_slayer_aris_more_info;
 
 [label,demon_slayer_aris_more_info]

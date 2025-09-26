@@ -1,5 +1,5 @@
 [oploc1,plaguekeybarrel]
-switch_int(%elena_progress) {
+switch_int(%elenaquest) {
     case ^quest_elena_spoke_cured_bravek :
         if (inv_total(inv, elenakey) > 0) {
             mes("The barrel is empty.");
@@ -28,7 +28,7 @@ if (~check_axis(coord, loc_coord, loc_angle) = false) {
     ~open_and_close_door(loc_param(next_loc_stage), ~check_axis(coord, loc_coord, loc_angle), false);
     return;
 }
-switch_int(%elena_progress) {
+switch_int(%elenaquest) {
     case ^quest_elena_freed_elena, ^elena_complete, ^elena_complete_read_scroll : ~open_and_close_door(loc_param(next_loc_stage), ~check_axis(coord, loc_coord, loc_angle), false);
     case default :
         if (inv_total(inv, elenakey) > 0) {

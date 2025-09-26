@@ -28,8 +28,8 @@ if (npc_finduid($npc) = true) {
 p_stopaction;
 // https://www.youtube.com/watch?v=KCjnsoBT0vA&t=97s
 if(inv_total(worn, excalibur) = 0) { // if this was queued we'll need to regain prot access
-    if(%grail_progress = ^grail_spoken_crone) {
-        %grail_progress = ^grail_failed_defeat_titan;
+    if(%grail = ^grail_spoken_crone) {
+        %grail = ^grail_failed_defeat_titan;
     }
     npc_statheal(hitpoints, 0, 100);
     mes("Maybe you need something more to beat the titan?");

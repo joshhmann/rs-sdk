@@ -4,7 +4,7 @@ if (npc_range(coord) > 2) {
     return;
 }
 // I don't think you can be in the jail area at this quest-stage?
-if(%arena_progress = ^arena_sent_jail) {
+if(%arenaquest = ^arena_sent_jail) {
     ~chatplayer("<p,quiz>Are you ok stranger?");
     ~chatnpc("<p,neutral>I'm fine thanks.");
     ~chatnpc("<p,quiz>So Khazard got his hands on you too?");
@@ -68,7 +68,7 @@ if(%arena_progress = ^arena_sent_jail) {
     npc_del;
     ~mesbox("From above you hear a voice..... 'Ladies and gentlemen! Let today's first fight between the outsider and everyone's favourite scorpion commence.'");
     @arena_release_scorp;
-} else if(%arena_progress >= ^arena_defeated_scorpion) { // you can't access the cells between being sent there and defeating bouncer
+} else if(%arenaquest >= ^arena_defeated_scorpion) { // you can't access the cells between being sent there and defeating bouncer
     ~chatplayer("<p,neutral>Hello again.");
     ~chatnpc("<p,shifty>I don't know how you managed to escape the arena, but you may not be as lucky next time. Get out of here while you can.");
 } else {

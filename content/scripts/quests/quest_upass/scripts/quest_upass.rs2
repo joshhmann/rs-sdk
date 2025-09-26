@@ -15,7 +15,7 @@ switch_int(random(8)) {
 cleartimer(iban_say);
 
 [proc,upass_voice]
-if(%upass_progress >= ^upass_defeated_iban) {
+if(%upass >= ^upass_defeated_iban) {
     return;
 }
 settimer(iban_say, ~random_range(1, 15));
@@ -78,7 +78,7 @@ settimer(iban_say, ~random_range(1, 15));
 [zoneexit,0_38_151_32_8] cleartimer(upass_grid_traps);
 
 [oploc1,upass_caveentrance2]
-if(%biohazard_progress < ^biohazard_complete) {
+if(%biohazard < ^biohazard_complete) {
     ~mesbox("You must complete the Biohazard quest before you can enter."); // rs3
     return;
 }
@@ -86,7 +86,7 @@ if(testbit(%upass_map_mechanisms, ^upass_started_bit) = ^false) {
     mes("You must talk to King Lathas before you can enter.");
     return;
 }
-if(testbit(%upass_map_mechanisms, ^upass_started_bit) = ^true & %upass_progress = ^upass_not_started) {
+if(testbit(%upass_map_mechanisms, ^upass_started_bit) = ^true & %upass = ^upass_not_started) {
     if(npc_find(coord, caveguide1, 7, 0) = true) {
         @koftik_first_dialogue;
     }
@@ -124,7 +124,7 @@ if(getbit_range(%upass_map_mechanisms, ^upass_orb1_bit, ^upass_orb4_bit) = calc(
     mes("You feel the grip of icy hands all around you...");
     p_delay(0);
     p_teleport(0_37_150_55_60);
-    if(%upass_progress = ^upass_passed_bridge) %upass_progress = ^upass_entered_second_area;
+    if(%upass = ^upass_passed_bridge) %upass = ^upass_entered_second_area;
     mes("... slowly dragging you further down into the caverns.");
     return;
     
@@ -276,12 +276,12 @@ mes("...The cage has been locked.");
 
 // https://x.com/JagexOrion/status/1039548840339296261
 [opnpcu,boulder_upass]
-if(last_useitem = caverailing & %upass_progress = ^upass_entered_second_area) {
+if(last_useitem = caverailing & %upass = ^upass_entered_second_area) {
     npc_tele(movecoord(npc_coord, 0, 0, 1));
     p_delay(1);
     npc_tele(movecoord(npc_coord, 0, 0, 1));
     p_delay(0);
-    %upass_progress = ^upass_killed_unicorn;
+    %upass = ^upass_killed_unicorn;
     p_telejump(movecoord(coord, -25, 0, 0));
     npc_tele(movecoord(npc_coord, 0, 0, -2)); // not sure about this
     ~chatplayer("<p,neutral>I heard something breaking.");
@@ -298,7 +298,7 @@ mes("You find a loose railing lying on the floor.");
 inv_add(inv, caverailing, 1);
 
 [oploc1,unicorncage_destroyed_upass]
-if(%upass_progress >= ^upass_entered_main_area) { 
+if(%upass >= ^upass_entered_main_area) { 
     mes("You search the cage remains...");
     p_delay(2);
     mes("But find nothing.");
@@ -319,7 +319,7 @@ mes("Nothing remains.");
 if(loc_angle = ^loc_south) {
     p_telejump(0_37_151_3_2);
 } else {
-    if(%upass_progress >= ^upass_killed_unicorn) {
+    if(%upass >= ^upass_killed_unicorn) {
         p_telejump(0_37_150_8_10);
     } else {
         p_telejump(0_37_150_33_10);
@@ -398,7 +398,7 @@ if(coordz(loc_coord) < 6400) {
         return;
     }
     p_teleport(1_33_73_61_53);
-    if(%upass_progress = ^upass_killed_unicorn) %upass_progress = ^upass_entered_main_area;
+    if(%upass = ^upass_killed_unicorn) %upass = ^upass_entered_main_area;
 }
 
 [oploc1,cavewalltunnel_upass_down]
@@ -442,7 +442,7 @@ say("Aaarrgghhh");
 
 [oplocu,_ibantomb]
 if(last_useitem = upassdwarfbrew) {
-    if(%upass_progress = ^upass_found_doll) {
+    if(%upass = ^upass_found_doll) {
         mes("You pour the strong alcohol over the tomb.");
         sound_synth(tap_fill, 0, 0);
         inv_del(inv, upassdwarfbrew, 1);
@@ -576,7 +576,7 @@ if(coordx(loc_coord) < coordx(coord)) {
         mes("Only followers of Zamorak may enter.");
         return;
     }
-    if(%upass_progress >= ^upass_complete) { // you can still enter after defeating iban and before finishing quest
+    if(%upass >= ^upass_complete) { // you can still enter after defeating iban and before finishing quest
         mes("The temple is in ruins...");
         p_delay(2);
         mes("...You cannot enter.");
@@ -588,8 +588,8 @@ if(coordx(loc_coord) < coordx(coord)) {
     sound_synth(door_open, 0, 0);
     ~forcemove(movecoord(loc_coord, -1, 0, 0));
     if(getbit_range(%upass_map_mechanisms, ^upass_blood_on_doll, ^upass_shadow_on_doll) = calc(pow(2,4) - 1) & inv_total(inv, ibandoll) > 0 
-        & %upass_progress < ^upass_defeated_iban) {
-        if(%upass_progress = ^upass_found_doll) %upass_progress = ^upass_confronted_iban;
+        & %upass < ^upass_defeated_iban) {
+        if(%upass = ^upass_found_doll) %upass = ^upass_confronted_iban;
         if(npc_findexact(1_33_72_21_39, iban) = true) {
             mes("Iban seems to sense danger.");
             mes("Iban: Who dares to bring the witch's magic into my temple?");
@@ -635,7 +635,7 @@ mes("The doll is made from old wood and cloth.");
 if(last_useitem = ibandoll) {
     // check if doll is complete, todo: how does this work if iban is currently dead
     if(getbit_range(%upass_map_mechanisms, ^upass_blood_on_doll, ^upass_shadow_on_doll) = calc(pow(2,4) - 1)
-        & %upass_progress <= ^upass_confronted_iban
+        & %upass <= ^upass_confronted_iban
         & npc_findexact(1_33_72_21_39, iban) = true) {
         mes("You throw the doll of Iban into the pit...");
         p_delay(1);
@@ -655,7 +655,7 @@ if(last_useitem = ibandoll) {
         mes("The infamous Iban has finally gone to rest.");
         p_delay(1);
         %iban_staff_charges = 120;
-        %upass_progress = ^upass_defeated_iban;
+        %upass = ^upass_defeated_iban;
         inv_del(inv, ibandoll, 1);
         inv_add(inv, ibanstaff, 1);
         inv_add(inv, deathrune, 15);
@@ -675,7 +675,7 @@ if(last_useitem = ibandoll) {
         mes("...And you're thrown from the temple platform.");
         cam_reset;
         p_teleport(0_38_150_50_7);
-    } else if(%upass_progress >= ^upass_defeated_iban | npc_findexact(1_33_72_21_39, iban) = false) {
+    } else if(%upass >= ^upass_defeated_iban | npc_findexact(1_33_72_21_39, iban) = false) {
         mes("Iban is already dead...");
     } else {
         mes("The doll is still incomplete.");
@@ -780,7 +780,7 @@ if_settext(stone:com_13, ^string_empty);
 if_openmain(stone);
 
 [queue,upass_quest_complete]
-%upass_progress = ^upass_complete;
+%upass = ^upass_complete;
 stat_advance(agility, 30000);
 stat_advance(attack, 30000);
 session_log(^log_adventure, "Quest complete: Underground Pass");

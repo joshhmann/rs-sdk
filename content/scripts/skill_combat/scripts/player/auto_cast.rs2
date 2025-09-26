@@ -21,7 +21,7 @@ if_close;
 if (p_finduid(uid) = false) { // cant open autocast interface if delayed
     return;
 }
-%attackstyle_magic = 0;
+%lastcastspell = 0;
 if_settab(staff_spells, 0);
 
 [if_button,staff_spells:cancelspell]
@@ -39,22 +39,22 @@ if (p_finduid(uid) = true) {
     // set auto cast varp
     %autocast_spell = $spell;
 
-    %attackstyle_magic = 2;
+    %lastcastspell = 2;
     if_settext(combat_staff_2:auto_spell, db_getfield($spell_data, magic_spell_table:name, 0));
 
     ~initalltabs;
 }
 
 [proc,player_autocast_enabled]()(boolean)
-if (testbit(%attackstyle_magic, 0) = ^true & %attackstyle_magic = 3 & %autocast_spell > 0) {
+if (testbit(%lastcastspell, 0) = ^true & %lastcastspell = 3 & %autocast_spell > 0) {
     return(true);
 }
 return(false);
 
 [proc,player_autocast_reset]
-%attackstyle_magic = 0;
+%lastcastspell = 0;
 %autocast_spell = null;
 
 [proc,.player_autocast_reset]
-.%attackstyle_magic = 0;
+.%lastcastspell = 0;
 .%autocast_spell = null;

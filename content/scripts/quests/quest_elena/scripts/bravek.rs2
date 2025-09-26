@@ -1,5 +1,5 @@
 [opnpc1,bravek]
-switch_int(%elena_progress) {
+switch_int(%elenaquest) {
     case ^quest_elena_spoke_to_clerk : @bravek_my_head_hurts;
     case ^quest_elena_spoke_to_bravek : @bravek_give_hangover_cure;
     case ^quest_elena_spoke_cured_bravek : @bravek_thanks_again_for_the_hangover_cure;
@@ -22,7 +22,7 @@ switch_obj(last_useitem) {
 
 [label,bravek_thanks_again_for_the_hangover_cure]
 ~chatnpc("<p,happy>Thanks again for the hangover cure.");
-switch_int(%elena_progress) {
+switch_int(%elenaquest) {
     case ^quest_elena_spoke_cured_bravek :
         if (inv_total(inv, warrant) > 0) {
             ~chatplayer("<p,happy>Not a problem, happy to help out.");
@@ -53,7 +53,7 @@ inv_add(inv, scruffy_note, 1);
 ~objbox(scruffy_note, "<nc_name(bravek)> hands you a tatty piece of paper.", 250, 0, divide(^objbox_height, 2));
 
 [label,bravek_give_hangover_cure]
-if (%elena_progress ! ^quest_elena_spoke_to_bravek) {
+if (%elenaquest ! ^quest_elena_spoke_to_bravek) {
     ~displaymessage(^dm_default);
     return; // sanity check
 }

@@ -1,5 +1,5 @@
 [opnpc1,ana]
-if(%desertrescue_progress = ^desertrescue_saved_ana & inzone(0_51_48_36_37, 0_51_48_50_50, coord) = true) {
+if(%desertrescue = ^desertrescue_saved_ana & inzone(0_51_48_36_37, 0_51_48_50_50, coord) = true) {
     ~chatnpc("<p,happy>Great! Thanks for getting me out of that mine! And that barrel wasn't too bad anyway! Pop by again sometime, I'm sure we'll have a barrel of laughs!");
     if(inv_total(inv, thgoodminekey) = 0) {
         ~chatnpc("<p,happy>Oh! I nearly forgot! Here's a key I found in the tunnels. It might be of some use to you, not sure what it opens. Sorry, but I have to go now.");
@@ -17,7 +17,7 @@ if(%desertrescue_progress = ^desertrescue_saved_ana & inzone(0_51_48_36_37, 0_51
     @irena_ana_found;
 }
 if(inzone(0_51_147_30_50, 0_51_147_50_63, coord) = false) return;
-if(%desertrescue_progress >= ^desertrescue_saved_ana | inv_total(inv, thanainabarrel) > 0) {
+if(%desertrescue >= ^desertrescue_saved_ana | inv_total(inv, thanainabarrel) > 0) {
     mes("This slave does not appear interested in talking to you.");
     return;
 }
@@ -55,7 +55,7 @@ switch_int(~p_choice2("No, I'm new here!", 1, "What's your name.", 2)) {
 
 [opnpcu,ana]
 if(last_useitem = thminebarrel_empty) {
-    if(%desertrescue_progress >= ^desertrescue_saved_ana) {
+    if(%desertrescue >= ^desertrescue_saved_ana) {
         mes("You have already completed this quest.");
         ~chatnpc("<p,neutral>I think you might have me confused with someone else."); // rsc
         return;
@@ -71,9 +71,9 @@ if(last_useitem = thminebarrel_empty) {
         mes("And sent her back to the mines...");
         p_delay(2);
     }
-    if(%desertrescue_progress < ^desertrescue_caught_ana) {
+    if(%desertrescue < ^desertrescue_caught_ana) {
         ~chatnpc("<p,angry>Hey, what do you think you're doing?");
-        %desertrescue_progress = ^desertrescue_caught_ana;
+        %desertrescue = ^desertrescue_caught_ana;
     } else {
         ~chatnpc("<p,angry>Hey, what do you think you're doing? Leave me alone and let me get on with my work. Else we'll both be in trouble. Oh no, NOT AGAIN!");
     }

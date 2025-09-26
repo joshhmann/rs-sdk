@@ -44,7 +44,7 @@ if (last_useitem = pot_empty) {
 }
 
 [label,millbase_take]
-if (%mill_flour > 0) {
+if (%flour > 0) {
     @take_flour_bin;
 } else {
     @empty_flour_bin;
@@ -62,12 +62,12 @@ if (inv_total(inv, pot_empty) < 1) {
     inv_del(inv, pot_empty, 1);
     inv_add(inv, pot_flour, 1);
 
-    if (%mill_flour > 1) {
-        %mill_flour = sub(%mill_flour, 1);
+    if (%flour > 1) {
+        %flour = sub(%flour, 1);
         mes("You fill a pot with flour from the bin.");
     } else {
         // todo: do we revert visual state? let the loc_change run its course?
-        %mill_flour = 0;
+        %flour = 0;
         mes("You fill a pot with the last of the flour in the bin.");
         // Temp note: dur does not need updated
         loc_change(millbase, 500);
@@ -103,7 +103,7 @@ loc_change(hoppercontrol_inuse, 3);
 anim(human_pickuptable, 0);
 
 if (loc_find($hopper_coord, hopper_full) = true) {
-    if (%mill_flour > 29) {
+    if (%flour > 29) {
         mes("The flour bin downstairs is full, I should empty it first.");
         return;
     }
@@ -111,8 +111,8 @@ if (loc_find($hopper_coord, hopper_full) = true) {
     mes("You operate the hopper. The grain slides down the chute.");
     sound_synth(millstones, 0, 0);
 
-    %mill_flour = add(%mill_flour, 1);
-    if (%mill_flour = 30) {
+    %flour = add(%flour, 1);
+    if (%flour = 30) {
         mes("The flour bin downstairs is now full.");
     }
 

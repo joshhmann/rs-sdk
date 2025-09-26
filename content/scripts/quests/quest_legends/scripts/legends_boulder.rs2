@@ -9,7 +9,7 @@ while (npc_huntnext = true) {
 anim(human_push, 0);
 mes("You attempt to push the boulder out of the way.");
 
-if(%legends_progress >= ^legends_defeated_nezikchened_water) {
+if(%legendsquest >= ^legends_defeated_nezikchened_water) {
     if(npc_coord ! %npc_start_coord) {
         mes("This boulder has already");
         mes("been pushed as far as it can go.");
@@ -39,7 +39,7 @@ if(%legends_progress >= ^legends_defeated_nezikchened_water) {
 ~mesbox("You see some sparkling effervescent water, it looks somehow similar to the water above ground.");
 
 [oplocu,lgwaterpool]
-if(%legends_progress < ^legends_defeated_nezikchened_water) {
+if(%legendsquest < ^legends_defeated_nezikchened_water) {
     mes("Some magical force keeps you away from the water."); // OSRS
     return;
 }
@@ -47,7 +47,7 @@ if (last_useitem = goldbowlbless_empty) {
     inv_del(inv, goldbowlbless_empty, 1);
     inv_add(inv, goldbowlbless_pure, 1);
     %legends_bits = setbit_range_toint(%legends_bits, 0, ^legends_golden_bowl_uses_start, ^legends_golden_bowl_uses_end);
-    if(%legends_progress = ^legends_defeated_nezikchened_water) %legends_progress = ^legends_sacred_water_collected;
+    if(%legendsquest = ^legends_defeated_nezikchened_water) %legendsquest = ^legends_sacred_water_collected;
     ~objbox(goldbowlbless_pure, "You get some sacred water in the golden blessed bowl.", 250, 0, divide(^objbox_height, 2));
 } else if (last_useitem = vial_enchanted) {
     inv_del(inv, vial_enchanted, 1);

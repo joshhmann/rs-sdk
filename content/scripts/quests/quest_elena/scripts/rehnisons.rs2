@@ -12,12 +12,12 @@ p_telejump(0_39_52_31_3);
 [opnpc1,milli] @rehnisons_ask_milli_what_happened;
 
 [label,rehnisons_i_hear_a_woman_is_staying_here]
-switch_int(%elena_progress) {
+switch_int(%elenaquest) {
     case ^quest_elena_returned_book, ^quest_elena_spoken_martha_ted :
         ~chatplayer("<p,happy>Hi, I hear a woman called <nc_name(elena2)> is staying here.");
         // https://youtu.be/UkF8Aqrck4Y?si=ssVMtqlJQPUXl-Xv&t=356
         ~chatnpc("<p,sad>Yes she was staying here,|but slightly over a week ago|she was getting ready to go back.");
-        if(%elena_progress = ^quest_elena_returned_book) ~quest_elena_set_progress(^quest_elena_spoken_martha_ted);
+        if(%elenaquest = ^quest_elena_returned_book) ~quest_elena_set_progress(^quest_elena_spoken_martha_ted);
         ~chatnpc("<p,sad>However she never managed to leave.|My daughter Milli was playing near the west wall|when she saw some shadowy figures jump out and grab her. Milli is upstairs if you wish to speak to her.");
     case ^quest_elena_spoke_to_milli, ^quest_elena_spoke_to_plague_house, ^quest_elena_spoke_to_clerk, ^quest_elena_spoke_to_bravek, ^quest_elena_spoke_cured_bravek :
         ~chatnpc("<p,quiz>Any luck with finding <nc_name(elena2)> yet?");
@@ -30,7 +30,7 @@ switch_int(%elena_progress) {
 }
 
 [label,rehnisons_ask_milli_what_happened]
-switch_int(%elena_progress) {
+switch_int(%elenaquest) {
     case ^quest_elena_returned_book :
         // https://youtu.be/UkF8Aqrck4Y?si=MoA8Jt-5Bn7eRW21&t=340
         ~chatplayer("<p,happy>Hello.");

@@ -1,5 +1,5 @@
 [opnpc1,grandtree_glough]
-switch_int(%grandtree_progress) {
+switch_int(%grandtree) {
     // https://youtu.be/LFvLBRCxFwk?si=IKRtVRjysWWM9U4u&t=482, fixed at some point?
     case ^grandtree_spoken_glough, ^grandtree_unlocked_trapdoor, ^grandtree_defeated_black_demon, ^grandtree_searching_daconia, ^grandtree_complete :
         // when underground during the fight, he will say this as well (before the cutscene update a few months after OSRS launch), if you interrupt the dialogue you have to go back down
@@ -67,7 +67,7 @@ switch_int(%grandtree_progress) {
         ~chatplayer("<p,neutral>Apparently a human took them from Hazelmere. Hazelmere believed him; he had the King's seal!");
         ~chatnpc("<p,angry>I should've known! The humans are going to invade!");
         ~chatplayer("<p,shock>Never!");
-        %grandtree_progress = ^grandtree_spoken_glough;
+        %grandtree = ^grandtree_spoken_glough;
         ~chatnpc("<p,angry>Your type can't be trusted!|I'll take care of this! Go back to the King.");
     case default :
         ~chatplayer("<p,happy>Hello there!");

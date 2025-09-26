@@ -6,7 +6,7 @@ if(coordz(coord) > coordz(loc_coord)) {
 mes("This door is securely locked.");
 
 [oploc2,horncrate]
-if(%totem_progress >= ^totem_started) {
+if(%totemquest >= ^totem_started) {
     if(inv_total(inv, tribal_totem_label) = 0) {
         ~mesbox("There is a label on this crate. It says; To Lord Handelmort, Handelmort Mansion, Ardougne.You carefully peel it off and take it.");
         inv_add(inv, tribal_totem_label, 1);
@@ -19,13 +19,13 @@ mes("This crate is securely fastened shut.");
 [oplocu,teleportcrate]
 switch_obj(last_useitem) {
     case tribal_totem_label :
-        if(%totem_progress >= ^totem_crate_marked) {
+        if(%totemquest >= ^totem_crate_marked) {
             mes("You have already replaced the delivery address label.");
             return;
         }
         ~mesbox("You carefully place the delivery label over the existing label, covering it completely.");
         inv_del(inv, tribal_totem_label, 1);
-        %totem_progress = ^totem_crate_marked;
+        %totemquest = ^totem_crate_marked;
         ~chatplayer("<p,happy>Now I just need someone to deliver it for me.");
         return;
     case default : ~displaymessage(^dm_default);
@@ -151,13 +151,13 @@ mes("You close the chest.");
 
 [oploc2,teleportcrate]
 ~mesbox("There is a label on this crate. It says;");
-if(%totem_progress >= ^totem_crate_marked) {
+if(%totemquest >= ^totem_crate_marked) {
     ~mesbox("To Lord Handelmort, Handelmort Mansion, Ardougne.");
 }
 ~mesbox("Senior Patents Clerk, Chamber of Invention, The Wizards' Tower, Misthalin. The crate is securely fastened shut and ready for delivery.");
 
 [queue,totem_quest_complete]
-%totem_progress = ^totem_complete;
+%totemquest = ^totem_complete;
 session_log(^log_adventure, "Quest complete: Tribal Totem");
 ~send_quest_complete(questlist:totem, tribal_totem, 250, ^totem_questpoints, "You have completed the\\nTribal Totem Quest!");
 stat_advance(thieving, 17750);

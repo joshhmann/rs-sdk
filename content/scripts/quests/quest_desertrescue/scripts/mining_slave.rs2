@@ -13,7 +13,7 @@ if(inzone(0_51_147_0_0, 0_51_147_63_63, coord) = true) {
     @standard_camp_slave;
 }
 
-if(%desertrescue_progress >= ^desertrescue_traded_clothes) {
+if(%desertrescue >= ^desertrescue_traded_clothes) {
     // this only checks worn
     if(inv_total(worn, slave_shirt) = 0 | inv_total(worn, slave_robe) = 0 | inv_total(worn, slave_boots) = 0) {
         ~chatnpc("<p,neutral>Oh bother, I was caught by the guards again... Listen, if you can get me some Desert Clothes, I'll trade you for my slaves clothes again.. Do you want to trade?");
@@ -21,10 +21,10 @@ if(%desertrescue_progress >= ^desertrescue_traded_clothes) {
     } else {
         ~chatnpc("<p,neutral>Not much to do here but mine all day long.");
     }
-} else if(%desertrescue_progress = ^desertrescue_freed_slave) {
+} else if(%desertrescue = ^desertrescue_freed_slave) {
     ~chatnpc("<p,neutral>Do you have the Desert Clothes yet?");
     @multi2("Yes, I'll trade.", mining_slave_male_trade, "No thanks...", mining_slave_male_notrade);
-} else if(%desertrescue_progress = ^desertrescue_spoken_slave) {
+} else if(%desertrescue = ^desertrescue_spoken_slave) {
     ~chatnpc("<p,quiz>Hello again, do you want to try and unlock my chains? I'd really appreciate it!");
     @multi2_header("Yeah, okay, let's give it a go.", mining_slave_male_unlock, "I need to do some other things first.", mining_slave_male_otherthing, "Unlock Prisoner's Chains?");
 } else {
@@ -78,7 +78,7 @@ if(%desertrescue_progress >= ^desertrescue_traded_clothes) {
 
 [label,mining_slave_male_undo]
 ~chatplayer("<p,neutral>I can try to undo them for you.");
-%desertrescue_progress = ^desertrescue_spoken_slave;
+%desertrescue = ^desertrescue_spoken_slave;
 ~chatnpc("<p,confused>Really, that would be great... @dbl@-- The slave looks at you @dbl@strangely. -- @bla@Hang on a minute... I suppose you want something for doing this?");
 ~chatnpc("<p,confused>The last time I did a trade in this place, I nearly lost the shirt from my back!");
 switch_int(~p_choice2("It's funny you should say that...", 1, "That sounds awful.", 2)) {
@@ -136,7 +136,7 @@ if(stat_random(thieving, 111, 250) = false) {
             ~chatnpc("<p,bored>Okay, if you want to try again, let me know.");
     }
 } else {
-    %desertrescue_progress = ^desertrescue_freed_slave;
+    %desertrescue = ^desertrescue_freed_slave;
     ~mesbox("You hear a satisfying 'click' as you tumble the lock mechanism.");
     ~chatnpc("<p,neutral>Great! You did it! Do you want to trade clothes now?");
     @multi2("Yes, I'll trade.", mining_slave_male_trade, "No thanks...", mining_slave_male_notrade);
@@ -162,7 +162,7 @@ if((inv_total(inv, desert_shirt) = 0 & inv_total(worn, desert_shirt) = 0) & (inv
 
 // based off this the gear swapping did exist originally https://web.archive.org/web/20060908030728/http://www.runeweb.net/index.php?page=rs2-quest-touristtrap
 // "But he can't get the chains off. Offer to undo them for him and trade your clothes with his. You will now be wearing the Slave outfit!"
-if(%desertrescue_progress = ^desertrescue_freed_slave) %desertrescue_progress = ^desertrescue_traded_clothes;
+if(%desertrescue = ^desertrescue_freed_slave) %desertrescue = ^desertrescue_traded_clothes;
 ~chatnpc("<p,happy>Great! You have the Desert Clothes! @dbl@-- The slave starts @dbl@undressing right in front of you --@bla@ Okay, here's the @bla@clothes, I won't need them anymore.");
 mes("The slave takes your desert robe.");
 mes("The slave takes your desert shirt.");
@@ -222,7 +222,7 @@ npc_changetype_keepall(escaped_slave, 200); // 200t in osrs
 ~chatnpc("<p,idle>@dbl@-- The slave nods in agreement and goes back to@dbl@work.");
 
 [opnpc1,escaped_slave]
-if(%desertrescue_progress >= ^desertrescue_traded_clothes) {
+if(%desertrescue >= ^desertrescue_traded_clothes) {
     // this only checks worn
     if(inv_total(worn, slave_shirt) = 0 | inv_total(worn, slave_robe) = 0 | inv_total(worn, slave_boots) = 0) {
         npc_changetype_keepall(mining_slave_male, ^max_32bit_int);

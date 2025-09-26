@@ -4,7 +4,7 @@
 [opnpc1,headmourner] @headmourner_talk_to_player;
 
 [opnpc1,mournerstew3] 
-if(%biohazard_progress < ^biohazard_complete) {
+if(%biohazard < ^biohazard_complete) {
     if(inv_total(worn, doctor_gown) = 0) {
         ~chatnpc("<p,angry>How did you get in here?|This is a restricted area!");
         ~npc_retaliate(0);
@@ -16,7 +16,7 @@ if(%biohazard_progress < ^biohazard_complete) {
 }
 
 [opnpc1,mournerstew1] 
-if(%biohazard_progress = ^biohazard_poisoned_stew) {
+if(%biohazard = ^biohazard_poisoned_stew) {
     ~chatplayer("<p,neutral>Hello there.");
     ~chatnpc("<p,sad>Oh dear oh dear.|I feel terrible, I think it was the stew.");
     ~chatplayer("<p,neutral>You should be more careful with your ingredients.");
@@ -34,7 +34,7 @@ mes("The mourner doesn't feel like talking.");
 @mourner_talk_to_player;
 
 [opnpc1,mournerstew2] // mourner hq upstairs
-if(%biohazard_progress = ^biohazard_poisoned_stew & inv_total(worn, doctor_gown) > 0) {
+if(%biohazard = ^biohazard_poisoned_stew & inv_total(worn, doctor_gown) > 0) {
     ~chatplayer("<p,neutral>Hello there.");
     ~chatnpc("<p,sad>You're here at last! I don't know what I've eaten but I feel like I'm on death's door."); 
     ~chatplayer("<p,neutral>Hmm... interesting, sounds like food poisoning.");
@@ -84,7 +84,7 @@ if(inv_total(inv, mournerkeytw) = 0) {
 [label,mourner_talk_to_player]
 if (~inzone_coord_pair_table(ardougne_west, coord) = true) {
     ~chatnpc("<p,confused>Hmmm, how did you get over here? You're not one of this rabble. Ah well, you'll have to stay. Can't risk you going back now.");
-    if(%elena_progress < ^quest_elena_freed_elena) {
+    if(%elenaquest < ^quest_elena_freed_elena) {
         @multi3("So what's a mourner?", mourner_so_whats_a_mourner, "I haven't got the plague though...", mourner_i_havent_got_the_plague_though, "I'm looking for a woman named <nc_name(elena2)>.", mourner_im_looking_for_a_woman);
     } else {
         @multi2("So what's a mourner?", mourner_so_whats_a_mourner, "I haven't got the plague though...", mourner_i_havent_got_the_plague_though);
@@ -110,7 +110,7 @@ if (~inzone_coord_pair_table(ardougne_west, coord) = true) {
 
 [label,headmourner_talk_to_player]
 ~chatnpc("<p,neutral>How did you get into West Ardougne? Ah well you'll have to stay, can't risk you spreading the plague outside.");
-switch_int(%elena_progress) {
+switch_int(%elenaquest) {
     case ^quest_elena_spoke_to_plague_house, ^quest_elena_spoke_to_clerk, ^quest_elena_spoke_to_bravek, ^quest_elena_spoke_cured_bravek :
         @multi4("I need clearance to enter a plague house.", headmourner_i_need_clearance, "So what's a mourner?", mourner_so_whats_a_mourner, "I haven't got the plague though...", mourner_i_havent_got_the_plague_though, "I'm looking for a woman named <nc_name(elena2)>.", mourner_im_looking_for_a_woman);
     case ^quest_elena_freed_elena, ^elena_complete, ^elena_complete_read_scroll : @multi2("So what's a mourner?", mourner_so_whats_a_mourner, "I haven't got the plague though...", mourner_i_havent_got_the_plague_though);

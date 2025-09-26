@@ -1,11 +1,11 @@
 [opnpc1,ikov_winelda]
-switch_int (%ikov_progress) {
+switch_int (%ikov) {
     case ^ikov_spoken_winelda :
         if(inv_total(inv, limpwurt_root) >= 20) {
             ~chatplayer("<p,happy>I've got you the limpwurt roots!");
             ~chatnpc("<p,happy>Good! Good! My potion is nearly ready! Bubble, bubble, toil and trouble!");
             ~chatnpc("<p,happy>Now we shows them ours magic! Hold on tight!");
-            %ikov_progress = ^ikov_paid_winelda;
+            %ikov = ^ikov_paid_winelda;
             inv_del(inv, limpwurt_root, 20);
             @ikov_winelda_teleport;
             return;
@@ -68,4 +68,4 @@ cam_reset;
 ~chatnpc("<p,happy>Good! Don't pester! Help!");
 ~chatnpc("<p,neutral>Get Winelda 20 limpwurt roots for my pot.");
 ~chatnpc("<p,happy>Then we shows them some magic!");
-%ikov_progress = ^ikov_spoken_winelda;
+%ikov = ^ikov_spoken_winelda;

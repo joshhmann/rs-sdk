@@ -44,7 +44,7 @@ switch_obj (last_useitem) {
 
 // Taverley wall
 [oploc1,scorpionwall]
-if(%scorpcatcher_progress < ^scorpcatcher_first_hint) {
+if(%scorpcatcher < ^scorpcatcher_first_hint) {
     mes("Looks like a wall...");
     return;
 }
@@ -54,7 +54,7 @@ mes("You've found a secret door");
 
 [queue,scorpcatcher_quest_complete]
 inv_del(inv, scorpioncagefull, 1);
-%scorpcatcher_progress = ^scorpcatcher_complete;
+%scorpcatcher = ^scorpcatcher_complete;
 session_log(^log_adventure, "Quest complete: Scorpion Catcher");
 ~send_quest_complete(questlist:scorpcatcher, scorpioncagefull, 250, ^scorpcatcher_questpoints, "You have completed the\\nScorpion Catcher Quest!");
 stat_advance(strength, 66250);

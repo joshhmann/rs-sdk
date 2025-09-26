@@ -27,7 +27,7 @@ switch_int(~p_choice2("Yes, I am very nimble and agile!", 1, "No, I am happy whe
 }
 
 [oploc1,_shilo_metalgate]
-if(%zombiequeen_progress >= ^zombiequeen_complete) {
+if(%zombiequeen >= ^zombiequeen_complete) {
     if(coordx(coord) < coordx(loc_coord)) {
         p_teleport(loc_coord);
         mes("You open the gates and make your way back out of the village.");
@@ -99,7 +99,7 @@ while(loc_findnext = true) {
 }
 
 [oploc1,_shilo_woodengate]
-if(%zombiequeen_progress >= ^zombiequeen_complete) {
+if(%zombiequeen >= ^zombiequeen_complete) {
     def_coord $loc_coord = loc_coord;
     loc_findallzone(movecoord(coord, 1, 0, 0));
     while(loc_findnext = true) {
@@ -163,23 +163,23 @@ if(testbit(%zq_map_mechanisms, 15) = ^true) {
 }
 
 [oploc1,_rashiliyia_tomb_door_closed]
-if(%zombiequeen_progress >= ^zombiequeen_unlocked_rashliyia_tomb) {
+if(%zombiequeen >= ^zombiequeen_unlocked_rashliyia_tomb) {
     @open_rash_tombdoor;
 }
 ~mesbox("There seems to be some sort of recepticle on the door.|Perhaps it needs a key?");
 
 [oploc2,_rashiliyia_tomb_door_closed]
-if(%zombiequeen_progress >= ^zombiequeen_unlocked_rashliyia_tomb) {
+if(%zombiequeen >= ^zombiequeen_unlocked_rashliyia_tomb) {
     @open_rash_tombdoor;
 }
-if(%zombiequeen_progress = ^zombiequeen_entered_tomb_bervirius & testbit(%zq_map_mechanisms, ^zq_found_door) = ^false) %zq_map_mechanisms = setbit(%zq_map_mechanisms, ^zq_found_door);
+if(%zombiequeen = ^zombiequeen_entered_tomb_bervirius & testbit(%zq_map_mechanisms, ^zq_found_door) = ^false) %zq_map_mechanisms = setbit(%zq_map_mechanisms, ^zq_found_door);
 ~mesbox("Examining the door, you see that it has a very|strange lock. You're shocked to find that it seems to|be made out of bone!"); // double spaces where the linebreaks are here in OSRS
 
 [oplocu,_rashiliyia_tomb_door_closed]
 if(last_useitem = zqbonekey) {
     mes("You try the bone key with the lock.");
     p_delay(0); // 1t
-    if(%zombiequeen_progress = ^zombiequeen_entered_tomb_bervirius) %zombiequeen_progress = ^zombiequeen_unlocked_rashliyia_tomb;
+    if(%zombiequeen = ^zombiequeen_entered_tomb_bervirius) %zombiequeen = ^zombiequeen_unlocked_rashliyia_tomb;
     @open_rash_tombdoor;
 }
 // no nothing interesting happens
@@ -188,7 +188,7 @@ if(last_useitem = zqbonekey) {
 [oplocu,_rashiliyia_tomb_door_opened] @enter_rash_tomb;
 
 [label,enter_rash_tomb]
-if(%zombiequeen_progress < ^zombiequeen_unlocked_rashliyia_tomb) {
+if(%zombiequeen < ^zombiequeen_unlocked_rashliyia_tomb) {
     if(loc_find(0_45_48_37_18, loc_2238) = true & .loc_find(0_45_48_36_18, loc_2239) = true) {
         loc_change(zq_doorblock_jungle1, ^max_32bit_int);
         .loc_change(zq_doorblock_jungle2, ^max_32bit_int);
@@ -227,7 +227,7 @@ if($item = zqbonekey) {
     p_delay(1);
     mes("You walk outside into the warmth of the jungle heat.");
     p_delay(1);
-    if(%zombiequeen_progress < ^zombiequeen_complete & inv_total(inv, zqcorpse) = 0) mes("You get a sense that something seems incomplete."); // only inv check
+    if(%zombiequeen < ^zombiequeen_complete & inv_total(inv, zqcorpse) = 0) mes("You get a sense that something seems incomplete."); // only inv check
     p_teleport(0_45_48_36_21);
     return;
 }
@@ -288,7 +288,7 @@ sound_synth(grate_open, 0, 0);
 if(coordz(coord) > coordz($loc_coord)) {
     p_teleport(0_45_148_49_43);
 } else {
-    if(%zombiequeen_progress < ^zombiequeen_complete & inv_total(worn, zqdeadbeads) = 0) {
+    if(%zombiequeen < ^zombiequeen_complete & inv_total(worn, zqdeadbeads) = 0) {
         p_teleport(movecoord($loc_coord, 0, 0, 1));
         p_delay(1);
     }
@@ -302,7 +302,7 @@ if(inv_total(worn, zqdeadbeads) > 0) {
 [queue,rash_queue] ~rash_summon;
 
 [proc,rash_summon]
-if(%zombiequeen_progress >= ^zombiequeen_complete 
+if(%zombiequeen >= ^zombiequeen_complete 
     | %zq_rash_timer > map_clock 
     | inv_total(worn, zqdeadbeads) > 0
     | inzone(0_45_148_0_0, 0_45_148_63_63, coord) = false) {
@@ -322,7 +322,7 @@ npc_queue(10, 0, 0);
 
 [oploc1,ahzarhoon_entrance]
 p_arrivedelay;
-switch_int(%zombiequeen_progress) {
+switch_int(%zombiequeen) {
     case default :
         loc_change(ahzarhoon_entrance_fissure_withrope, 50);
         ~mesbox("You see a small fissure in the granite that you might just be able to crawl through. You can see that a rope is attached nearby.");
@@ -330,14 +330,14 @@ switch_int(%zombiequeen_progress) {
         loc_change(ahzarhoon_entrance_fissure, 50);
         ~mesbox("You see a small fissure in the granite that you might just be able to crawl through. It's very dark beyond the fissure.");
     case ^zombiequeen_started, ^zombiequeen_found_mound, ^zombiequeen_searched_mound :
-        if(%zombiequeen_progress < ^zombiequeen_found_mound) %zombiequeen_progress = ^zombiequeen_found_mound;
+        if(%zombiequeen < ^zombiequeen_found_mound) %zombiequeen = ^zombiequeen_found_mound;
         ~mesbox("It looks as if something is buried here.");
     case ^zombiequeen_not_started : ~mesbox("It just looks like some bumpy ground.");
 }
 
 [oploc2,ahzarhoon_entrance]
 p_arrivedelay;
-switch_int(%zombiequeen_progress) {
+switch_int(%zombiequeen) {
     case default :
         loc_change(ahzarhoon_entrance_fissure_withrope, 50);
         ~mesbox("You see a small fissure in the granite that you might just be able to crawl through. You can see that a rope is attached nearby.");
@@ -347,18 +347,18 @@ switch_int(%zombiequeen_progress) {
         ~mesbox("You see a small fissure in the granite that you might just be able to crawl through. It's very dark beyond the fissure. Do you want to try to crawl through the fissure?");
         @zombiequeen_enter_fissure;
     case ^zombiequeen_started, ^zombiequeen_found_mound, ^zombiequeen_searched_mound :
-        if(%zombiequeen_progress < ^zombiequeen_searched_mound) %zombiequeen_progress = ^zombiequeen_searched_mound;
+        if(%zombiequeen < ^zombiequeen_searched_mound) %zombiequeen = ^zombiequeen_searched_mound;
         ~mesbox("It looks as if something is buried here. You may need some tools to excavate further.");
     case ^zombiequeen_not_started : ~mesbox("It just looks like some bumpy ground.");
 }
 
 [oploc1,ahzarhoon_entrance_fissure]
 p_arrivedelay;
-if(%zombiequeen_progress < ^zombiequeen_dug_mound) {
+if(%zombiequeen < ^zombiequeen_dug_mound) {
     mes("Some earth falls down and fills in the fissure.");
     loc_change(ahzarhoon_entrance, 50);
     return;
-} else if(%zombiequeen_progress >= ^zombiequeen_roped_mound) {
+} else if(%zombiequeen >= ^zombiequeen_roped_mound) {
     loc_change(ahzarhoon_entrance_fissure_withrope, 50);
     ~mesbox("You see a small fissure in the granite that you might just be able to crawl through. You can see that a rope is attached nearby.");
 } else {
@@ -367,10 +367,10 @@ if(%zombiequeen_progress < ^zombiequeen_dug_mound) {
 
 [oploc2,ahzarhoon_entrance_fissure]
 p_arrivedelay;
-if(%zombiequeen_progress < ^zombiequeen_dug_mound) {
+if(%zombiequeen < ^zombiequeen_dug_mound) {
     mes("Some earth falls down and fills in the fissure.");
     loc_change(ahzarhoon_entrance_fissure, 50);
-} else if(%zombiequeen_progress >= ^zombiequeen_roped_mound) {
+} else if(%zombiequeen >= ^zombiequeen_roped_mound) {
     loc_change(ahzarhoon_entrance_fissure_withrope, 50);
     ~mesbox("You see a small fissure in the granite that you might just be able to crawl through. You can see that a rope is attached nearby. Do you want to try to crawl through the fissure?");
     @zombiequeen_enter_fissure;
@@ -386,11 +386,11 @@ if($op = 2) {
     say("It looks very dangerous, and dark... Scary!");
     return;
 }
-if(%zombiequeen_progress = ^zombiequeen_dug_mound) {
+if(%zombiequeen = ^zombiequeen_dug_mound) {
     ~mesbox("The fissure looks very dark, you're not sure what lies beyond.");
     return;
 }
-if(%zombiequeen_progress = ^zombiequeen_lit_mound) {
+if(%zombiequeen = ^zombiequeen_lit_mound) {
     ~mesbox("It looks like there is a steep drop just after the fissure. It may be dangerous to try to climb down without any sort of support.");
     return;
 }
@@ -409,7 +409,7 @@ mes("the rock.");
 anim(human_pickupfloor, 0);
 p_delay(0);
 ~update_bas;
-if(%zombiequeen_progress = ^zombiequeen_roped_mound) %zombiequeen_progress = ^zombiequeen_entered_ah_za_rhoon;
+if(%zombiequeen = ^zombiequeen_roped_mound) %zombiequeen = ^zombiequeen_entered_ah_za_rhoon;
 mes("You cleverly use the rope to slowly lower yourself to the floor.");
 stat_advance(agility, 30);
 p_teleport(0_45_146_18_57);
@@ -425,7 +425,7 @@ p_arrivedelay;
 p_arrivedelay;
 p_stopaction;
 facesquare(loc_coord);
-switch_int(%zombiequeen_progress) {
+switch_int(%zombiequeen) {
     case default :
         loc_change(ahzarhoon_entrance_fissure, 50);
         anim(human_dig, 0);
@@ -434,7 +434,7 @@ switch_int(%zombiequeen_progress) {
         p_delay(1);
         ~mesbox("You have already excavated this area. Your spade clangs against the granite.");
     case ^zombiequeen_started, ^zombiequeen_found_mound, ^zombiequeen_searched_mound :
-        %zombiequeen_progress = ^zombiequeen_dug_mound;
+        %zombiequeen = ^zombiequeen_dug_mound;
         mes("You start digging...");
         anim(human_dig_long, 0);
         p_delay(1);
@@ -454,18 +454,18 @@ switch_int(%zombiequeen_progress) {
 [oplocu,ahzarhoon_entrance_fissure]
 def_obj $use_obj = last_useitem;
 p_arrivedelay;
-if(%zombiequeen_progress < ^zombiequeen_dug_mound) {
+if(%zombiequeen < ^zombiequeen_dug_mound) {
     mes("Some earth falls down and fills in the fissure.");
     loc_change(ahzarhoon_entrance, 50);
     return;
 }
 switch_obj($use_obj) {
     case rope :
-        if(%zombiequeen_progress = ^zombiequeen_dug_mound) {
+        if(%zombiequeen = ^zombiequeen_dug_mound) {
             mes("It's too dark to clearly see where to fix that.");
             return;
         }
-        if(%zombiequeen_progress >= ^zombiequeen_roped_mound) {
+        if(%zombiequeen >= ^zombiequeen_roped_mound) {
             mes("There is already a rope attached!");
             return;
         }
@@ -473,10 +473,10 @@ switch_obj($use_obj) {
         p_delay(0);
         inv_del(inv, rope, 1);
         loc_change(ahzarhoon_entrance_fissure_withrope, 50);
-        %zombiequeen_progress = ^zombiequeen_roped_mound;
+        %zombiequeen = ^zombiequeen_roped_mound;
         ~objbox(rope, "You see where to attach the rope very clearly. You secure the rope well.", 250, 0, 0);
     case lit_candle, lit_black_candle, torch_lit : // not all light sources work so not using cat here so this won't cause a bug for 2005
-        if(%zombiequeen_progress > ^zombiequeen_lit_mound) {
+        if(%zombiequeen > ^zombiequeen_lit_mound) {
             mes("You have already seen inside the fissure.");
             return;
         }
@@ -484,7 +484,7 @@ switch_obj($use_obj) {
         p_delay(0);
         // guessed linebreaks, what osrs has doesn't work and dialogue is different to rsc
         ~objbox($use_obj, "You drop the <lowercase(oc_name($use_obj))> into the fissure and see|that there is quite a large drop after you get through|the hole. There is a good anchor point nearby onto which|you could tie a rope.", 250, 0, ^objbox_height);
-        %zombiequeen_progress = ^zombiequeen_lit_mound;
+        %zombiequeen = ^zombiequeen_lit_mound;
         inv_del(inv, $use_obj, 1);
         ~mesbox("The <lowercase(oc_name($use_obj))> burns out.");
         ~mesbox("Some rope might help here.");
@@ -493,10 +493,10 @@ switch_obj($use_obj) {
 
 [oploc1,ahzarhoon_entrance_fissure_withrope]
 p_arrivedelay;
-if(%zombiequeen_progress < ^zombiequeen_dug_mound) {
+if(%zombiequeen < ^zombiequeen_dug_mound) {
     mes("Some earth falls down and fills in the fissure.");
     loc_change(ahzarhoon_entrance, 50);
-} else if (%zombiequeen_progress < ^zombiequeen_roped_mound) {
+} else if (%zombiequeen < ^zombiequeen_roped_mound) {
     loc_change(ahzarhoon_entrance_fissure, 50);
     ~mesbox("You see a small fissure in the granite that you might just be able to crawl through. It's very dark beyond the fissure. Do you want to try to crawl through the fissure?");
 } else {
@@ -505,10 +505,10 @@ if(%zombiequeen_progress < ^zombiequeen_dug_mound) {
 
 [oploc2,ahzarhoon_entrance_fissure_withrope]
 p_arrivedelay;
-if(%zombiequeen_progress < ^zombiequeen_dug_mound) {
+if(%zombiequeen < ^zombiequeen_dug_mound) {
     mes("Some earth falls down and fills in the fissure.");
     loc_change(ahzarhoon_entrance, 50);
-} else if (%zombiequeen_progress < ^zombiequeen_roped_mound) {
+} else if (%zombiequeen < ^zombiequeen_roped_mound) {
     loc_change(ahzarhoon_entrance_fissure, 50);
     ~mesbox("You see a small fissure in the granite that you might just be able to crawl through. It's very dark beyond the fissure. Do you want to try to crawl through the fissure?");
 } else {
@@ -518,7 +518,7 @@ if(%zombiequeen_progress < ^zombiequeen_dug_mound) {
 
 [oplocu,ahzarhoon_entrance_fissure_withrope]
 p_arrivedelay;
-if(%zombiequeen_progress < ^zombiequeen_dug_mound) {
+if(%zombiequeen < ^zombiequeen_dug_mound) {
     mes("Some earth falls down and fills in the fissure.");
     loc_change(ahzarhoon_entrance, 50);
     return;
@@ -647,7 +647,7 @@ if(testbit(%zq_map_mechanisms, ^zq_read_tattered_scroll) = ^true) {
                 return;
             }
             ~mesbox("You struggle through the narrow crevice in the rocks.");
-            if(%zombiequeen_progress = ^zombiequeen_left_ah_za_rhoon) %zombiequeen_progress = ^zombiequeen_entered_tomb_bervirius;
+            if(%zombiequeen = ^zombiequeen_left_ah_za_rhoon) %zombiequeen = ^zombiequeen_entered_tomb_bervirius;
             p_teleport(0_43_146_8_45);
             ~mesbox("And drop to your feet into a narrow underground corridor.");
         case 2 : mes("You decide that the surface is the place for you!");
@@ -775,21 +775,21 @@ switch_int(~p_choice3("A ladder", 1, "A crude raft", 2, "A pole vault", 3)) {
 }
 
 [oploc1,zqsecretstone]
-if(%zombiequeen_progress >= ^zombiequeen_complete) {
+if(%zombiequeen >= ^zombiequeen_complete) {
     mes("You notice nothing significant about this stone.");
     return;
 }
 ~mesbox("This stone seems to have strange markings on it.");
 
 [oploc2,zqsecretstone]
-if(%zombiequeen_progress >= ^zombiequeen_complete) {
+if(%zombiequeen >= ^zombiequeen_complete) {
     mes("You notice nothing significant about this stone.");
     return;
 }
 ~mesbox("This stone seems to have strange markings on it. Maybe Trufitus can decipher them? The stone is too heavy to carry but the letters stand proud on a plaque. Maybe you could seperate the plaque from the rock?");
 
 [oplocu,zqsecretstone]
-if(%zombiequeen_progress >= ^zombiequeen_complete) {
+if(%zombiequeen >= ^zombiequeen_complete) {
     mes("You notice nothing significant about this.");
     return;
 }
@@ -843,7 +843,7 @@ if ($choice = 1) {
 }
 
 [oploc2,secretrubblebook]
-if(%zombiequeen_progress >= ^zombiequeen_complete) {
+if(%zombiequeen >= ^zombiequeen_complete) {
     mes("You notice nothing significant about this.");
     return;
 }
@@ -888,7 +888,7 @@ if ($choice = 1) {
 }
 
 [oploc2,zqsacks]
-if(%zombiequeen_progress >= ^zombiequeen_complete) {
+if(%zombiequeen >= ^zombiequeen_complete) {
     mes("You notice nothing significant about this.");
     return;
 }
@@ -920,7 +920,7 @@ if ($choice = 1) {
 }
 
 [oploc1,zqgallows]
-if(%zombiequeen_progress >= ^zombiequeen_complete) {
+if(%zombiequeen >= ^zombiequeen_complete) {
     mes("You notice nothing significant about this.");
     return;
 }
@@ -928,7 +928,7 @@ if(%zombiequeen_progress >= ^zombiequeen_complete) {
 ~mesbox("A grisly sight meets your eyes. A human corpse hangs from the noose. His hands have been tied behind his back.");
 
 [oploc2,zqgallows]
-if(%zombiequeen_progress >= ^zombiequeen_complete) {
+if(%zombiequeen >= ^zombiequeen_complete) {
     mes("You notice nothing significant about this.");
     return;
 }
@@ -1069,10 +1069,10 @@ switch_int(~p_choice2_header("Yes, I'll follow the path.", 1, "No, I'll look for
 if(inzone(0_45_145_0_0, 0_45_146_63_63, coord) = true) {
     return;
 }
-if(%zombiequeen_progress = ^zombiequeen_entered_ah_za_rhoon) %zombiequeen_progress = ^zombiequeen_left_ah_za_rhoon;
+if(%zombiequeen = ^zombiequeen_entered_ah_za_rhoon) %zombiequeen = ^zombiequeen_left_ah_za_rhoon;
 
 [oploc1,zqdolmen]
-if(%zombiequeen_progress >= ^zombiequeen_complete) {
+if(%zombiequeen >= ^zombiequeen_complete) {
     mes("There is nothing new about this dolmen.");
     return;
 }
@@ -1085,7 +1085,7 @@ if(~zqhaspommel = true & ~obj_gettotal(zqcrystal) > 0) {
 }
 
 [oploc2,zqdolmen]
-if(%zombiequeen_progress >= ^zombiequeen_complete) {
+if(%zombiequeen >= ^zombiequeen_complete) {
     mes("There is nothing new about this dolmen.");
     return;
 }
@@ -1128,7 +1128,7 @@ if(~obj_gettotal(zqberviriusscroll2) = 0) {
 [oplocu,zqdolmen]
 if(last_useitem = zqcorpse) {
     // can't find any way to get a 2nd corpse, not sure what the interaction is if the quest is already complete
-    if(%zombiequeen_progress = ^zombiequeen_retrieved_corpse) {
+    if(%zombiequeen = ^zombiequeen_retrieved_corpse) {
         ~objbox(zqcorpse, "You carefully place Rashiliyia's remains on the dolmen.|You feel a strange vibration in the air.", 250, 0, 0);
         if_close;
         if(npc_find(coord, zqzombiequeen, 7, 0) = false) {
@@ -1213,7 +1213,7 @@ switch_int(~p_choice2_header("Yes, I'm sure.", 1, "Nope, I've had second thought
 }
 
 [opheld1,zqcrystal]
-if(%zombiequeen_progress >= ^zombiequeen_complete) {
+if(%zombiequeen >= ^zombiequeen_complete) {
     mes("The crystal does not respond anymore.");
     return;
 }
@@ -1354,7 +1354,7 @@ if(add(%lastcombat, 8) < map_clock) @rash_summon_minions(uid);
 
 [oploc1,_zqtombdoor]
 queue(rash_queue, 6); // this is the only interaction that queues it besides entering the area
-if(%zombiequeen_progress < ^zombiequeen_unlocked_tombdoor) {
+if(%zombiequeen < ^zombiequeen_unlocked_tombdoor) {
     mes("This door is completely sealed, it is very ornately carved.");
     return;
 }
@@ -1404,7 +1404,7 @@ if((loc_find(0_45_148_12_8, thzq_tombrooml1) = true | loc_find(0_45_148_12_8, th
 def_obj $last_obj = last_useitem;
 ~rash_summon;
 if($last_obj = bones) {
-    if(%zombiequeen_progress >= ^zombiequeen_unlocked_tombdoor) {
+    if(%zombiequeen >= ^zombiequeen_unlocked_tombdoor) {
         mes("There are no more recesses to fill, you filled them all.");
         if(loc_find(0_45_148_12_8, thzq_tombrooml1) = false) mes("The doors seem busy at the moment.");
         if(loc_find(0_45_148_13_8, thzq_tombroomr1) = false) mes("The doors seem busy at the moment.");
@@ -1441,7 +1441,7 @@ if($last_obj = bones) {
                 .loc_change(thzq_tombroomr2, 50);
             }
             ~set_zqtombdoorstate(3);
-            %zombiequeen_progress = ^zombiequeen_unlocked_tombdoor;
+            %zombiequeen = ^zombiequeen_unlocked_tombdoor;
             ~objbox(bones, "You place the bone into the last recess on the skeletal door and it fits. All the recesses are filled...", 250, 0, divide(^objbox_height, 2));
             mes("You fit the last bone into the recess.");
             ~mesbox("The door seems to change slightly. Two depictions of skeletal warriors turn their heads towards you. They are alive! The Skeletons wrench themselves free of the door. Stepping out of the door, with grinning teeth they push the huge doors open.");
@@ -1465,7 +1465,7 @@ if(stat_random(agility, 125, 250) = false) {
     $failed = true;
 }
 if(coordz(coord) > 9512) {
-    if(%zombiequeen_progress < ^zombiequeen_complete & inv_total(worn, zqdeadbeads) = 0) {
+    if(%zombiequeen < ^zombiequeen_complete & inv_total(worn, zqdeadbeads) = 0) {
         mes("You simply cannot concentrate enough to climb down the rocks.");
         return;
     }
@@ -1510,7 +1510,7 @@ if(coordz(coord) > 9512) {
 
 [label,search_tombdolmen]
 ~rash_summon;
-if(%zombiequeen_progress >= ^zombiequeen_complete) {
+if(%zombiequeen >= ^zombiequeen_complete) {
     mes("You have already completed this quest.");
     p_delay(0);
     mes("Rashiliyia's remains have been put to rest.");
@@ -1519,7 +1519,7 @@ if(%zombiequeen_progress >= ^zombiequeen_complete) {
 } else if(testbit(%zq_map_mechanisms, ^zq_defeated_nazastarool3) = ^true) { // the rash corpse checks only check if you defeated the 3rd form
     ~objbox(zqcorpse, "You search the dolmen... And find the mumified remains of a human female.", 250, 0, 0);
     if(inv_freespace(inv) > 0) { 
-        if(%zombiequeen_progress = ^zombiequeen_unlocked_tombdoor) %zombiequeen_progress = ^zombiequeen_retrieved_corpse;
+        if(%zombiequeen = ^zombiequeen_unlocked_tombdoor) %zombiequeen = ^zombiequeen_retrieved_corpse;
         %zq_map_mechanisms = clearbit_range(%zq_map_mechanisms, 9, 11); // todo: this might happen when checking dolmen with progress >= 14 and no rash corpse on player instead, functionally this is the same though
     }
     inv_add(inv, zqcorpse, 1);
@@ -1581,7 +1581,7 @@ if(testbit(%zq_map_mechanisms, ^zq_defeated_nazastarool1) = ^false) {
 }
 
 [opobj3,zqcorpse]
-if(%zombiequeen_progress >= ^zombiequeen_complete | ~obj_gettotal(zqcorpse) > 0 | testbit(%zq_map_mechanisms, ^zq_defeated_nazastarool3) = ^false) {
+if(%zombiequeen >= ^zombiequeen_complete | ~obj_gettotal(zqcorpse) > 0 | testbit(%zq_map_mechanisms, ^zq_defeated_nazastarool3) = ^false) {
     mes("The object must have been a trick of the light...");
     obj_del;
     return;
@@ -1595,7 +1595,7 @@ anim(human_pickuptable, 0);
 obj_takeitem(inv);
 sound_synth(pick2, 0, 0);
 p_delay(1);
-if(%zombiequeen_progress = ^zombiequeen_unlocked_tombdoor) %zombiequeen_progress = ^zombiequeen_retrieved_corpse;
+if(%zombiequeen = ^zombiequeen_unlocked_tombdoor) %zombiequeen = ^zombiequeen_retrieved_corpse;
 %zq_map_mechanisms = clearbit_range(%zq_map_mechanisms, 9, 11);
 ~objbox(zqcorpse, "You take the mummified remains of a human female.|You feel certain that these are Rashiliyia's remains.|You|carefully place the remains in your inventory.", 250, 0, 0);
 
@@ -1636,7 +1636,7 @@ switch_int(random(4)) {
 }
 
 [queue,zombiequeen_quest_complete]
-%zombiequeen_progress = ^zombiequeen_complete;
+%zombiequeen = ^zombiequeen_complete;
 stat_advance(crafting, 38750);
 session_log(^log_adventure, "Quest complete: Shilo Village");
 // todo: find image for proof on sizing

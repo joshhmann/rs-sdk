@@ -1,5 +1,5 @@
 [opnpc1,butler_jones_hazeel_cultist]
-switch_int(%hazeelcult_progress) {
+switch_int(%hazeelcultquest) {
     case ^hazeelcult_complete :
         if(%hazeelcult_side = ^hazeelcult_goodside) {
             ~chatplayer("<p,neutral>Hello stranger.");
