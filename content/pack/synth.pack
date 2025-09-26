@@ -48,10 +48,10 @@
 47=black_demon_attack
 48=demon_attack
 49=demon_hit
-50=sound_50
-51=sound_51
-52=sound_52
-53=sound_53
+50=ghast_attack
+51=ghast_appear
+52=ghast_death
+53=ghast_hit
 54=giant_hit
 55=giant_death
 56=giant_attack
@@ -118,7 +118,7 @@
 117=babydragon_attack
 118=babydragon_death
 119=babydragon_hit
-120=sound_120
+120=half_werewolf_attack
 121=half_werewolf_death
 122=half_werewolf_hit
 123=goblin_attack

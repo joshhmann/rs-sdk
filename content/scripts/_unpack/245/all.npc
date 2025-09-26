@@ -26,6 +26,19 @@ attack=10
 defence=10
 strength=10
 hitpoints=60
+respawnrate=50
+wanderrange=5
+maxrange=20
+category=canafis_citizen
+param=stabdefence,-21
+param=slashdefence,-21
+param=crushdefence,-21
+param=magicdefence,-21
+param=rangedefence,-21
+param=attack_sound,half_werewolf_attack
+param=defend_sound,half_werewolf_hit
+param=death_sound,half_werewolf_death
+param=next_npc_type,canafis_werewolf_man1
 param=death_drop,wolf_bones
 
 [canafis_man2]
@@ -55,6 +68,19 @@ attack=10
 defence=10
 strength=10
 hitpoints=60
+respawnrate=50
+wanderrange=5
+maxrange=20
+category=canafis_citizen
+param=stabdefence,-21
+param=slashdefence,-21
+param=crushdefence,-21
+param=magicdefence,-21
+param=rangedefence,-21
+param=attack_sound,half_werewolf_attack
+param=defend_sound,half_werewolf_hit
+param=death_sound,half_werewolf_death
+param=next_npc_type,canafis_werewolf_man2
 param=death_drop,wolf_bones
 
 [canafis_man3]
@@ -86,6 +112,19 @@ attack=10
 defence=10
 strength=10
 hitpoints=60
+respawnrate=50
+wanderrange=5
+maxrange=20
+category=canafis_citizen
+param=stabdefence,-21
+param=slashdefence,-21
+param=crushdefence,-21
+param=magicdefence,-21
+param=rangedefence,-21
+param=attack_sound,half_werewolf_attack
+param=defend_sound,half_werewolf_hit
+param=death_sound,half_werewolf_death
+param=next_npc_type,canafis_werewolf_man3
 param=death_drop,wolf_bones
 
 [canafis_woman1]
@@ -116,6 +155,19 @@ attack=10
 defence=10
 strength=10
 hitpoints=60
+respawnrate=50
+wanderrange=5
+maxrange=20
+category=canafis_citizen
+param=stabdefence,-21
+param=slashdefence,-21
+param=crushdefence,-21
+param=magicdefence,-21
+param=rangedefence,-21
+param=attack_sound,half_werewolf_attack
+param=defend_sound,half_werewolf_hit
+param=death_sound,half_werewolf_death
+param=next_npc_type,canafis_werewolf_woman1
 param=death_drop,wolf_bones
 
 [canafis_woman2]
@@ -146,6 +198,19 @@ attack=10
 defence=10
 strength=10
 hitpoints=60
+respawnrate=50
+wanderrange=5
+maxrange=20
+category=canafis_citizen
+param=stabdefence,-21
+param=slashdefence,-21
+param=crushdefence,-21
+param=magicdefence,-21
+param=rangedefence,-21
+param=attack_sound,half_werewolf_attack
+param=defend_sound,half_werewolf_hit
+param=death_sound,half_werewolf_death
+param=next_npc_type,canafis_werewolf_woman2
 param=death_drop,wolf_bones
 
 [canafis_woman3]
@@ -182,6 +247,19 @@ attack=10
 defence=10
 strength=10
 hitpoints=60
+respawnrate=50
+wanderrange=5
+maxrange=20
+category=canafis_citizen
+param=stabdefence,-21
+param=slashdefence,-21
+param=crushdefence,-21
+param=magicdefence,-21
+param=rangedefence,-21
+param=attack_sound,half_werewolf_attack
+param=defend_sound,half_werewolf_hit
+param=death_sound,half_werewolf_death
+param=next_npc_type,canafis_werewolf_woman3
 param=death_drop,wolf_bones
 
 [canafis_werewolf_man1]
@@ -204,6 +282,17 @@ attack=70
 defence=70
 strength=70
 hitpoints=100
+wanderrange=5
+maxrange=20
+category=werewolf
+param=damagetype,^slash_style
+param=magicdefence,60
+param=attack_anim,werewolf_attack
+param=defend_anim,werewolf_block
+param=death_anim,werewolf_death
+param=attack_sound,wolf_attack
+param=defend_sound,wolf_hit
+param=death_sound,wolf_death
 param=death_drop,wolf_bones
 
 [canafis_werewolf_man2]
@@ -226,6 +315,17 @@ attack=70
 defence=70
 strength=70
 hitpoints=100
+wanderrange=5
+maxrange=20
+category=werewolf
+param=damagetype,^slash_style
+param=magicdefence,60
+param=attack_anim,werewolf_attack
+param=defend_anim,werewolf_block
+param=death_anim,werewolf_death
+param=attack_sound,wolf_attack
+param=defend_sound,wolf_hit
+param=death_sound,wolf_death
 param=death_drop,wolf_bones
 
 [canafis_werewolf_man3]
@@ -248,6 +348,17 @@ attack=70
 defence=70
 strength=70
 hitpoints=100
+wanderrange=5
+maxrange=20
+category=werewolf
+param=damagetype,^slash_style
+param=magicdefence,60
+param=attack_anim,werewolf_attack
+param=defend_anim,werewolf_block
+param=death_anim,werewolf_death
+param=attack_sound,wolf_attack
+param=defend_sound,wolf_hit
+param=death_sound,wolf_death
 param=death_drop,wolf_bones
 
 [canafis_werewolf_woman1]
@@ -272,6 +383,17 @@ attack=70
 defence=70
 strength=70
 hitpoints=100
+wanderrange=5
+maxrange=20
+category=werewolf
+param=damagetype,^slash_style
+param=magicdefence,60
+param=attack_anim,werewolf_attack
+param=defend_anim,werewolf_block
+param=death_anim,werewolf_death
+param=attack_sound,wolf_attack
+param=defend_sound,wolf_hit
+param=death_sound,wolf_death
 param=death_drop,wolf_bones
 
 [canafis_werewolf_woman2]
@@ -296,6 +418,17 @@ attack=70
 defence=70
 strength=70
 hitpoints=100
+wanderrange=5
+maxrange=20
+category=werewolf
+param=damagetype,^slash_style
+param=magicdefence,60
+param=attack_anim,werewolf_attack
+param=defend_anim,werewolf_block
+param=death_anim,werewolf_death
+param=attack_sound,wolf_attack
+param=defend_sound,wolf_hit
+param=death_sound,wolf_death
 param=death_drop,wolf_bones
 
 [canafis_werewolf_woman3]
@@ -322,6 +455,17 @@ attack=70
 defence=70
 strength=70
 hitpoints=100
+wanderrange=5
+maxrange=20
+category=werewolf
+param=damagetype,^slash_style
+param=magicdefence,60
+param=attack_anim,werewolf_attack
+param=defend_anim,werewolf_block
+param=death_anim,werewolf_death
+param=attack_sound,wolf_attack
+param=defend_sound,wolf_hit
+param=death_sound,wolf_death
 param=death_drop,wolf_bones
 
 [werewolfroadblocker]
@@ -381,6 +525,7 @@ param=shop_delta,30
 // todo: confirm title
 param=shop_title,Rufus' Meat Emporium
 moverestrict=indoors
+wanderrange=5
 
 [werewolfshopkeeper2]
 name=Barker
@@ -414,6 +559,7 @@ param=shop_delta,30
 // todo: confirm title
 param=shop_title,Barkers' Haberdashery
 moverestrict=indoors
+wanderrange=5
 
 [werewolfshopkeeper3]
 name=Fidelio
@@ -440,6 +586,7 @@ param=shop_delta,30
 // todo: confirm title
 param=shop_title,Canifis General Store
 moverestrict=indoors
+wanderrange=5
 
 [werewolftanner]
 name=Sbott
@@ -465,6 +612,7 @@ op3=Trade
 head1=model_63_idk_head
 head2=model_84_idk_head
 head3=npc_1024_head
+wanderrange=5
 
 [werewolfinnkeeper]
 name=Roavar
@@ -489,6 +637,7 @@ op1=Talk-to
 op3=Trade
 head1=model_63_idk_head
 head2=npc_1024_head
+wanderrange=5
 
 [willowthewisp]
 name=Willow the wisp
@@ -503,6 +652,7 @@ resizev=142
 minimap=no
 ambient=70
 contrast=70
+wanderrange=5
 
 [priestperilevilmonk1]
 name=Monk of Zamorak
@@ -528,6 +678,8 @@ defence=22
 strength=18
 hitpoints=20
 magic=25
+wanderrange=12
+maxrange=14
 
 [priestperilevilmonk2]
 name=Monk of Zamorak
@@ -554,6 +706,8 @@ defence=12
 strength=8
 hitpoints=10
 magic=25
+wanderrange=12
+maxrange=14
 
 [priestperilevilmonk3]
 name=Monk of Zamorak
@@ -599,15 +753,16 @@ attack=20
 defence=20
 strength=20
 hitpoints=45
+wanderrange=5
+maxrange=5
 param=damagetype,^stab_style
-// todo: real anims
-// param=attack_anim,
-// param=defend_anim,
-// param=death_anim,
+param=attack_anim,seq_18
+param=defend_anim,seq_19
+param=death_anim,seq_20
+param=attack_sound,wolf_attack
+param=defend_sound,wolf_hit
+param=death_sound,wolf_death
 param=death_drop,null
-// todo: real sounds
-// param=attack_sound,
-// param=defend_sound,
 
 [priestperiltrappedmonk]
 name=Drezel
@@ -628,7 +783,6 @@ walkanim=human_walk_f,human_walk_b,human_walk_l,human_walk_r
 readyanim=human_ready
 op1=Talk-to
 head1=model_63_idk_head
-// todo: real wander range
 wanderrange=5
 
 [priestperiltrappedmonk2]
@@ -650,6 +804,7 @@ walkanim=human_walk_f,human_walk_b,human_walk_l,human_walk_r
 readyanim=human_ready
 op1=Talk-to
 head1=model_63_idk_head
+wanderrange=1
 
 [filliman_tarlock_spirit]
 name=Filliman Tarlock
@@ -679,6 +834,8 @@ op1=Talk-to
 alwaysontop=yes
 head1=model_49_idk_head
 head2=model_82_idk_head
+wanderrange=0
+moverestrict=nomove
 
 [filliman_tarlock_ns]
 name=Nature Spirit
@@ -711,6 +868,8 @@ op1=Talk-to
 alwaysontop=yes
 head1=model_49_idk_head
 head2=model_82_idk_head
+wanderrange=0
+moverestrict=nomove
 
 [ghast_invis]
 name=Ghast
@@ -726,6 +885,14 @@ attack=22
 strength=22
 hitpoints=45
 defence=17
+wanderrange=5
+maxrange=7
+param=attack_anim,ghast_attack
+param=defend_anim,ghast_block
+param=death_anim,ghast_death
+param=attack_sound,ghast_attack
+param=defend_sound,ghast_hit
+param=death_sound,ghast_death
 
 [ghast_vis]
 name=Ghast
@@ -741,6 +908,14 @@ attack=22
 strength=22
 hitpoints=45
 defence=18
+wanderrange=5
+maxrange=7
+param=attack_anim,ghast_attack
+param=defend_anim,ghast_block
+param=death_anim,ghast_death
+param=attack_sound,ghast_attack
+param=defend_sound,ghast_hit
+param=death_sound,ghast_death
 
 [mort_myre_gate_guard]
 name=Ulizius
@@ -767,3 +942,4 @@ walkanim=human_walk_f,human_walk_b,human_walk_l,human_walk_r
 readyanim=human_ready
 op1=Talk-to
 head1=model_65_npc_head
+wanderrange=5
