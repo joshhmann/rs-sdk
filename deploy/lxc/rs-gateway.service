@@ -1,0 +1,15 @@
+[Unit]
+Description=2004scape Gateway
+After=rs-engine.service
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/opt/rs-sdk/server/gateway
+ExecStart=/root/.bun/bin/bun run gateway.ts
+Restart=always
+Environment=NODE_ENV=production
+Environment=PORT=7780
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,19 @@
+[Unit]
+Description=2004scape Game Engine
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/opt/rs-sdk/server/engine
+# Assumes bun is installed in root's home. Adjust if running as another user.
+ExecStart=/root/.bun/bin/bun run src/app.ts
+Restart=always
+# Environment variables
+Environment=NODE_ENV=production
+Environment=PORT=8888
+# Increase node memory if needed
+Environment=NODE_OPTIONS="--max-old-space-size=4096"
+
+[Install]
+WantedBy=multi-user.target
