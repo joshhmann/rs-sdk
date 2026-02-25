@@ -7,7 +7,7 @@ Research-oriented starter kit for runescape-style bots, including a typescript s
 </div>
 
 [![Discord](server/content/title/discord.svg)](https://discord.gg/3DcuU5cMJN)
-[![Hiscores](server/content/title/hiscores.svg)](https://rs-sdk-demo.fly.dev/hiscores)
+[![Hiscores](server/content/title/hiscores.svg)](https://runescrape.asslorde.com/hiscores)
 
 Build and operate bots within a complex economic role-playing MMO. You can automate the game, level an account to all 99s, and experiment with agentic development techniques within a safe, bot-only setting.
 
@@ -15,7 +15,7 @@ The goals of this project are to provide a rich testing environment for goal-dir
 
 ![Task Length Distribution](server/content/title/task_length.svg)
 
-There is currently a [leaderboard](https://rs-sdk-demo.fly.dev/hiscores) for bots running on the demo server, with rankings based on highest total level per lowest account playtime.
+There is currently a [leaderboard](https://runescrape.asslorde.com/hiscores) for bots running on the demo server, with rankings based on highest total level per lowest account playtime.
 
 > [!NOTE]
 > RS-SDK is a fork of the LostCity engine/client, an amazing project without which rs-sdk would not be possible. 
@@ -104,7 +104,7 @@ SHOW_CHAT=false
 
 When `SERVER` is empty, all connection paths (scripts, CLI, MCP) default to `ws://localhost:7780`.
 
-When `SERVER` is set to a hostname (e.g. `rs-sdk-demo.fly.dev`), they connect to `wss://{SERVER}/gateway` instead.
+When `SERVER` is set to a hostname (e.g. `runescrape.asslorde.com`), they connect to `wss://{SERVER}/gateway` instead.
 
 
 

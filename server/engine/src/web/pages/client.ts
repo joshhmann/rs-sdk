@@ -7,7 +7,21 @@ import { tryParseInt } from '#/util/TryParse.js';
 import Environment from '#/util/Environment.js';
 
 export async function handleClientPage(url: URL): Promise<Response | null> {
-    // Bot client at / and /bot
+    // Human player client at /play - no bot SDK, clean interface
+    if (url.pathname === '/play' || url.pathname === '/play/') {
+        const lowmem = tryParseInt(url.searchParams.get('lowmem'), 0);
+
+        return new Response(await ejs.renderFile('view/client.ejs', {
+            nodeid: Environment.NODE_ID,
+            lowmem,
+            members: Environment.NODE_MEMBERS,
+            per_deployment_token: Environment.WEB_SOCKET_TOKEN_PROTECTION ? getPublicPerDeploymentToken() : ''
+        }), {
+            headers: { 'Content-Type': 'text/html' }
+        });
+    }
+
+    // Bot client at / and /bot - full SDK, agent controls
     if (url.pathname === '/' || url.pathname === '/bot' || url.pathname === '/bot/') {
         const lowmem = tryParseInt(url.searchParams.get('lowmem'), 0);
         const botUsername = url.searchParams.get('bot') || 'default';
@@ -23,7 +37,7 @@ export async function handleClientPage(url: URL): Promise<Response | null> {
         });
     }
 
-    // Vanilla client at /vanilla
+    // Vanilla client at /vanilla (legacy route, same as /play)
     if (url.pathname === '/vanilla' || url.pathname === '/vanilla/') {
         const lowmem = tryParseInt(url.searchParams.get('lowmem'), 0);
 

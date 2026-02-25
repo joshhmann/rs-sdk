@@ -57,7 +57,7 @@ import { BotActions } from './sdk/actions';
 const sdk = new BotSDK({
     botUsername: 'mybot',
     password: 'secret',
-    gatewayUrl: 'wss://rs-sdk-demo.fly.dev/gateway'
+    gatewayUrl: 'wss://runescrape.asslorde.com/gateway'
 });
 
 await sdk.connect();
@@ -93,7 +93,7 @@ bun my-bot.ts
 To actually see your bot in-game, open a browser to the bot client URL:
 
 ```
-https://rs-sdk-demo.fly.dev/bot?bot=mybot123&password=test
+https://runescrape.asslorde.com/bot?bot=mybot123&password=test
 ```
 
 Or launch programmatically with Puppeteer:
@@ -103,7 +103,7 @@ import puppeteer from 'puppeteer';
 
 const browser = await puppeteer.launch({ headless: false });
 const page = await browser.newPage();
-await page.goto('https://rs-sdk-demo.fly.dev/bot?bot=mybot123&password=test');
+await page.goto('https://runescrape.asslorde.com/bot?bot=mybot123&password=test');
 ```
 
 ## Connection Configuration

@@ -26,7 +26,7 @@ Usage:
   bun --env-file=bots/<name>/bot.env sdk/cli.ts
 
 Options:
-  --server <host>   Server hostname (default: from bot.env or rs-sdk-demo.fly.dev)
+  --server <host>   Server hostname (default: from bot.env or runescrape.asslorde.com)
   --timeout <ms>    Connection timeout in ms (default: 5000)
   --help            Show this help
 
@@ -106,7 +106,7 @@ async function main() {
     }
 
     // Default server if not set
-    if (!server) server = 'rs-sdk-demo.fly.dev';
+    if (!server) server = 'runescrape.asslorde.com';
 
     const isLocal = server === 'localhost' || server.startsWith('localhost:');
 
