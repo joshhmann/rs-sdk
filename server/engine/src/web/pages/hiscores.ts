@@ -25,6 +25,10 @@ const HISCORES_STYLES = `
     .text-orange { color: #ffbb22; }
     select { background-color: #B1977E; }
     input { margin-top: 4px; }
+    /* Decorative frame styling without external images */
+    .frame-container { border: 3px outset #373737; background: #000; }
+    .frame-inner { border: 2px solid #382418; background: #1a1a1a; }
+    .stone-button { background: #474747; border: 3px outset #373737; }
 `;
 
 // Format gold value with K/M suffixes
@@ -158,10 +162,9 @@ export async function handleHiscoresPlayerPage(url: URL): Promise<Response | nul
             rank = String((Number(rankResult?.rank) || 0) + 1);
         }
 
-        const iconFile = skill.name.toLowerCase() + '.png';
         skillRows.push(`
             <tr>
-                <td><a href="/hiscores?category=${skill.id + 1}&profile=${profile}" class="c"><img src="/img/skill/${iconFile}" width="16" height="16" style="vertical-align:middle;margin-right:4px">${skill.name}</a></td>
+                <td><a href="/hiscores?category=${skill.id + 1}&profile=${profile}" class="c">${skill.name}</a></td>
                 <td align="right">${rank}</td>
                 <td align="right">${stat ? stat.level.toLocaleString() : '-'}</td>
                 <td align="right">${stat ? formatPlaytime(stat.playtime) : '-'}</td>
@@ -180,77 +183,52 @@ export async function handleHiscoresPlayerPage(url: URL): Promise<Response | nul
     <tr>
         <td valign="middle">
             <center>
-                <div style="width: 600px; position: relative;">
-
-<!-- Top edge decoration -->
-<table cellpadding="0" cellspacing="0">
-    <tr>
-        <td valign="top"><img src="/img/edge_a.jpg" width="100" height="43"></td>
-        <td valign="top"><img src="/img/edge_c.jpg" width="400" height="42"></td>
-        <td valign="top"><img src="/img/edge_d.jpg" width="100" height="43"></td>
-    </tr>
-</table>
-
-<!-- Main content area -->
-<table width="600" cellpadding="0" cellspacing="0" border="0" background="/img/background2.jpg">
-    <tr>
-        <td valign="bottom">
-            <center>
-                <br>
-                <!-- Title box -->
-                <table width="350" bgcolor="black" cellpadding="4">
-                    <tr>
-                        <td class="e">
-                            <center>
-                                <b>Hiscores for ${escapeHtml(account.username)}</b><br>
-                                <a href="/" class="c">Main menu</a> | <a href="/hiscores?profile=${profile}" class="c">All Hiscores</a>
-                            </center>
-                        </td>
-                    </tr>
-                </table>
-                <br>
-
-                <!-- Profile selector -->
-                <center>
-                    <form method="GET" action="/hiscores/player/${encodeURIComponent(account.username)}">
-                        <select name="profile" onchange="this.form.submit()">
-                            <option value="main"${profile === 'main' ? ' selected' : ''}>Main</option>
-                        </select>
-                    </form>
-                </center>
-
-                <!-- Stats table -->
-                <table width="400" bgcolor="black" cellpadding="4">
-                    <tr>
-                        <td class="e">
-                            <table width="100%" cellspacing="2" cellpadding="2">
+                <div class="frame-container" style="width: 600px; position: relative; padding: 10px;">
+                    <div class="frame-inner" style="padding: 20px;">
+                        <center>
+                            <br>
+                            <!-- Title box -->
+                            <table width="350" bgcolor="black" cellpadding="4">
                                 <tr>
-                                    <td><b>Skill</b></td>
-                                    <td align="right"><b>Rank</b></td>
-                                    <td align="right"><b>Level</b></td>
-                                    <td align="right"><b>Time</b></td>
+                                    <td class="e">
+                                        <center>
+                                            <b>Hiscores for ${escapeHtml(account.username)}</b><br>
+                                            <a href="/" class="c">Main menu</a> | <a href="/hiscores?profile=${profile}" class="c">All Hiscores</a>
+                                        </center>
+                                    </td>
                                 </tr>
-                                ${skillRows.join('')}
                             </table>
-                        </td>
-                    </tr>
-                </table>
+                            <br>
 
-                <br>
-            </center>
-        </td>
-    </tr>
-</table>
+                            <!-- Profile selector -->
+                            <center>
+                                <form method="GET" action="/hiscores/player/${encodeURIComponent(account.username)}">
+                                    <select name="profile" onchange="this.form.submit()">
+                                        <option value="main"${profile === 'main' ? ' selected' : ''}>Main</option>
+                                    </select>
+                                </form>
+                            </center>
 
-<!-- Bottom edge decoration -->
-<table cellpadding="0" cellspacing="0">
-    <tr>
-        <td valign="top"><img src="/img/edge_g2.jpg" width="100" height="43"></td>
-        <td valign="top"><img src="/img/edge_c.jpg" width="400" height="42"></td>
-        <td valign="top"><img src="/img/edge_h2.jpg" width="100" height="43"></td>
-    </tr>
-</table>
+                            <!-- Stats table -->
+                            <table width="400" bgcolor="black" cellpadding="4">
+                                <tr>
+                                    <td class="e">
+                                        <table width="100%" cellspacing="2" cellpadding="2">
+                                            <tr>
+                                                <td><b>Skill</b></td>
+                                                <td align="right"><b>Rank</b></td>
+                                                <td align="right"><b>Level</b></td>
+                                                <td align="right"><b>Time</b></td>
+                                            </tr>
+                                            ${skillRows.join('')}
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
 
+                            <br>
+                        </center>
+                    </div>
                 </div>
             </center>
         </td>
@@ -358,7 +336,7 @@ export async function handleHiscoresPage(url: URL): Promise<Response | null> {
 
     // Build skill links for sidebar
     const skillLinks = skillOptions.map(s => {
-        const icon = s.name === 'Overall' ? '' : `<img src="/img/skill/${s.name.toLowerCase()}.png" width="15" height="15" style="vertical-align:middle;margin-right:3px">`;
+        const icon = '';
         return `<tr><td><a href="/hiscores?category=${s.id}&profile=${profile}" class="c">${icon}${s.name}</a></td></tr>`;
     }).join('\n')
         + `\n<tr><td>&nbsp;</td></tr>\n<tr><td><a href="/hiscores/outfit?profile=${profile}" class="c text-orange">Equipment</a></td></tr>`;
@@ -375,169 +353,137 @@ export async function handleHiscoresPage(url: URL): Promise<Response | null> {
 <html>
 <head>
     <title>${selectedSkill} Hiscores</title>
-    <style>
-        body, p, td { font-family: Arial, Helvetica, sans-serif; font-size: 13px; }
-        body { background: #000; color: #fff; margin: 0; padding: 0; }
-        a { text-decoration: none; }
-        .b { border-style: outset; border-width: 3pt; border-color: #373737; }
-        .b2 { border-style: outset; border-width: 3pt; border-color: #570700; }
-        .e { border: 2px solid #382418; }
-        .c { text-decoration: none; color: #fff; }
-        .c:hover { text-decoration: underline; }
-        .white { text-decoration: none; color: #FFFFFF; }
-        .red { text-decoration: none; color: #E10505; }
-        .lblue { text-decoration: none; color: #9DB8C3; }
-        .dblue { text-decoration: none; color: #0D6083; }
-        .yellow { text-decoration: none; color: #FFE139; }
-        .green { text-decoration: none; color: #04A800; }
-        .purple { text-decoration: none; color: #C503FD; }
-        .text-orange { color: #ffbb22; }
-        select { background-color: #B1977E; }
-        input { margin-top: 4px; }
-    </style>
+    <style>${HISCORES_STYLES}</style>
 </head>
 <body>
 <table width="100%" height="100%" cellpadding="0" cellspacing="0">
     <tr>
         <td valign="middle">
             <center>
-                <div style="width: 600px; position: relative;">
-
-<!-- Top edge decoration -->
-<table cellpadding="0" cellspacing="0">
-    <tr>
-        <td valign="top"><img src="/img/edge_a.jpg" width="100" height="43"></td>
-        <td valign="top"><img src="/img/edge_c.jpg" width="400" height="42"></td>
-        <td valign="top"><img src="/img/edge_d.jpg" width="100" height="43"></td>
-    </tr>
-</table>
-
-<!-- Main content area -->
-<table width="600" cellpadding="0" cellspacing="0" border="0" background="/img/background2.jpg">
-    <tr>
-        <td valign="bottom">
-            <center>
-                <br>
-                <!-- Title box -->
-                <table width="250" bgcolor="black" cellpadding="4">
-                    <tr>
-                        <td class="e">
-                            <center>
-                                <b>${selectedSkill} Hiscores</b><br>
-                                <a href="/" class="c">Main menu</a>
-                            </center>
-                        </td>
-                    </tr>
-                </table>
-                <br>
-
-                <!-- Profile selector -->
-                <center>
-                    <form id="profile-select-form" method="GET" action="/hiscores">
-                        <input type="hidden" name="category" value="${currentCategory}">
-                        <select name="profile" id="profile" onchange="this.form.submit()">
-                            <option value="main"${profile === 'main' ? ' selected' : ''}>Main</option>
-                        </select>
-                    </form>
-                </center>
-
-                <!-- Two column layout: skills + data -->
-                <table>
-                    <tr>
-                        <td width="160" valign="top">
-                            <center>
-                                <b>Select hiscore table</b><br>
-                                <table width="150" height="400" bgcolor="black" cellpadding="4">
-                                    <tr>
-                                        <td class="e" valign="top">
-                                            <center>
-                                                <table height="380" cellspacing="1" cellpadding="0">
-                                                    ${skillLinks}
-                                                </table>
-                                            </center>
-                                        </td>
-                                    </tr>
-                                </table>
-                            </center>
-                        </td>
-
-                        <td width="290" valign="top">
-                            <center>
-                                <b>${selectedSkill} Hiscores</b><br>
-                                <table width="300" height="400" bgcolor="black" cellpadding="4">
-                                    <tr>
-                                        <td class="e" valign="top">
-                                            ${rows.length > 0 ? `<table>
-                                                <tr>
-                                                    <td align="right" valign="top">
-                                                        <b>Rank</b><br>
-                                                        ${rankCol}
-                                                    </td>
-                                                    <td>&nbsp;</td>
-                                                    <td valign="top">
-                                                        <b>Name</b><br>
-                                                        ${nameCol}
-                                                    </td>
-                                                    <td>&nbsp;</td>
-                                                    <td valign="top">
-                                                        <b>Level</b><br>
-                                                        ${levelCol}
-                                                    </td>
-                                                    <td>&nbsp;</td>
-                                                    <td align="right" valign="top">
-                                                        <b>Time</b><br>
-                                                        ${timeCol}
-                                                    </td>
-                                                </tr>
-                                            </table>` : '<center><br>No players found</center>'}
-                                        </td>
-                                    </tr>
-                                </table>
-                            </center>
-                        </td>
-                    </tr>
-                </table>
-
-                <br>
-
-                <!-- Search boxes -->
-                <table>
-                    <tr>
-                        <td>
-                            <table width="200" bgcolor="black" cellpadding="4">
+                <div class="frame-container" style="width: 600px; position: relative; padding: 10px;">
+                    <div class="frame-inner" style="padding: 20px;">
+                        <center>
+                            <br>
+                            <!-- Title box -->
+                            <table width="250" bgcolor="black" cellpadding="4">
                                 <tr>
-                                    <td class="b" bgcolor="#474747" background="/img/stoneback.gif">
+                                    <td class="e">
                                         <center>
-                                            <form action="/hiscores">
-                                                <b>Search by rank</b><br>
-                                                <input type="number" maxlength="12" size="12" name="rank" value="">
-                                                <input type="hidden" name="category" value="${currentCategory}">
-                                                <input type="hidden" name="profile" value="${profile}">
-                                                <br>
-                                                <input type="submit" value="Search">
-                                            </form>
+                                            <b>${selectedSkill} Hiscores</b><br>
+                                            <a href="/" class="c">Main menu</a>
                                         </center>
                                     </td>
                                 </tr>
                             </table>
-                        </td>
-                        <td>&nbsp;&nbsp;&nbsp;</td>
-                        <td>
-                            <table width="200" bgcolor="black" cellpadding="4">
+                            <br>
+
+                            <!-- Profile selector -->
+                            <center>
+                                <form id="profile-select-form" method="GET" action="/hiscores">
+                                    <input type="hidden" name="category" value="${currentCategory}">
+                                    <select name="profile" id="profile" onchange="this.form.submit()">
+                                        <option value="main"${profile === 'main' ? ' selected' : ''}>Main</option>
+                                    </select>
+                                </form>
+                            </center>
+
+                            <!-- Two column layout: skills + data -->
+                            <table>
                                 <tr>
-                                    <td class="b" bgcolor="#474747" background="/img/stoneback.gif">
+                                    <td width="160" valign="top">
                                         <center>
-                                            <form action="/hiscores" autocomplete="off">
-                                                <b>Search by name</b><br>
-                                                <input type="text" maxlength="12" size="12" name="player" value="${escapeHtml(playerSearch)}" autocomplete="off">
-                                                <input type="hidden" name="category" value="${currentCategory}">
-                                                <input type="hidden" name="profile" value="${profile}">
-                                                <br>
-                                                <input type="submit" value="Search">
-                                            </form>
+                                            <b>Select hiscore table</b><br>
+                                            <table width="150" height="400" bgcolor="black" cellpadding="4">
+                                                <tr>
+                                                    <td class="e" valign="top">
+                                                        <center>
+                                                            <table height="380" cellspacing="1" cellpadding="0">
+                                                                ${skillLinks}
+                                                            </table>
+                                                        </center>
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </center>
+                                    </td>
+
+                                    <td width="290" valign="top">
+                                        <center>
+                                            <b>${selectedSkill} Hiscores</b><br>
+                                            <table width="300" height="400" bgcolor="black" cellpadding="4">
+                                                <tr>
+                                                    <td class="e" valign="top">
+                                                        ${rows.length > 0 ? `<table>
+                                                            <tr>
+                                                                <td align="right" valign="top">
+                                                                    <b>Rank</b><br>
+                                                                    ${rankCol}
+                                                                </td>
+                                                                <td>&nbsp;</td>
+                                                                <td valign="top">
+                                                                    <b>Name</b><br>
+                                                                    ${nameCol}
+                                                                </td>
+                                                                <td>&nbsp;</td>
+                                                                <td valign="top">
+                                                                    <b>Level</b><br>
+                                                                    ${levelCol}
+                                                                </td>
+                                                                <td>&nbsp;</td>
+                                                                <td align="right" valign="top">
+                                                                    <b>Time</b><br>
+                                                                    ${timeCol}
+                                                                </td>
+                                                            </tr>
+                                                        </table>` : '<center><br>No players found</center>'}
+                                                    </td>
+                                                </tr>
+                                            </table>
                                         </center>
                                     </td>
                                 </tr>
+                            </table>
+
+                            <br>
+
+                            <!-- Search boxes -->
+                            <table>
+                                <tr>
+                                    <td>
+                                        <table width="200" bgcolor="black" cellpadding="4">
+                                            <tr>
+                                                <td class="b stone-button">
+                                                    <center>
+                                                        <form action="/hiscores">
+                                                            <b>Search by rank</b><br>
+                                                            <input type="number" maxlength="12" size="12" name="rank" value="">
+                                                            <input type="hidden" name="category" value="${currentCategory}">
+                                                            <input type="hidden" name="profile" value="${profile}">
+                                                            <br>
+                                                            <input type="submit" value="Search">
+                                                        </form>
+                                                    </center>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                    <td>&nbsp;&nbsp;&nbsp;</td>
+                                    <td>
+                                        <table width="200" bgcolor="black" cellpadding="4">
+                                            <tr>
+                                                <td class="b stone-button">
+                                                    <center>
+                                                        <form action="/hiscores" autocomplete="off">
+                                                            <b>Search by name</b><br>
+                                                            <input type="text" maxlength="12" size="12" name="player" value="${escapeHtml(playerSearch)}" autocomplete="off">
+                                                            <input type="hidden" name="category" value="${currentCategory}">
+                                                            <input type="hidden" name="profile" value="${profile}">
+                                                            <br>
+                                                            <input type="submit" value="Search">
+                                                        </form>
+                                                    </center>
+                                                </td>
+                                            </tr>
                             </table>
                         </td>
                     </tr>
@@ -569,21 +515,9 @@ export async function handleHiscoresPage(url: URL): Promise<Response | null> {
                 </table>
                 ` : ''}
 
-                <br>
-            </center>
-        </td>
-    </tr>
-</table>
-
-<!-- Bottom edge decoration -->
-<table cellpadding="0" cellspacing="0">
-    <tr>
-        <td valign="top"><img src="/img/edge_g2.jpg" width="100" height="43"></td>
-        <td valign="top"><img src="/img/edge_c.jpg" width="400" height="42"></td>
-        <td valign="top"><img src="/img/edge_h2.jpg" width="100" height="43"></td>
-    </tr>
-</table>
-
+                            <br>
+                        </center>
+                    </div>
                 </div>
             </center>
         </td>
@@ -645,7 +579,7 @@ export async function handleHiscoresOutfitPage(url: URL): Promise<Response | nul
         ...ENABLED_SKILLS.map(s => ({ id: s.id + 1, name: s.name }))
     ];
     const skillLinks = skillOptions.map(s => {
-        const icon = s.name === 'Overall' ? '' : `<img src="/img/skill/${s.name.toLowerCase()}.png" width="15" height="15" style="vertical-align:middle;margin-right:3px">`;
+        const icon = '';
         return `<tr><td><a href="/hiscores?category=${s.id}&profile=${profile}" class="c">${icon}${s.name}</a></td></tr>`;
     }).join('\n')
         + `\n<tr><td>&nbsp;</td></tr>\n<tr><td><a href="/hiscores/outfit?profile=${profile}" class="c text-orange">Equipment</a></td></tr>`;
@@ -661,37 +595,24 @@ export async function handleHiscoresOutfitPage(url: URL): Promise<Response | nul
     <tr>
         <td valign="middle">
             <center>
-                <div style="width: 600px; position: relative;">
+                <div class="frame-container" style="width: 600px; position: relative; padding: 10px;">
+                    <div class="frame-inner" style="padding: 20px;">
+                        <center>
+                            <br>
+                            <!-- Title box -->
+                            <table width="350" bgcolor="black" cellpadding="4">
+                                <tr>
+                                    <td class="e">
+                                        <center>
+                                            <b>Equipment Hiscores</b><br>
+                                            <a href="/" class="c">Main menu</a> | <a href="/hiscores?profile=${profile}" class="c">All Hiscores</a>
+                                        </center>
+                                    </td>
+                                </tr>
+                            </table>
+                            <br>
 
-<!-- Top edge decoration -->
-<table cellpadding="0" cellspacing="0">
-    <tr>
-        <td valign="top"><img src="/img/edge_a.jpg" width="100" height="43"></td>
-        <td valign="top"><img src="/img/edge_c.jpg" width="400" height="42"></td>
-        <td valign="top"><img src="/img/edge_d.jpg" width="100" height="43"></td>
-    </tr>
-</table>
-
-<!-- Main content area -->
-<table width="600" cellpadding="0" cellspacing="0" border="0" background="/img/background2.jpg">
-    <tr>
-        <td valign="bottom">
-            <center>
-                <br>
-                <!-- Title box -->
-                <table width="350" bgcolor="black" cellpadding="4">
-                    <tr>
-                        <td class="e">
-                            <center>
-                                <b>Equipment Hiscores</b><br>
-                                <a href="/" class="c">Main menu</a> | <a href="/hiscores?profile=${profile}" class="c">All Hiscores</a>
-                            </center>
-                        </td>
-                    </tr>
-                </table>
-                <br>
-
-                <!-- Two column layout: skills + data -->
+                            <!-- Two column layout: skills + data -->
                 <table>
                     <tr>
                         <td width="160" valign="top">
@@ -734,21 +655,9 @@ export async function handleHiscoresOutfitPage(url: URL): Promise<Response | nul
                     </tr>
                 </table>
 
-                <br>
-            </center>
-        </td>
-    </tr>
-</table>
-
-<!-- Bottom edge decoration -->
-<table cellpadding="0" cellspacing="0">
-    <tr>
-        <td valign="top"><img src="/img/edge_g2.jpg" width="100" height="43"></td>
-        <td valign="top"><img src="/img/edge_c.jpg" width="400" height="42"></td>
-        <td valign="top"><img src="/img/edge_h2.jpg" width="100" height="43"></td>
-    </tr>
-</table>
-
+                            <br>
+                        </center>
+                    </div>
                 </div>
             </center>
         </td>
