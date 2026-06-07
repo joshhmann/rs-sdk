@@ -6,11 +6,13 @@ import VarPlayerType from '#/cache/config/VarPlayerType.js';
 import { CoordGrid } from '#/engine/CoordGrid.js';
 import CameraInfo from '#/engine/entity/CameraInfo.js';
 import { PlayerTimerType } from '#/engine/entity/EntityTimer.js';
+import type { HuntVis } from '#/engine/entity/hunt/HuntVis.js';
 import { Interaction } from '#/engine/entity/Interaction.js';
 import Player from '#/engine/entity/Player.js';
 import { PlayerQueueType, ScriptArgument } from '#/engine/entity/PlayerQueueRequest.js';
 import { PlayerStat } from '#/engine/entity/PlayerStat.js';
 import { findPath } from '#/engine/GameMap.js';
+import { PlayerHuntAllCommandIterator } from '#/engine/script/ScriptIterators.js';
 import { ScriptOpcode } from '#/engine/script/ScriptOpcode.js';
 import ScriptPointer, { ActivePlayer, checkedHandler, ProtectedActivePlayer } from '#/engine/script/ScriptPointer.js';
 import ScriptProvider from '#/engine/script/ScriptProvider.js';
@@ -29,7 +31,9 @@ import {
     SeqTypeValid,
     StringNotNull,
     GenderValid,
-    SkinColourValid
+    PlayerOpIndexValid,
+    PlayerOpStateValid,
+    HuntVisValid
 } from '#/engine/script/ScriptValidators.js';
 import ServerTriggerType from '#/engine/script/ServerTriggerType.js';
 import World from '#/engine/World.js';
@@ -46,7 +50,9 @@ import IfSetPosition from '#/network/game/server/model/IfSetPosition.js';
 import IfSetScrollPos from '#/network/game/server/model/IfSetScrollPos.js';
 import IfSetTabActive from '#/network/game/server/model/IfSetTabActive.js';
 import IfSetText from '#/network/game/server/model/IfSetText.js';
+import MinimapToggle from '#/network/game/server/model/MinimapToggle.js';
 import PCountDialog from '#/network/game/server/model/PCountDialog.js';
+import SetPlayerOp from '#/network/game/server/model/SetPlayerOp.js';
 import SynthSound from '#/network/game/server/model/SynthSound.js';
 import TutFlash from '#/network/game/server/model/TutFlash.js';
 import ColorConversion from '#/util/ColorConversion.js';
@@ -92,16 +98,14 @@ const PlayerOps: CommandHandlers = {
 
     // https://x.com/JagexAsh/status/1698973910048403797
     [ScriptOpcode.STRONGQUEUE]: checkedHandler(ActivePlayer, state => {
-        const args = popScriptArgs(state);
-        const delay = check(state.popInt(), NumberNotNull);
-        const scriptId = state.popInt();
+        const [scriptId, delay, arg] = state.popInts(3);
 
         const script = ScriptProvider.get(scriptId);
         if (!script) {
             throw new Error(`Unable to find queue script: ${scriptId}`);
         }
 
-        state.activePlayer.enqueueScript(script, PlayerQueueType.STRONG, delay, args);
+        state.activePlayer.enqueueScript(script, PlayerQueueType.STRONG, delay, [arg]);
     }),
 
     [ScriptOpcode.STRONGQUEUEVARARG]: checkedHandler(ActivePlayer, state => {
@@ -194,13 +198,6 @@ const PlayerOps: CommandHandlers = {
         const seq = state.popInt();
 
         state.activePlayer.playAnimation(seq, delay);
-    }),
-
-    // https://x.com/JagexAsh/status/1694990340669747261
-    // soft-limit for developers to be better aware of the bandwidth used and mitigate the impact on the player experience
-    [ScriptOpcode.BUFFER_FULL]: checkedHandler(ActivePlayer, state => {
-        // todo: should we have this yet?
-        state.pushInt(0);
     }),
 
     [ScriptOpcode.BUILDAPPEARANCE]: checkedHandler(ActivePlayer, state => {
@@ -470,10 +467,13 @@ const PlayerOps: CommandHandlers = {
     [ScriptOpcode.SOUND_SYNTH]: checkedHandler(ActivePlayer, state => {
         const [synth, loops, delay] = state.popInts(3);
 
+        check(synth, NumberNotNull);
+
         const player = state.activePlayer;
         if (player.lowMemory) {
             return;
         }
+
         player.write(new SynthSound(synth, loops, delay));
     }),
 
@@ -485,6 +485,15 @@ const PlayerOps: CommandHandlers = {
         const stat: PlayerStat = check(state.popInt(), PlayerStatValid);
 
         state.pushInt(state.activePlayer.levels[stat]);
+    }),
+
+    [ScriptOpcode.STAT_TOTAL]: checkedHandler(ActivePlayer, state => {
+        let total = 0;
+        for (let stat = 0; stat < state.activePlayer.baseLevels.length; stat++) {
+            total += state.activePlayer.baseLevels[stat];
+        }
+
+        state.pushInt(total);
     }),
 
     [ScriptOpcode.STAT_BASE]: checkedHandler(ActivePlayer, state => {
@@ -575,7 +584,7 @@ const PlayerOps: CommandHandlers = {
 
         const level = state.activePlayer.levels[stat];
         const value = Math.floor((low * (99 - level)) / 98) + Math.floor((high * (level - 1)) / 98) + 1;
-        const chance = JavaRandom.nextInt(256);
+        const chance = Math.floor(JavaRandom.nextDouble() * 256);
 
         state.pushInt(value > chance ? 1 : 0);
     }),
@@ -635,7 +644,7 @@ const PlayerOps: CommandHandlers = {
     }),
 
     [ScriptOpcode.IF_OPENCHAT]: checkedHandler(ActivePlayer, state => {
-        state.activePlayer.openChat(check(state.popInt(), NumberNotNull));
+        state.activePlayer.openChatModal(check(state.popInt(), NumberNotNull));
     }),
 
     [ScriptOpcode.IF_OPENMAIN_SIDE]: checkedHandler(ActivePlayer, state => {
@@ -644,7 +653,7 @@ const PlayerOps: CommandHandlers = {
         check(main, NumberNotNull);
         check(side, NumberNotNull);
 
-        state.activePlayer.openMainModalSide(main, side);
+        state.activePlayer.openMainSideModal(main, side);
     }),
 
     [ScriptOpcode.IF_SETHIDE]: checkedHandler(ActivePlayer, state => {
@@ -688,11 +697,6 @@ const PlayerOps: CommandHandlers = {
 
         check(com, NumberNotNull);
 
-        if (seq === -1) {
-            // uh, client crashes! which means empty dialogue wasn't an option at the time
-            return;
-        }
-
         state.activePlayer.write(new IfSetAnim(com, seq));
     }),
 
@@ -710,7 +714,7 @@ const PlayerOps: CommandHandlers = {
 
     [ScriptOpcode.IF_OPENOVERLAY]: checkedHandler(ActivePlayer, state => {
         const com = state.popInt();
-        state.activePlayer.openOverlay(com);
+        state.activePlayer.openMainOverlay(com);
     }),
 
     [ScriptOpcode.TUT_OPEN]: checkedHandler(ActivePlayer, state => {
@@ -726,8 +730,45 @@ const PlayerOps: CommandHandlers = {
     }),
 
     [ScriptOpcode.IF_SETTEXT]: checkedHandler(ActivePlayer, state => {
-        const text = state.popString();
+        let text = state.popString();
         const com = check(state.popInt(), NumberNotNull);
+
+        if (text.indexOf('\\n') !== -1 && text.indexOf('@') !== -1) {
+            const lines = text.split('\\n');
+            let savedCol: string | null = null;
+            for (let i = 0; i < lines.length; i++) {
+                let line = lines[i];
+                if (i > 0 && savedCol !== null && line.length > 0) {
+                    const strIndex = line.indexOf('@str@');
+                    if (strIndex !== -1) {
+                        if (line.substring(strIndex + 5, strIndex + 10) !== '@bla@') {
+                            line = line.substring(0, strIndex + 5) + '@bla@' + line.substring(strIndex + 5);
+                        }
+                        savedCol = null;
+                    } else {
+                        line = savedCol + line;
+                    }
+                    lines[i] = line;
+                }
+
+                for (let j = 0; j + 4 < line.length; j++) {
+                    if (line.charAt(j) === '@' && line.charAt(j + 4) === '@') {
+                        const col = line.substring(j + 1, j + 4);
+                        if (col === 'str') {
+                            savedCol = null;
+                            if (line.substring(j + 5, j + 10) === '@bla@') {
+                                j += 9;
+                                continue;
+                            }
+                        } else {
+                            savedCol = line.substring(j, j + 5);
+                        }
+                        j += 4;
+                    }
+                }
+            }
+            text = lines.join('\\n');
+        }
 
         state.activePlayer.write(new IfSetText(com, text));
     }),
@@ -779,10 +820,10 @@ const PlayerOps: CommandHandlers = {
         player.applyDamage(amount, type);
     },
 
-    [ScriptOpcode.IF_SETRESUMEBUTTONS]: checkedHandler(ActivePlayer, state => {
-        const [button1, button2, button3, button4, button5] = state.popInts(5);
+    [ScriptOpcode.IF_ADDRESUMEBUTTON]: checkedHandler(ActivePlayer, state => {
+        const comId = state.popInt();
 
-        state.activePlayer.resumeButtons = [button1, button2, button3, button4, button5];
+        state.activePlayer.resumeButtons.push(comId);
     }),
 
     [ScriptOpcode.TEXT_GENDER]: checkedHandler(ActivePlayer, state => {
@@ -795,25 +836,31 @@ const PlayerOps: CommandHandlers = {
     }),
 
     [ScriptOpcode.MIDI_SONG]: state => {
-        const name = check(state.popString(), StringNotNull);
+        const id = state.popInt();
 
         const player = state.activePlayer;
         if (player.lowMemory) {
             return;
         }
-        player.playSong(name);
+
+        player.playSong(id);
     },
 
     [ScriptOpcode.MIDI_JINGLE]: state => {
-        const delay = check(state.popInt(), NumberNotNull);
-        const name = check(state.popString(), StringNotNull);
+        const id = state.popInt();
 
         const player = state.activePlayer;
         if (player.lowMemory) {
             return;
         }
-        player.playJingle(delay, name);
+
+        player.playJingle(id);
     },
+
+    [ScriptOpcode.MINIMAP_TOGGLE]: checkedHandler(ActivePlayer, state => {
+        const type = check(state.popInt(), NumberNotNull);
+        state.activePlayer.write(new MinimapToggle(type));
+    }),
 
     [ScriptOpcode.SOFTTIMER]: checkedHandler(ActivePlayer, state => {
         const args = popScriptArgs(state);
@@ -905,12 +952,12 @@ const PlayerOps: CommandHandlers = {
         const scriptId = state.popInt();
 
         let count: number = 0;
-        for (let request = state.activePlayer.queue.head(); request !== null; request = state.activePlayer.queue.next()) {
+        for (const request of state.activePlayer.queue.all()) {
             if (request.script.id === scriptId) {
                 count++;
             }
         }
-        for (let request = state.activePlayer.weakQueue.head(); request !== null; request = state.activePlayer.weakQueue.next()) {
+        for (const request of state.activePlayer.weakQueue.all()) {
             if (request.script.id === scriptId) {
                 count++;
             }
@@ -933,31 +980,31 @@ const PlayerOps: CommandHandlers = {
         state.activePlayer.lastLoginInfo();
     },
 
-    [ScriptOpcode.BAS_READYANIM]: state => {
+    [ScriptOpcode.READYANIM]: state => {
         state.activePlayer.readyanim = check(state.popInt(), SeqTypeValid).id;
     },
 
-    [ScriptOpcode.BAS_TURNONSPOT]: state => {
+    [ScriptOpcode.TURNANIM]: state => {
         state.activePlayer.turnanim = check(state.popInt(), SeqTypeValid).id;
     },
 
-    [ScriptOpcode.BAS_WALK_F]: state => {
+    [ScriptOpcode.WALKANIM]: state => {
         state.activePlayer.walkanim = check(state.popInt(), SeqTypeValid).id;
     },
 
-    [ScriptOpcode.BAS_WALK_B]: state => {
+    [ScriptOpcode.WALKANIM_B]: state => {
         state.activePlayer.walkanim_b = check(state.popInt(), SeqTypeValid).id;
     },
 
-    [ScriptOpcode.BAS_WALK_L]: state => {
+    [ScriptOpcode.WALKANIM_L]: state => {
         state.activePlayer.walkanim_l = check(state.popInt(), SeqTypeValid).id;
     },
 
-    [ScriptOpcode.BAS_WALK_R]: state => {
+    [ScriptOpcode.WALKANIM_R]: state => {
         state.activePlayer.walkanim_r = check(state.popInt(), SeqTypeValid).id;
     },
 
-    [ScriptOpcode.BAS_RUNNING]: state => {
+    [ScriptOpcode.RUNANIM]: state => {
         const seq = state.popInt();
         if (seq === -1) {
             state.activePlayer.runanim = -1;
@@ -971,16 +1018,11 @@ const PlayerOps: CommandHandlers = {
     },
 
     [ScriptOpcode.HINT_NPC]: state => {
-        state.activePlayer.hintNpc(check(state.popInt(), NumberNotNull));
+        state.activePlayer.hintNpc(state.activeNpc.nid);
     },
 
-    [ScriptOpcode.HINT_PLAYER]: state => {
-        const uid = check(state.popInt(), NumberNotNull);
-        const player = World.getPlayerByUid(uid);
-        if (!player) {
-            return;
-        }
-        state.activePlayer.hintPlayer(player.pid);
+    [ScriptOpcode.HINT_PL]: state => {
+        state.activePlayer.hintPlayer(state.activePlayer2.slot);
     },
 
     [ScriptOpcode.HEADICONS_GET]: state => {
@@ -994,19 +1036,21 @@ const PlayerOps: CommandHandlers = {
     // https://x.com/JagexAsh/status/1791472651623370843
     // https://x.com/JagexAsh/status/1790684996480442796
     [ScriptOpcode.P_OPOBJ]: checkedHandler(ProtectedActivePlayer, state => {
-        const type = check(state.popInt(), NumberNotNull) - 1;
-        if (type < 0 || type >= 5) {
-            throw new Error(`Invalid opobj: ${type + 1}`);
+        const op = check(state.popInt(), NumberNotNull) - 1;
+        if (op < 0 || op >= 5) {
+            throw new Error(`Invalid opobj: ${op + 1}`);
         }
-        const objType: ObjType = ObjType.get(state.activeObj.type);
-        if (!objType.op || !objType.op[type]) {
+
+        const type: ObjType = ObjType.get(state.activeObj.type);
+        if (type.op[op] === null) {
             return;
         }
+
         state.activePlayer.stopAction();
 
         // Sets player destination naively to the Obj's coordinate
         state.activePlayer.queueWaypoint(state.activeObj.x, state.activeObj.z);
-        state.activePlayer.setInteraction(Interaction.SCRIPT, state.activeObj, ServerTriggerType.APOBJ1 + type);
+        state.activePlayer.setInteraction(Interaction.SCRIPT, state.activeObj, ServerTriggerType.APOBJ1 + op);
     }),
 
     // https://x.com/JagexAsh/status/1791472651623370843
@@ -1059,11 +1103,11 @@ const PlayerOps: CommandHandlers = {
     },
 
     [ScriptOpcode.AFK_EVENT]: state => {
-        state.pushInt((Environment.NODE_DEBUG || state.activePlayer.staffModLevel < 2) && state.activePlayer.afkEventReady ? 1 : 0);
+        state.pushInt((Environment.node.debug || state.activePlayer.staffModLevel < 2) && state.activePlayer.afkEventReady ? 1 : 0);
         state.activePlayer.afkEventReady = false;
     },
 
-    [ScriptOpcode.LOWMEMORY]: state => {
+    [ScriptOpcode.LOWMEM]: state => {
         state.pushInt(state.activePlayer.lowMemory ? 1 : 0);
     },
 
@@ -1122,9 +1166,17 @@ const PlayerOps: CommandHandlers = {
         state.activePlayer.gender = gender;
     },
 
-    [ScriptOpcode.SETSKINCOLOUR]: state => {
-        const skin = check(state.popInt(), SkinColourValid);
-        state.activePlayer.colors[4] = skin;
+    [ScriptOpcode.SET_SKILL_LEVEL]: checkedHandler(ActivePlayer, state => {
+        const level = check(state.popInt(), NumberNotNull);
+        state.activePlayer.skillLevel = level;
+    }),
+
+    [ScriptOpcode.SETIDKCOLOUR]: state => {
+        const [slot, color] = state.popInts(2);
+        if (slot > state.activePlayer.colors.length || slot < 0) {
+            throw new Error(`Invalid idk slot: ${slot}`);
+        }
+        state.activePlayer.colors[slot] = color;
     },
 
     // https://x.com/JagexAsh/status/1791472651623370843
@@ -1199,8 +1251,8 @@ const PlayerOps: CommandHandlers = {
         const objType = ObjType.getByName(name);
 
         state.activePlayer.addWealthEvent({
-            event_type: eventType, 
-            account_items: [{ id: objType?.id, name, count }], 
+            event_type: eventType,
+            account_items: [{ id: objType?.id, name, count }],
             account_value: value
         });
     }),
@@ -1215,6 +1267,42 @@ const PlayerOps: CommandHandlers = {
     [ScriptOpcode.PLAYERMEMBER]: checkedHandler(ActivePlayer, state => {
         state.pushInt(state.activePlayer.members ? 1 : 0);
     }),
+
+    [ScriptOpcode.SET_PLAYER_OP]: checkedHandler(ActivePlayer, state => {
+        const text = state.popString();
+        const [index, primary] = state.popInts(2);
+
+        check(index, PlayerOpIndexValid);
+        check(primary, PlayerOpStateValid);
+
+        state.activePlayer.write(new SetPlayerOp(index, text, primary));
+    }),
+
+    [ScriptOpcode.HUNTALL]: state => {
+        const [coord, distance, checkVis] = state.popInts(3);
+
+        const position: CoordGrid = check(coord, CoordValid);
+        check(distance, NumberNotNull);
+        const huntvis: HuntVis = check(checkVis, HuntVisValid);
+
+        state.playerIterator = new PlayerHuntAllCommandIterator(World.currentTick, position.level, position.x, position.z, distance, huntvis);
+    },
+
+    [ScriptOpcode.HUNTNEXT]: state => {
+        const result = state.playerIterator?.next();
+        if (!result || result.done) {
+            state.pushInt(0);
+            return;
+        }
+
+        if (!(result.value instanceof Player)) {
+            throw new Error('[ServerOps] huntnext command must result instance of Player.');
+        }
+
+        state.activePlayer = result.value;
+        state.pointerAdd(ActivePlayer[state.intOperand]);
+        state.pushInt(1);
+    }
 };
 
 /**

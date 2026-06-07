@@ -28,9 +28,9 @@ import UpdateZonePartialEnclosed from '#/network/game/server/model/UpdateZonePar
 import UpdateZonePartialFollows from '#/network/game/server/model/UpdateZonePartialFollows.js';
 import ServerGameZoneMessage from '#/network/game/server/ServerGameZoneMessage.js';
 import Environment from '#/util/Environment.js';
-import LinkList from '#/util/LinkList.js';
+import LinkList from '#/datastruct/LinkList.js';
 import ServerGameProtRepository from '#/network/game/server/ServerGameProtRepository.js';
-
+import DoublyLinkList from '#/datastruct/DoublyLinkList.js';
 
 export default class Zone {
     private static readonly SIZE: number = 8 * 8;
@@ -43,8 +43,8 @@ export default class Zone {
     readonly level: number;
 
     // zone entities
-    private readonly players: LinkList<Player> = new LinkList();
-    private readonly npcs: LinkList<Npc> = new LinkList();
+    private readonly players: DoublyLinkList<Player> = new DoublyLinkList();
+    private readonly npcs: DoublyLinkList<Npc> = new DoublyLinkList();
     private readonly locs: LinkList<Loc> = new LinkList();
     private readonly objs: LinkList<Obj> = new LinkList();
     private playersCount: number = 0;
@@ -87,7 +87,7 @@ export default class Zone {
     }
 
     leave(entity: PathingEntity): void {
-        entity.unlink();
+        entity.unlink2();
         if (entity instanceof Player) {
             this.playersCount--;
             if (this.playersCount === 0) {
@@ -265,7 +265,7 @@ export default class Zone {
     }
 
     mergeLoc(loc: Loc, player: Player, startCycle: number, endCycle: number, south: number, east: number, north: number, west: number): void {
-        this.queueEvent(loc, new ZoneEvent(ZoneEventType.ENCLOSED, -1n, new LocMerge(loc.x, loc.z, loc.shape, loc.angle, loc.type, startCycle, endCycle, player.pid, east, south, west, north)));
+        this.queueEvent(loc, new ZoneEvent(ZoneEventType.ENCLOSED, -1n, new LocMerge(loc.x, loc.z, loc.shape, loc.angle, loc.type, startCycle, endCycle, player.slot, east, south, west, north)));
     }
 
     animLoc(loc: Loc, seq: number): void {
@@ -306,7 +306,7 @@ export default class Zone {
         obj.lastChange = -1;
 
         // If the obj is not tradeable, or it's members in an f2p world, or it's already revealed, then skip
-        if (!objType.tradeable || (objType.members && !Environment.NODE_MEMBERS) || obj.reveal === -1) {
+        if (!objType.tradeable || (objType.members && !Environment.node.members) || obj.reveal === -1) {
             obj.reveal = -1;
             return;
         }
@@ -318,7 +318,7 @@ export default class Zone {
 
         const coord: number = CoordGrid.packZoneCoord(obj.x, obj.z);
 
-        this.queueEvent(obj, new ZoneEvent(ZoneEventType.ENCLOSED, initialReceiver, new ObjReveal(coord, obj.type, obj.count, World.getPlayerByHash64(initialReceiver)?.pid ?? 0)));
+        this.queueEvent(obj, new ZoneEvent(ZoneEventType.ENCLOSED, initialReceiver, new ObjReveal(coord, obj.type, obj.count, World.getPlayerByHash64(initialReceiver)?.slot ?? 0)));
     }
 
     changeObj(obj: Obj, oldCount: number, newCount: number): void {

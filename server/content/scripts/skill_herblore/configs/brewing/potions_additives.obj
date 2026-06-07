@@ -26,6 +26,7 @@ model=model_2343_obj
 2dxan=252
 weight=7g
 param=brew_potion_struct,3dose1restore
+param=brew_potion_struct_secondary,3dose2restore
 // jagex name
 
 [limpwurt_root]
@@ -115,7 +116,7 @@ param=brew_potion_struct_secondary,3dose1antidragon
 
 [wine_of_zamorak]
 name=Wine of zamorak
-desc=I wonder if stealing Zamorak's wine was a good idea.
+desc=An evil wine for an evil god.
 model=model_2390_obj
 recol1s=32767
 recol1d=25765
@@ -132,7 +133,7 @@ param=brew_potion_struct,3doserangerspotion
 [jangerberries]
 name=Jangerberries
 desc=They don't look very ripe.
-iop1=eat
+iop1=Eat
 model=model_2358_obj
 recol1s=30753
 recol1d=15937
@@ -170,9 +171,21 @@ name=Ground bat bones
 desc=Let's see it fly now!
 cost=20
 model=model_2742_obj
-2dyof=-1
-2dzoom=520
-2dyan=2008
-2dxan=136
+2dxof=-6
+2dzoom=1210
+2dyan=1892
+2dxan=264
 weight=100g
 members=yes
+
+[cactus_potato]
+name=Potato cactus
+desc=How am I supposed to eat that?!
+model=obj_3138
+2dyof=20
+2dzoom=1240
+2dyan=300
+2dxan=348
+members=yes
+weight=500g
+param=brew_potion_struct,3dose1magic

@@ -1,10 +1,5 @@
 import { packAll } from '#tools/pack/PackAll.js';
-import Environment from '#/util/Environment.js';
-import { updateCompiler } from '#/util/RuneScriptCompiler.js';
-
-if (Environment.BUILD_STARTUP_UPDATE) {
-    await updateCompiler();
-}
+import { printError } from '#/util/Logger.js';
 
 try {
     const modelFlags: number[] = [];
@@ -13,7 +8,7 @@ try {
     console.timeEnd('pack');
 } catch (err) {
     if (err instanceof Error) {
-        console.log(err.message);
+        printError(err);
     }
 
     process.exit(1);

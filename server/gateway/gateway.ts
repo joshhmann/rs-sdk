@@ -138,13 +138,11 @@ function getSessionStatus(session: BotSession): SessionStatus {
 /**
  * SDK Session - represents an SDK client connected to control/observe a bot.
  *
- * Multiple SDK clients can connect to the same bot simultaneously:
- * - Multiple 'control' mode clients: Both can send actions (first-come-first-served execution)
- * - Multiple 'observe' mode clients: Read-only, receive state updates only
- * - Mixed: Controllers and observers can coexist
- *
- * The `otherControllers` count is returned on connect to help SDK clients coordinate.
- * There is no automatic pre-emption - SDKs must coordinate externally if needed.
+ * Controller pre-emption (last controller wins):
+ * - When a new 'control' mode client connects, any existing controllers are disconnected
+ * - This prevents conflicts from stale daemon connections or background scripts
+ * - Multiple 'observe' mode clients can coexist freely
+ * - Mixed: One controller and multiple observers can coexist
  */
 interface SDKSession {
     ws: any;
@@ -252,10 +250,21 @@ const SyncModule = {
         }
     },
 
-    handleBotMessage(ws: any, message: BotClientMessage) {
+    async handleBotMessage(ws: any, message: BotClientMessage) {
         if (message.type === 'connected') {
             const username = message.username || this.extractUsernameFromClientId(message.clientId) || 'default';
             const clientId = message.clientId || `bot-${Date.now()}`;
+
+            // Authenticate bot using per-bot password (same as SDK auth)
+            const authResult = await authenticateSDK(username, message.password || '');
+            if (!authResult.success) {
+                console.log(`[Gateway] Bot auth failed: ${clientId} -> ${username} (${authResult.error})`);
+                try {
+                    ws.send(JSON.stringify({ type: 'error', error: `Authentication failed: ${authResult.error}` }));
+                    ws.close();
+                } catch {}
+                return;
+            }
 
             const existingSession = botSessions.get(username);
             if (existingSession && existingSession.ws !== ws && existingSession.ws) {
@@ -365,9 +374,22 @@ const SyncModule = {
             sdkSessions.set(sdkClientId, session);
             wsToType.set(ws, { type: 'sdk', id: sdkClientId });
 
-            // Count other controllers (excluding this one)
-            const otherControllers = this.getControllersForBot(targetUsername)
-                .filter(s => s.sdkClientId !== sdkClientId).length;
+            // Last controller wins: disconnect existing controllers for this bot
+            if (mode === 'control') {
+                const oldControllers = this.getControllersForBot(targetUsername)
+                    .filter(s => s.sdkClientId !== sdkClientId);
+
+                for (const old of oldControllers) {
+                    console.log(`[Gateway] Pre-empting old controller ${old.sdkClientId} for ${targetUsername} (replaced by ${sdkClientId})`);
+                    this.sendToSDK(old, {
+                        type: 'sdk_error',
+                        error: 'Disconnected: another controller connected'
+                    });
+                    sdkSessions.delete(old.sdkClientId);
+                    wsToType.delete(old.ws);
+                    try { old.ws.close(); } catch {}
+                }
+            }
 
             const authStatus = LOGIN_SERVER_ENABLED ? ' (authenticated)' : '';
             console.log(`[Gateway] SDK connected: ${sdkClientId} -> ${targetUsername} (mode: ${mode})${authStatus}`);
@@ -376,7 +398,7 @@ const SyncModule = {
                 type: 'sdk_connected',
                 success: true,
                 mode,
-                otherControllers
+                otherControllers: 0  // Always 0 now since we pre-empt old controllers
             });
 
             const botSession = botSessions.get(targetUsername);
@@ -408,7 +430,12 @@ const SyncModule = {
                 return;
             }
 
-            const botSession = botSessions.get(message.username || sdkSession.targetUsername);
+            // Always use the authenticated session target — ignore message.username to prevent IDOR
+            if (message.username && message.username !== sdkSession.targetUsername) {
+                console.log(`[Gateway] IDOR blocked: SDK ${sdkSession.sdkClientId} authenticated for "${sdkSession.targetUsername}" tried to target "${message.username}"`);
+            }
+
+            const botSession = botSessions.get(sdkSession.targetUsername);
             if (!botSession || !botSession.ws) {
                 this.sendToSDK(sdkSession, {
                     type: 'sdk_error',
@@ -435,7 +462,12 @@ const SyncModule = {
             const sdkSession = sdkSessions.get(wsInfo.id);
             if (!sdkSession) return;
 
-            const botSession = botSessions.get(message.username || sdkSession.targetUsername);
+            // Always use the authenticated session target — ignore message.username to prevent IDOR
+            if (message.username && message.username !== sdkSession.targetUsername) {
+                console.log(`[Gateway] IDOR blocked: SDK ${sdkSession.sdkClientId} authenticated for "${sdkSession.targetUsername}" tried to screenshot "${message.username}"`);
+            }
+
+            const botSession = botSessions.get(sdkSession.targetUsername);
             if (!botSession || !botSession.ws) {
                 this.sendToSDK(sdkSession, {
                     type: 'sdk_error',
@@ -520,7 +552,7 @@ async function handleMessage(ws: any, data: string) {
     const wsInfo = wsToType.get(ws);
     if (wsInfo) {
         if (wsInfo.type === 'bot') {
-            SyncModule.handleBotMessage(ws, parsed);
+            await SyncModule.handleBotMessage(ws, parsed);
         } else if (wsInfo.type === 'sdk') {
             await SyncModule.handleSDKMessage(ws, parsed);
         }
@@ -531,7 +563,7 @@ async function handleMessage(ws: any, data: string) {
     if (parsed.type?.startsWith('sdk_')) {
         await SyncModule.handleSDKMessage(ws, parsed);
     } else if (parsed.type === 'connected' || parsed.type === 'state' || parsed.type === 'actionResult') {
-        SyncModule.handleBotMessage(ws, parsed);
+        await SyncModule.handleBotMessage(ws, parsed);
     }
 }
 

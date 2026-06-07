@@ -89,9 +89,10 @@ manwear=model_243_obj_wear,0
 womanwear=model_416_obj_wear,0
 manhead=model_76_obj_wear
 womanhead=model_134_obj_wear
+param=party_clean_exempt,^true
 
 [berret_blue]
-name=Berret
+name=Beret
 desc=Pouvez-vous parler francais?
 cost=80
 weight=40g
@@ -110,9 +111,10 @@ manwear=model_198_obj_wear,0
 womanwear=model_373_obj_wear,0
 manhead=model_40_obj_wear
 womanhead=model_98_obj_wear
+param=party_clean_exempt,^true
 
 [berret_black]
-name=Berret
+name=Beret
 desc=Pouvez-vous parler francais?
 cost=80
 weight=40g
@@ -131,9 +133,10 @@ manwear=model_198_obj_wear,0
 womanwear=model_373_obj_wear,0
 manhead=model_40_obj_wear
 womanhead=model_98_obj_wear
+param=party_clean_exempt,^true
 
 [berret_white]
-name=Berret
+name=Beret
 desc=Pouvez-vous parler francais?
 cost=80
 weight=40g
@@ -152,6 +155,7 @@ manwear=model_198_obj_wear,0
 womanwear=model_373_obj_wear,0
 manhead=model_40_obj_wear
 womanhead=model_98_obj_wear
+param=party_clean_exempt,^true
 
 [cavalier_brown]
 name=Cavalier
@@ -235,6 +239,7 @@ manwear=model_201_obj_wear,0
 womanwear=model_376_obj_wear,0
 manhead=model_43_obj_wear
 womanhead=model_101_obj_wear
+param=party_clean_exempt,^true
 
 [headband_black]
 name=Headband
@@ -257,6 +262,7 @@ manwear=model_201_obj_wear,0
 womanwear=model_376_obj_wear,0
 manhead=model_43_obj_wear
 womanhead=model_101_obj_wear
+param=party_clean_exempt,^true
 
 [headband_brown]
 name=Headband
@@ -279,6 +285,7 @@ manwear=model_201_obj_wear,0
 womanwear=model_376_obj_wear,0
 manhead=model_43_obj_wear
 womanhead=model_101_obj_wear
+param=party_clean_exempt,^true
 
 [piratehat]
 name=Pirate's hat
@@ -333,7 +340,7 @@ param=rangedefence,80
 
 [rune_platelegs_zamorak]
 name=Zamorak platelegs
-desc=Rune platelegs in the colours of zamorak.
+desc=Rune platelegs in the colours of Zamorak.
 cost=64000
 model=model_2582_obj
 recol1s=15855
@@ -420,6 +427,7 @@ param=slashdefence,48
 param=crushdefence,46
 param=magicdefence,-1
 param=rangedefence,46
+param=defend_anim,human_shield_defence
 
 [rune_platebody_saradomin]
 name=Saradomin plate
@@ -545,6 +553,7 @@ param=slashdefence,48
 param=crushdefence,46
 param=magicdefence,-1
 param=rangedefence,46
+param=defend_anim,human_shield_defence
 
 [rune_platebody_guthix]
 name=Guthix platebody
@@ -668,6 +677,7 @@ param=slashdefence,48
 param=crushdefence,46
 param=magicdefence,-1
 param=rangedefence,46
+param=defend_anim,human_shield_defence
 
 [black_platebody_trim]
 name=Black platebody (t)
@@ -789,6 +799,7 @@ param=slashdefence,19
 param=crushdefence,18
 param=magicdefence,-1
 param=rangedefence,18
+param=defend_anim,human_shield_defence
 
 [black_platebody_gold]
 name=Black platebody (g)
@@ -910,6 +921,7 @@ param=slashdefence,19
 param=crushdefence,18
 param=magicdefence,-1
 param=rangedefence,18
+param=defend_anim,human_shield_defence
 
 [adamant_platebody_trim]
 name=Adam platebody (t)
@@ -999,6 +1011,7 @@ param=slashdefence,31
 param=crushdefence,29
 param=magicdefence,-1
 param=rangedefence,29
+param=defend_anim,human_shield_defence
 
 [adamant_full_helm_trim]
 name=Adam full helm (t)
@@ -1120,6 +1133,7 @@ param=slashdefence,31
 param=crushdefence,29
 param=magicdefence,-1
 param=rangedefence,29
+param=defend_anim,human_shield_defence
 
 [adamant_full_helm_gold]
 name=Adam full helm (g)
@@ -1273,6 +1287,7 @@ param=slashdefence,48
 param=crushdefence,46
 param=magicdefence,-1
 param=rangedefence,46
+param=defend_anim,human_shield_defence
 
 [rune_platebody_trim]
 name=Rune platebody (t)
@@ -1394,3 +1409,437 @@ param=slashdefence,48
 param=crushdefence,46
 param=magicdefence,-1
 param=rangedefence,46
+param=defend_anim,human_shield_defence
+
+[black_plateskirt_trim]
+name=Black plateskirt (t)
+recol1s=15855
+recol1d=2114
+recol2s=10570
+recol2d=0
+recol3s=14798
+recol3d=6342
+recol4s=2340
+recol4d=0
+desc=Black plateskirt with trim.
+cost=1920
+model=obj_3472
+2dxof=5
+2dyof=5
+2dzoom=1100
+2dxan=620
+iop2=Wear
+wearpos=legs
+manwear=obj_3472_manwear,0
+womanwear=obj_3472_womanwear,0
+category=armour_legs
+weight=20lb
+param=magicattack,-21
+param=rangeattack,-7
+param=stabdefence,21
+param=slashdefence,20
+param=crushdefence,19
+param=magicdefence,-4
+param=rangedefence,20
+
+[black_plateskirt_gold]
+name=Black plateskirt (g)
+recol1s=15855
+recol1d=2114
+recol2s=10570
+recol2d=0
+recol3s=14798
+recol3d=31366
+recol4s=2340
+recol4d=0
+desc=Black plateskirt with gold trim.
+cost=1920
+model=obj_3472
+2dxof=5
+2dyof=5
+2dzoom=1100
+2dxan=620
+iop2=Wear
+wearpos=legs
+manwear=obj_3472_manwear,0
+womanwear=obj_3472_womanwear,0
+category=armour_legs
+weight=20lb
+param=magicattack,-21
+param=rangeattack,-7
+param=stabdefence,21
+param=slashdefence,20
+param=crushdefence,19
+param=magicdefence,-4
+param=rangedefence,20
+
+[adamant_plateskirt_trim]
+name=Adam plateskirt (t)
+recol1s=15855
+recol1d=6438
+recol2s=10570
+recol2d=3235
+recol3s=14798
+recol3d=13802
+recol4s=2340
+recol4d=3235
+desc=Adamant plateskirt with trim.
+cost=6400
+model=obj_3472
+2dxof=5
+2dyof=5
+2dzoom=1100
+2dxan=620
+iop2=Wear
+wearpos=legs
+manwear=obj_3472_manwear,0
+womanwear=obj_3472_womanwear,0
+category=armour_legs
+weight=23lb
+param=magicattack,-21
+param=rangeattack,-7
+param=stabdefence,33
+param=slashdefence,31
+param=crushdefence,29
+param=magicdefence,-4
+param=rangedefence,31
+
+[adamant_plateskirt_gold]
+name=Adam plateskirt (g)
+recol1s=15855
+recol1d=6438
+recol2s=10570
+recol2d=3235
+recol3s=14798
+recol3d=31366
+recol4s=2340
+recol4d=3235
+desc=Adamant plateskirt with gold trim.
+cost=6400
+model=obj_3472
+2dxof=5
+2dyof=5
+2dzoom=1100
+2dxan=620
+iop2=Wear
+wearpos=legs
+manwear=obj_3472_manwear,0
+womanwear=obj_3472_womanwear,0
+category=armour_legs
+weight=23lb
+param=magicattack,-21
+param=rangeattack,-7
+param=stabdefence,33
+param=slashdefence,31
+param=crushdefence,29
+param=magicdefence,-4
+param=rangedefence,31
+
+[rune_plateskirt_gold]
+name=Rune plateskirt (g)
+recol1s=15855
+recol1d=6476
+recol2s=10570
+recol2d=3272
+recol3s=14798
+recol3d=31366
+recol4s=2340
+recol4d=3272
+desc=Rune plateskirt with gold trim.
+cost=64000
+model=obj_3472
+2dxof=5
+2dyof=5
+2dzoom=1100
+2dxan=620
+iop2=Wear
+wearpos=legs
+manwear=obj_3472_manwear,0
+womanwear=obj_3472_womanwear,0
+category=armour_legs
+weight=20lb
+param=magicattack,-21
+param=rangeattack,-7
+param=stabdefence,51
+param=slashdefence,49
+param=crushdefence,47
+param=magicdefence,-4
+param=rangedefence,49
+
+[rune_plateskirt_trim]
+name=Rune plateskirt (t)
+recol1s=15855
+recol1d=6476
+recol2s=10570
+recol2d=3272
+recol3s=14798
+recol3d=17048
+recol4s=2340
+recol4d=3272
+desc=Rune plateskirt with trim.
+cost=64000
+model=obj_3472
+2dxof=5
+2dyof=5
+2dzoom=1100
+2dxan=620
+iop2=Wear
+wearpos=legs
+manwear=obj_3472_manwear,0
+womanwear=obj_3472_womanwear,0
+category=armour_legs
+weight=20lb
+param=magicattack,-21
+param=rangeattack,-7
+param=stabdefence,51
+param=slashdefence,49
+param=crushdefence,47
+param=magicdefence,-4
+param=rangedefence,49
+
+[rune_plateskirt_zamorak]
+name=Zamorak plateskirt
+recol1s=15855
+recol1d=6476
+recol2s=10570
+recol2d=3272
+recol3s=14798
+recol3d=19489
+recol4s=2340
+recol4d=3271
+desc=Rune plateskirt in the colours of Zamorak.
+cost=64000
+model=obj_3472
+2dxof=5
+2dyof=5
+2dzoom=1100
+2dxan=620
+iop2=Wear
+wearpos=legs
+manwear=obj_3472_manwear,0
+womanwear=obj_3472_womanwear,0
+category=armour_legs
+weight=20lb
+param=magicattack,-21
+param=rangeattack,-7
+param=stabdefence,51
+param=slashdefence,49
+param=crushdefence,47
+param=magicdefence,-4
+param=rangedefence,49
+
+[rune_plateskirt_saradomin]
+name=Saradomin skirt
+recol1s=15855
+recol1d=6476
+recol2s=10570
+recol2d=3272
+recol3s=14798
+recol3d=29588
+recol4s=2340
+recol4d=3271
+desc=Rune plateskirt in the colours of Saradomin.
+cost=64000
+model=obj_3472
+2dxof=5
+2dyof=5
+2dzoom=1100
+2dxan=620
+iop2=Wear
+wearpos=legs
+manwear=obj_3472_manwear,0
+womanwear=obj_3472_womanwear,0
+category=armour_legs
+weight=20lb
+param=magicattack,-21
+param=rangeattack,-7
+param=stabdefence,51
+param=slashdefence,49
+param=crushdefence,47
+param=magicdefence,-4
+param=rangedefence,49
+
+[rune_plateskirt_guthix]
+name=Guthix plateskirt
+recol1s=15855
+recol1d=6476
+recol2s=10570
+recol2d=3272
+recol3s=14798
+recol3d=7751
+recol4s=2340
+recol4d=3271
+desc=Rune plateskirt in the colours of Guthix.
+cost=64000
+model=obj_3472
+2dxof=5
+2dyof=5
+2dzoom=1100
+2dxan=620
+iop2=Wear
+wearpos=legs
+manwear=obj_3472_manwear,0
+womanwear=obj_3472_womanwear,0
+category=armour_legs
+weight=20lb
+param=magicattack,-21
+param=rangeattack,-7
+param=stabdefence,51
+param=slashdefence,49
+param=crushdefence,47
+param=magicdefence,-4
+param=rangedefence,49
+
+[rune_platebody_goldplate]
+name=Gilded platebody
+recol1s=15855
+recol1d=31366
+recol2s=10570
+recol2d=28161
+recol3s=6342
+recol3d=19777
+desc=Rune platebody with gold plate.
+cost=65000
+model=model_2378_obj
+2dyof=14
+2dzoom=1290
+2dxan=424
+iop2=Wear
+wearpos=torso
+wearpos2=arms
+manwear=model_3379_obj_wear,0
+manwear2=model_164_obj_wear
+womanwear=model_3383_obj_wear,0
+womanwear2=model_344_obj_wear
+members=yes
+category=armour_body
+weight=22lb
+param=magicattack,-30
+param=rangeattack,-10
+param=stabdefence,82
+param=slashdefence,80
+param=crushdefence,72
+param=magicdefence,-6
+param=rangedefence,80
+
+[rune_platelegs_goldplate]
+name=Gilded platelegs
+recol1s=15855
+recol1d=31366
+recol2s=10570
+recol2d=28161
+recol3s=14798
+recol3d=19777
+desc=Rune platelegs with gold plate.
+cost=64000
+model=model_2582_obj
+2dyof=-8
+2dzoom=1740
+2dxan=444
+iop2=Wear
+wearpos=legs
+manwear=model_268_obj_wear,0
+womanwear=model_432_obj_wear,0
+members=yes
+category=armour_legs
+weight=20lb
+param=magicattack,-21
+param=rangeattack,-7
+param=stabdefence,51
+param=slashdefence,49
+param=crushdefence,47
+param=magicdefence,-4
+param=rangedefence,49
+
+[rune_plateskirt_goldplate]
+name=Gilded plateskirt
+recol1s=15855
+recol1d=31366
+recol2s=10570
+recol2d=28161
+recol3s=14798
+recol3d=19777
+recol4s=2340
+recol4d=28161
+desc=Rune plateskirt with gold plate.
+cost=64000
+model=obj_3472
+2dxof=5
+2dyof=5
+2dzoom=1100
+2dxan=620
+iop2=Wear
+wearpos=legs
+manwear=obj_3472_manwear,0
+womanwear=obj_3472_womanwear,0
+members=yes
+category=armour_legs
+weight=20lb
+param=magicattack,-21
+param=rangeattack,-7
+param=stabdefence,51
+param=slashdefence,49
+param=crushdefence,47
+param=magicdefence,-4
+param=rangedefence,49
+
+[rune_full_helm_goldplate]
+name=Gilded full helm
+recol1s=15855
+recol1d=31366
+recol2s=15360
+recol2d=19777
+desc=Rune full helm with gold plate.
+cost=35200
+model=model_2813_obj
+2dxof=-1
+2dyof=6
+2dzoom=800
+2dyan=152
+2dxan=160
+iop2=Wear
+wearpos=hat
+wearpos2=head
+wearpos3=jaw
+manwear=model_218_obj_wear,0
+womanwear=model_394_obj_wear,0
+manhead=model_56_obj_wear
+womanhead=model_116_obj_wear
+members=yes
+param=magicattack,-6
+param=rangeattack,-2
+param=stabdefence,30
+param=slashdefence,32
+param=crushdefence,27
+param=magicdefence,-1
+param=rangedefence,30
+
+[rune_kiteshield_goldplate]
+name=Gilded kiteshield
+recol1s=15855
+recol1d=31366
+recol2s=7296
+recol2d=28161
+recol3s=14798
+recol3d=19777
+desc=Rune kiteshield with gold plate.
+model=model_2339_obj
+2dxof=-6
+2dyof=-14
+2dzoom=1560
+2dyan=1104
+2dxan=344
+iop2=Wear
+wearpos=lefthand
+cost=54400
+manwear=model_486_obj_wear,0
+womanwear=model_486_obj_wear,6
+members=yes
+param=magicattack,-8
+param=rangeattack,-2
+param=stabdefence,44
+param=slashdefence,48
+param=crushdefence,46
+param=magicdefence,-1
+param=rangedefence,46
+param=defend_anim,human_shield_defence

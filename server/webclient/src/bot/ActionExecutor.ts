@@ -195,7 +195,7 @@ export class ActionExecutor {
 
                 case 'closeModal':
                     return this.wrapBool(
-                        this.client.closeModal(),
+                        this.client.closeBotModal(),
                         'Closed modal',
                         'Failed to close modal'
                     );
@@ -224,6 +224,13 @@ export class ActionExecutor {
                         'Failed to cast spell on item'
                     );
 
+                case 'spellOnGroundItem':
+                    return this.wrapBool(
+                        this.client.spellOnGroundItem(action.x, action.z, action.itemId, action.spellComponent),
+                        `Casting spell on ground item ${action.itemId} at (${action.x}, ${action.z})`,
+                        'Failed to cast spell on ground item'
+                    );
+
                 case 'setTab':
                     return this.wrapBool(
                         this.client.setTab(action.tabIndex),
@@ -250,6 +257,9 @@ export class ActionExecutor {
                     }
                     return { success: true, message: `Withdrawing from slot ${action.slot}` };
                 }
+
+                case 'submitCountDialog':
+                    return this.waitForCountDialogAndSubmit(action.value, `Submitted ${action.value} to count dialog`);
 
                 case 'acceptCharacterDesign':
                     // TODO: Should be parameterized as (gender, kits[7], colours[5])

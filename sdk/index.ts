@@ -99,7 +99,7 @@ export class BotSDK {
             reconnectMaxRetries: config.reconnectMaxRetries ?? Infinity,
             reconnectBaseDelay: config.reconnectBaseDelay ?? 1000,
             reconnectMaxDelay: config.reconnectMaxDelay ?? 30000,
-            showChat: config.showChat ?? false
+            showChat: config.showChat ?? true
         };
         this.sdkClientId = `sdk-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
     }
@@ -396,29 +396,20 @@ export class BotSDK {
 
     /**
      * Launch native browser to client URL.
-     * Uses platform-specific open command (open on macOS, start on Windows, xdg-open on Linux).
+     * Uses the `open` package for cross-platform support (macOS, Windows, Linux, WSL).
+     * Falls back to printing the URL if no browser can be opened.
      */
     async launchBrowser(): Promise<void> {
         const url = this.buildClientUrl();
         console.log(`[BotSDK] Opening browser: ${url}`);
 
-        const { exec } = await import('child_process');
-
-        const command = process.platform === 'darwin'
-            ? `open "${url}"`
-            : process.platform === 'win32'
-                ? `start "" "${url}"`
-                : `xdg-open "${url}"`;
-
-        return new Promise((resolve, reject) => {
-            exec(command, (error) => {
-                if (error) {
-                    reject(new Error(`Failed to open browser: ${error.message}`));
-                } else {
-                    resolve();
-                }
-            });
-        });
+        try {
+            const open = (await import('open')).default;
+            await open(url);
+        } catch (e) {
+            console.warn(`[BotSDK] Could not open browser automatically.`);
+            console.warn(`[BotSDK] Open this URL manually: ${url}`);
+        }
     }
 
     /**
@@ -831,9 +822,62 @@ export class BotSDK {
         return this.sendAction({ type: 'useItemOnNpc', itemSlot, npcIndex, reason: 'SDK' });
     }
 
-    /** Click a dialog option by index. */
+    /**
+     * Click a dialog option by its server-assigned index.
+     *
+     * IMPORTANT: `option` is the **server-assigned index** stored on each
+     * `DialogOption.index` field — NOT the array position in `dialog.options`.
+     * Server-assigned indices are 1-based: `dialog.options[0].index === 1`.
+     *
+     * Pass `0` only as the implicit "continue" click for dialogs with no
+     * selectable options (the common pattern: pass through narration pages).
+     *
+     * To click an option by its visible text, prefer `clickDialogByText()`,
+     * which avoids the index-vs-position footgun entirely.
+     *
+     * @example
+     * ```ts
+     * const opt = sdk.getDialog()?.options.find(o => /yes/i.test(o.text));
+     * await sdk.sendClickDialog(opt?.index ?? 0);  // ← .index, NOT array position
+     * ```
+     */
     async sendClickDialog(option: number = 0): Promise<ActionResult> {
         return this.sendAction({ type: 'clickDialogOption', optionIndex: option, reason: 'SDK' });
+    }
+
+    /**
+     * Click a dialog option whose visible text matches `pattern`.
+     *
+     * Convenience wrapper that resolves the server-assigned index for you,
+     * sidestepping the 1-based vs 0-based array-position confusion of
+     * `sendClickDialog()`. Matches against `DialogOption.text` (case-insensitive
+     * by default for string patterns).
+     *
+     * @returns ActionResult with `success: false` and `reason: 'no_dialog'` if
+     *          no dialog is open, or `reason: 'no_match'` if no option matches.
+     *
+     * @example
+     * ```ts
+     * await sdk.clickDialogByText(/yes/i);             // pay the toll
+     * await sdk.clickDialogByText('Is there anything down this alleyway?');
+     * ```
+     */
+    async clickDialogByText(pattern: string | RegExp): Promise<ActionResult> {
+        const dialog = this.state?.dialog;
+        if (!dialog?.isOpen) {
+            return { success: false, message: 'No dialog open', reason: 'no_dialog' };
+        }
+        const regex = typeof pattern === 'string' ? new RegExp(pattern, 'i') : pattern;
+        const match = dialog.options.find(o => regex.test(o.text));
+        if (!match) {
+            const available = dialog.options.map(o => `"${o.text}"`).join(', ') || '(none)';
+            return {
+                success: false,
+                message: `No dialog option matched ${pattern}. Available: ${available}`,
+                reason: 'no_match'
+            };
+        }
+        return this.sendClickDialog(match.index);
     }
 
     /** Click a component using IF_BUTTON packet - for simple buttons, spellcasting, etc. */
@@ -896,6 +940,11 @@ export class BotSDK {
         return this.sendAction({ type: 'closeModal', reason: 'SDK' });
     }
 
+    /** Submit a numeric value to an open p_countdialog (Enter Amount) prompt. */
+    async sendCountDialog(value: number): Promise<ActionResult> {
+        return this.sendAction({ type: 'submitCountDialog', value, reason: 'SDK' });
+    }
+
     /** Set combat style (0-3). */
     async sendSetCombatStyle(style: number): Promise<ActionResult> {
         return this.sendAction({ type: 'setCombatStyle', style, reason: 'SDK' });
@@ -943,6 +992,11 @@ export class BotSDK {
     /** Cast spell on inventory item. */
     async sendSpellOnItem(slot: number, spellComponent: number): Promise<ActionResult> {
         return this.sendAction({ type: 'spellOnItem', slot, spellComponent, reason: 'SDK' });
+    }
+
+    /** Cast spell on ground item (e.g., Telekinetic Grab). */
+    async sendSpellOnGroundItem(x: number, z: number, itemId: number, spellComponent: number): Promise<ActionResult> {
+        return this.sendAction({ type: 'spellOnGroundItem', x, z, itemId, spellComponent, reason: 'SDK' });
     }
 
     /** Switch to a UI tab by index. */
@@ -1043,6 +1097,18 @@ export class BotSDK {
             lastWaypoint.x === destX &&
             lastWaypoint.z === destZ;
 
+        // Detect unreachable destinations: if the pathfinder couldn't reach the
+        // destination and the remaining distance is still very large, the target
+        // is likely on a different plane (underground areas share level 0 but use
+        // Z offsets of +6400, making them allocated but disconnected from the surface).
+        // The "just past a gate" case has a remaining distance of ~10-20 tiles, not hundreds.
+        if (!reachedDestination && waypoints.length > 0) {
+            const remainDist = Math.abs(lastWaypoint!.x - destX) + Math.abs(lastWaypoint!.z - destZ);
+            if (remainDist > 100) {
+                return { success: false, waypoints: [], error: `Destination (${destX}, ${destZ}) is unreachable — path ends ${remainDist} tiles away at (${lastWaypoint!.x}, ${lastWaypoint!.z}). The target may be underground or on a different plane that requires a ladder/stairs to access.` };
+            }
+        }
+
         return { success: true, waypoints, reachedDestination };
     }
 
@@ -1078,7 +1144,7 @@ export class BotSDK {
             const state = await this.waitForCondition(s => {
                 const validPosition = !!(s.player && s.player.worldX !== 0 && s.player.worldZ !== 0);
                 const inGame = s.inGame;
-                const hasEntities = s.nearbyNpcs.length > 0 || s.nearbyLocs.length > 0 || s.groundItems.length > 0;
+                const hasEntities = (s.nearbyNpcs?.length ?? 0) > 0 || (s.nearbyLocs?.length ?? 0) > 0 || (s.groundItems?.length ?? 0) > 0;
 
                 // Log progress for debugging
                 if (!validPosition) {
@@ -1212,12 +1278,30 @@ export class BotSDK {
         }
 
         if (message.type === 'sdk_state' && message.state) {
-            // Filter out player chat messages unless showChat is enabled
-            // Type 2 = public chat, Type 3 = private message received
-            if (!this.config.showChat && message.state.gameMessages) {
+            // Filter out player chat messages unless showChat is enabled.
+            // Type 2 = public chat (in-range OR global broadcast — both arrive
+            // with a structured sender), Type 3 = private message received.
+            if (this.config.showChat === false && message.state.gameMessages) {
                 message.state.gameMessages = message.state.gameMessages.filter(
                     msg => msg.type !== 2 && msg.type !== 3
                 );
+            }
+
+            // Wrap skills array with a Proxy so both state.skills[0] and state.skills.Woodcutting work
+            if (message.state.skills) {
+                const nameMap: Record<string, SkillState> = {};
+                for (const skill of message.state.skills) {
+                    if (/^Stat\d+$/i.test(skill.name)) continue;
+                    nameMap[skill.name] = skill;
+                }
+                message.state.skills = new Proxy(message.state.skills, {
+                    get(target, prop, receiver) {
+                        if (typeof prop === 'string' && prop in nameMap) {
+                            return nameMap[prop];
+                        }
+                        return Reflect.get(target, prop, receiver);
+                    }
+                }) as SkillState[];
             }
 
             this.state = message.state;
@@ -1246,6 +1330,12 @@ export class BotSDK {
         }
 
         if (message.type === 'sdk_error') {
+            // Handle controller pre-emption: another controller connected, so we were kicked
+            if (message.error?.includes('another controller connected')) {
+                console.warn(`[BotSDK] Pre-empted by another controller - disabling auto-reconnect`);
+                this.intentionalDisconnect = true;
+            }
+
             if (message.actionId) {
                 const pending = this.pendingActions.get(message.actionId);
                 if (pending) {

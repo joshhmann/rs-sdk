@@ -5,7 +5,7 @@ readyanim=ogre_ready
 name=Ogre
 desc=A large dim looking humanoid.
 op2=Attack
-vislevel=48
+vislevel=53
 model1=model_2878_npc
 model2=model_2874_npc
 wanderrange=3
@@ -28,7 +28,7 @@ param=death_sound,giant_death
 param=death_drop,big_bones
 huntmode=cowardly
 huntrange=2
-// Stats match osrs version but our version Vislvl is different.
+// osrs stats and Vislvl match 1:1
 // https://raw.githubusercontent.com/Joshua-F/osrs-dumps/refs/heads/master/config/dump.npc npc_2095
 
 [ogre2]
@@ -38,7 +38,7 @@ readyanim=ogre_ready
 name=Ogre
 desc=A large dim looking humanoid.
 op2=Attack
-vislevel=48
+vislevel=53
 model1=model_2878_npc
 model2=model_2876_npc
 wanderrange=3
@@ -61,7 +61,7 @@ param=death_sound,giant_death
 param=death_drop,big_bones
 huntmode=cowardly
 huntrange=2
-// Stats match osrs version but our version Vislvl is different.
+// osrs stats and Vislvl match 1:1
 // https://raw.githubusercontent.com/Joshua-F/osrs-dumps/refs/heads/master/config/dump.npc npc_2096
 
 [skavid]
@@ -90,7 +90,7 @@ walkanim=ogre_walk
 readyanim=ogre_ready
 op1=Talk-to
 op2=Attack
-vislevel=70
+vislevel=81
 model1=model_2880_npc
 model2=model_2876_npc
 head1=model_141_npc_head
@@ -112,13 +112,12 @@ param=defend_anim,ogre_block
 param=death_anim,ogre_death
 param=attack_sound,mace_crush
 param=defend_sound,giant_hit
-// param=defend_sound, TODO
-// osrs defend_sound blade3_mail
+param=defend_sound,blade3_mail
 param=death_sound,giant_death
 param=death_drop,big_bones
 huntmode=cowardly
 huntrange=2
-// Stats match osrs version but our version Vislvl is different.
+// osrs stats and Vislvl match 1:1
 // https://raw.githubusercontent.com/Joshua-F/osrs-dumps/refs/heads/master/config/dump.npc npc_4363
 
 [og]
@@ -171,7 +170,7 @@ walkanim=ogre_walk
 readyanim=ogre_ready
 op1=Talk-to
 op2=Attack
-vislevel=58
+vislevel=68
 model1=model_2880_npc
 model2=model_2876_npc
 head1=model_141_npc_head
@@ -192,11 +191,10 @@ param=attack_anim,ogre_attack
 param=defend_anim,ogre_block
 param=death_anim,ogre_death
 param=attack_sound,mace_crush
-// param=defend_sound, TODO
-// osrs defend_sound blade3_mail
+param=defend_sound,blade3_mail
 param=death_sound,giant_death
 param=death_drop,big_bones
-// Stats match osrs version but our version Vislvl is different.
+// osrs stats and Vislvl match 1:1
 // https://raw.githubusercontent.com/Joshua-F/osrs-dumps/refs/heads/master/config/dump.npc npc_4367
 
 [ogre_guard]
@@ -206,7 +204,7 @@ size=2
 walkanim=ogre_walk
 readyanim=ogre_ready
 op1=Talk-to
-vislevel=74
+vislevel=83
 model1=model_2880_npc
 model2=model_2874_npc
 head1=model_141_npc_head
@@ -239,7 +237,7 @@ size=2
 walkanim=ogre_walk
 readyanim=ogre_ready
 op1=Talk-to
-vislevel=74
+vislevel=83
 model1=model_2880_npc
 model2=model_2874_npc
 head1=model_141_npc_head
@@ -272,7 +270,7 @@ size=2
 walkanim=ogre_walk
 readyanim=ogre_ready
 op1=Talk-to
-vislevel=74
+vislevel=83
 model1=model_2880_npc
 model2=model_2874_npc
 head1=model_141_npc_head
@@ -305,7 +303,7 @@ size=2
 walkanim=ogre_walk
 readyanim=ogre_ready
 op1=Talk-to
-vislevel=74
+vislevel=83
 model1=model_2880_npc
 model2=model_2874_npc
 head1=model_141_npc_head
@@ -338,7 +336,7 @@ size=2
 walkanim=ogre_walk
 readyanim=ogre_ready
 op1=Talk-to
-vislevel=74
+vislevel=83
 model1=model_2880_npc
 model2=model_2874_npc
 head1=model_141_npc_head
@@ -372,7 +370,7 @@ walkanim=ogre_walk
 readyanim=ogre_ready
 op1=Talk-to
 op2=Attack
-vislevel=74
+vislevel=83
 model1=model_2878_npc
 model2=model_2876_npc
 head1=model_141_npc_head
@@ -394,7 +392,7 @@ param=attack_sound,mace_crush
 param=defend_sound,giant_hit
 param=death_sound,giant_death
 param=death_drop,big_bones
-// Stats match osrs version but our version Vislvl is different.
+// osrs stats and Vislvl match 1:1
 // https://raw.githubusercontent.com/Joshua-F/osrs-dumps/refs/heads/master/config/dump.npc npc_4373
 
 [scared_skavid]
@@ -498,7 +496,7 @@ walkanim=ogre_walk
 readyanim=ogre_ready
 op1=Talk-to
 op2=Attack
-vislevel=74
+vislevel=83
 model1=model_2880_npc
 model2=model_2876_npc
 head1=model_141_npc_head
@@ -519,11 +517,10 @@ param=attack_anim,ogre_attack
 param=defend_anim,ogre_block
 param=death_anim,ogre_death
 param=attack_sound,mace_stab
-// param=defend_sound, TODO
-// osrs defend_sound blade3_mail
+param=defend_sound,blade3_mail
 param=death_sound,giant_death
 param=death_drop,big_bones
-// Stats match osrs version but our version Vislvl is different.
+// osrs stats and Vislvl match 1:1
 // https://raw.githubusercontent.com/Joshua-F/osrs-dumps/refs/heads/master/config/dump.npc npc_4381
 
 [ogre_shaman]
@@ -563,7 +560,7 @@ op1=Talk-to
 op1=Talk-to
 op2=Attack
 op3=Trade
-vislevel=60
+vislevel=70
 model1=model_2878_npc
 model2=model_2874_npc
 head1=model_141_npc_head
@@ -599,7 +596,7 @@ op1=Talk-to
 op1=Talk-to
 op2=Attack
 op3=Trade
-vislevel=60
+vislevel=70
 model1=model_2878_npc
 model2=model_2874_npc
 head1=model_141_npc_head
@@ -635,7 +632,7 @@ op1=Talk-to
 op1=Talk-to
 op2=Attack
 op3=Trade
-vislevel=60
+vislevel=70
 model1=model_2878_npc
 model2=model_2874_npc
 head1=model_141_npc_head
@@ -665,7 +662,7 @@ op1=Talk-to
 op1=Talk-to
 op2=Attack
 op3=Trade
-vislevel=60
+vislevel=70
 model1=model_2878_npc
 model2=model_2874_npc
 head1=model_141_npc_head

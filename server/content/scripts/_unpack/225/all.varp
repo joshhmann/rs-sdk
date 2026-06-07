@@ -13,9 +13,8 @@ protect=no
 [lastcombat]
 protect=no
 
-[varp_19]
-
-[cog_cooled]
+[cog_bits]
+scope=perm
 
 [lastcombat_pvp]
 protect=no
@@ -101,6 +100,7 @@ scope=perm
 
 [xplamp]
 transmit=yes
+scope=perm
 
 [qp]
 transmit=yes
@@ -296,6 +296,7 @@ scope=perm
 
 [temp]
 scope=temp
+protect=no
 
 [if1]
 transmit=yes

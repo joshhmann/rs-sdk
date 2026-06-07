@@ -13,6 +13,12 @@ export interface BotConnection {
   username: string;
   connected: boolean;
   unsubscribeConnectionState?: () => void;
+  /**
+   * High-water tick for gameMessages already shown to the agent. Used by
+   * the MCP server's formatter so repeated execute_code calls only render
+   * NEW chat / system messages. Internal — not part of the SDK surface.
+   */
+  lastShownMessageTick: number;
 }
 
 class BotManager {
@@ -31,7 +37,7 @@ class BotManager {
         return existing;
       }
       // Reconnect if disconnected
-      await this.connectWithTimeout(existing.sdk, 30000);
+      await this.connectWithRetry(existing.sdk);
       existing.connected = true;
       return existing;
     }
@@ -39,14 +45,17 @@ class BotManager {
     let username = name;
     let pwd = password;
     let gateway = gatewayUrl || this.defaultGatewayUrl;
-    let showChat = false;
+    let showChat = true;
 
     // Load credentials from bot.env if no password provided
     if (!password) {
-      const envPath = join(process.cwd(), 'bots', name, 'bot.env');
+      // Try cwd first, then fall back to the repo root (one level up from mcp/)
+      const cwdPath = join(process.cwd(), 'bots', name, 'bot.env');
+      const repoPath = join(import.meta.dir, '..', 'bots', name, 'bot.env');
+      const envPath = existsSync(cwdPath) ? cwdPath : repoPath;
 
       if (!existsSync(envPath)) {
-        throw new Error(`Bot "${name}" not found. Create it first with: bun scripts/create-bot.ts ${name}`);
+        throw new Error(`Bot "${name}" not found. Create it first with: bun bots/create-bot.ts ${name}`);
       }
 
       const envContent = await readFile(envPath, 'utf-8');
@@ -59,9 +68,10 @@ class BotManager {
         gateway = deriveGatewayUrl(env.SERVER);
       }
 
-      // Check if chat should be shown (default: false for safety)
-      if (env.SHOW_CHAT?.toLowerCase() === 'true') {
-        showChat = true;
+      // Allow opting out of player chat via SHOW_CHAT=false in bot.env.
+      // Default: true, so multi-bot scripts can see each other's speech.
+      if (env.SHOW_CHAT?.toLowerCase() === 'false') {
+        showChat = false;
       }
     }
 
@@ -81,21 +91,22 @@ class BotManager {
       connectionMode: 'control',
       autoReconnect: true,       // Enable auto-reconnect for connection stability
       autoLaunchBrowser: 'auto', // Auto-launch browser if session is stale
-      showChat,                  // Show other players' chat (default: false for safety)
+      showChat,                  // Show other players' chat (default: true; opt out with SHOW_CHAT=false)
     });
 
     const bot = new BotActions(sdk);
 
-    // Connect with 30s timeout to avoid blocking forever
+    // Connect with retry to handle race conditions
     console.error(`[MCP] Starting connection...`);
-    await this.connectWithTimeout(sdk, 30000);
+    await this.connectWithRetry(sdk);
     console.error(`[MCP] Bot "${name}" connected!`);
 
     const connection: BotConnection = {
       sdk,
       bot,
       username,
-      connected: true
+      connected: true,
+      lastShownMessageTick: -1
     };
 
     // Track connection state changes
@@ -113,16 +124,26 @@ class BotManager {
     return connection;
   }
 
-  private async connectWithTimeout(sdk: BotSDK, timeoutMs: number): Promise<void> {
-    let timeoutId: ReturnType<typeof setTimeout>;
-    const timeoutPromise = new Promise<never>((_, reject) => {
-      timeoutId = setTimeout(() => reject(new Error(`Connection timed out after ${timeoutMs / 1000}s`)), timeoutMs);
-    });
+  private async connectWithRetry(sdk: BotSDK, maxAttempts = 3, timeoutMs = 30000): Promise<void> {
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+      try {
+        let timeoutId: ReturnType<typeof setTimeout>;
+        const timeoutPromise = new Promise<never>((_, reject) => {
+          timeoutId = setTimeout(() => reject(new Error(`Connection timed out after ${timeoutMs / 1000}s`)), timeoutMs);
+        });
 
-    try {
-      await Promise.race([sdk.connect(), timeoutPromise]);
-    } finally {
-      clearTimeout(timeoutId!);
+        await Promise.race([sdk.connect(), timeoutPromise]).finally(() => clearTimeout(timeoutId!));
+        return; // success
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err);
+        if (attempt < maxAttempts) {
+          const delay = attempt * 2000; // 2s, 4s backoff
+          console.error(`[MCP] Connection attempt ${attempt}/${maxAttempts} failed: ${msg}. Retrying in ${delay / 1000}s...`);
+          await new Promise(resolve => setTimeout(resolve, delay));
+        } else {
+          throw new Error(`Failed to connect after ${maxAttempts} attempts. Last error: ${msg}`);
+        }
+      }
     }
   }
 

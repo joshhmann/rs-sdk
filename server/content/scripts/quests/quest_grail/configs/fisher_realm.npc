@@ -23,7 +23,6 @@ model5=model_421_idk
 model6=model_358_idk
 model7=model_446_obj_wear
 head1=model_108_npc_head
-param=death_sound,female_death
 
 [sir_percival]
 vislevel=hide
@@ -167,7 +166,6 @@ model4=model_356_obj_wear
 model5=model_426_npc
 model6=model_361_obj_wear
 head1=model_103_idk_head
-param=death_sound,female_death
 
 [brother_galahad]
 vislevel=hide
@@ -273,7 +271,7 @@ walkanim=giant_walk
 readyanim=giant_ready
 op1=Talk-to
 op2=Attack
-vislevel=126
+vislevel=120
 recol1s=12288
 recol1d=0
 recol2s=31649
@@ -288,6 +286,7 @@ recol6s=15855
 recol6d=0
 model1=model_2864_npc
 model2=model_2872_npc
+head1=model_4091
 wanderrange=0
 maxrange=0
 moverestrict=nomove

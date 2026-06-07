@@ -1,9 +1,8 @@
 import fs from 'fs';
 import fsp from 'fs/promises';
 
-import bcrypt from 'bcrypt';
+import * as bcrypt from 'bcrypt-ts';
 import { WebSocket, WebSocketServer } from 'ws';
-
 
 import { db, toDbDate } from '#/db/query.js';
 import Player from '#/engine/entity/Player.js';
@@ -13,16 +12,18 @@ import Packet from '#/io/Packet.js';
 import Environment from '#/util/Environment.js';
 import { toSafeName } from '#/util/JString.js';
 import { printInfo } from '#/util/Logger.js';
-import { getUnreadMessageCount } from '#/server/login/Messages.js';
 import { startManagementWeb } from '#/web.js';
 import InvType from '#/cache/config/InvType.js';
 import ObjType from '#/cache/config/ObjType.js';
 
-async function updateHiscores(account: { id: number, staffmodlevel: number } | undefined, player: Player, profile: string) {
-    if (!account)
-        return;
+async function updateHiscores(account: { id: number; staffmodlevel: number; banned_until: string | Date | null } | undefined, player: Player, profile: string) {
+    if (!account) return;
 
     if (account.staffmodlevel > 1) {
+        return;
+    }
+
+    if (account.banned_until !== null && new Date(account.banned_until) >= new Date()) {
         return;
     }
 
@@ -137,6 +138,39 @@ async function updateHiscores(account: { id: number, staffmodlevel: number } | u
             }
         }
     }
+
+    // Update bank hiscore
+    const bankInvId = InvType.getId('bank');
+    if (bankInvId !== -1) {
+        const bank = player.getInventory(bankInvId);
+        if (bank) {
+            const bankItems: { id: number; name: string; value: number; count: number }[] = [];
+            let bankTotalValue = 0;
+            for (let slot = 0; slot < bank.capacity; slot++) {
+                const item = bank.get(slot);
+                if (item) {
+                    const objType = ObjType.get(item.id);
+                    if (objType) {
+                        const value = objType.cost * item.count;
+                        bankItems.push({ id: item.id, name: objType.name || `obj_${item.id}`, value, count: item.count });
+                        bankTotalValue += value;
+                    }
+                }
+            }
+
+            if (bankItems.length > 0) {
+                // Sort by value descending so the most valuable items appear first
+                bankItems.sort((a, b) => b.value - a.value);
+                const bankItemsJson = JSON.stringify(bankItems);
+                const existingBank = await db.selectFrom('hiscore_bank').select('value').where('account_id', '=', account.id).where('profile', '=', profile).executeTakeFirst();
+                if (existingBank) {
+                    await db.updateTable('hiscore_bank').set({ value: bankTotalValue, items: bankItemsJson, date: toDbDate(new Date()) }).where('account_id', '=', account.id).where('profile', '=', profile).execute();
+                } else {
+                    await db.insertInto('hiscore_bank').values({ account_id: account.id, profile, value: bankTotalValue, items: bankItemsJson }).execute();
+                }
+            }
+        }
+    }
 }
 
 export default class LoginServer {
@@ -203,15 +237,15 @@ export default class LoginServer {
     }
 
     constructor() {
-        if (Environment.LOGIN_SERVER && !Environment.EASY_STARTUP) {
+        if (Environment.login.enabled && !Environment.easyStartup) {
             startManagementWeb();
         }
 
         InvType.load('data/pack');
         ObjType.load('data/pack');
 
-        this.server = new WebSocketServer({ port: Environment.LOGIN_PORT, host: '0.0.0.0' }, () => {
-            printInfo(`Login server listening on port ${Environment.LOGIN_PORT}`);
+        this.server = new WebSocketServer({ port: Environment.login.port, host: '0.0.0.0' }, () => {
+            printInfo(`Login server listening on port ${Environment.login.port}`);
         });
 
         this.server.on('connection', (s: WebSocket) => {
@@ -244,7 +278,7 @@ export default class LoginServer {
                     } else if (type === 'player_login') {
                         const { nodeMembers, replyTo, username, password, uid, socket, remoteAddress, reconnecting, hasSave } = msg;
                         const safeName = toSafeName(username);
-                        
+
                         if (this.loginRequests.has(safeName)) {
                             s.send(
                                 JSON.stringify({
@@ -269,16 +303,14 @@ export default class LoginServer {
                                 return;
                             }
 
-                            let account = await db.selectFrom('account')
-                                .leftJoin('account_login', join => join
-                                    .onRef('account_id', '=', 'id')
-                                    .on('profile', '=', profile)
-                                )
+                            let account = await db
+                                .selectFrom('account')
+                                .leftJoin('account_login', join => join.onRef('account_id', '=', 'id').on('profile', '=', profile))
                                 .where('username', '=', username)
                                 .selectAll()
                                 .executeTakeFirst();
 
-                            if (!Environment.WEBSITE_REGISTRATION && !account) {
+                            if (!Environment.website.registration && !account) {
                                 // reject usernames containing banned words
                                 const lower = username.toLowerCase();
                                 if (Environment.BANNED_USERNAME_WORDS.some(w => lower.includes(w))) {
@@ -303,66 +335,24 @@ export default class LoginServer {
                                     .executeTakeFirst();
 
                                 if (typeof insertResult.insertId === 'undefined') {
-                                    return;
-                                }
-
-                                account = await db.selectFrom('account')
-                                    .leftJoin('account_login', join => join
-                                        .onRef('account_id', '=', 'id')
-                                        .on('profile', '=', profile)
-                                    )
-                                    .where('username', '=', username)
-                                    .selectAll()
-                                    .executeTakeFirst();
-                            }
-
-                            if (account) {
-                                const recent = await db
-                                    .selectFrom('login')
-                                    .selectAll()
-                                    .where('account_id', '=', account.id)
-                                    .where('ip', '=', remoteAddress)
-                                    .where('timestamp', '>=', toDbDate(new Date(Date.now() - 5000)))
-                                    .limit(3)
-                                    .execute();
-
-                                if (recent.length === 3) {
-                                    // rate limited
+                                    // previously a bare return - the world never got a reply and
+                                    // the client hung forever on "Connecting to server..."
+                                    console.error('[LoginServer] auto-register insert failed for', username);
                                     s.send(
                                         JSON.stringify({
                                             replyTo,
-                                            response: 8
+                                            response: 7
                                         })
                                     );
                                     return;
                                 }
 
-                                // Concurrent logins per IP limit (staff exempt)
-                                // if (account.staffmodlevel < 2 && Environment.NODE_MAX_LOGINS_PER_IP > 0) {
-                                //     const currentCount = this.getLoginCountForIp(remoteAddress);
-                                //     if (currentCount >= Environment.NODE_MAX_LOGINS_PER_IP) {
-                                //         console.log(`[LOGIN] IP ${remoteAddress} rejected: ${currentCount} concurrent logins (limit ${Environment.NODE_MAX_LOGINS_PER_IP})`);
-                                //         s.send(
-                                //             JSON.stringify({
-                                //                 replyTo,
-                                //                 response: 8
-                                //             })
-                                //         );
-                                //         return;
-                                //     }
-                                // }
-
-                                await db
-                                    .insertInto('login')
-                                    .values({
-                                        uuid: socket,
-                                        account_id: account.id,
-                                        world: nodeId,
-                                        timestamp: toDbDate(nodeTime),
-                                        uid,
-                                        ip: remoteAddress
-                                    })
-                                    .execute();
+                                account = await db
+                                    .selectFrom('account')
+                                    .leftJoin('account_login', join => join.onRef('account_id', '=', 'id').on('profile', '=', profile))
+                                    .where('username', '=', username)
+                                    .selectAll()
+                                    .executeTakeFirst();
                             }
 
                             const passwordMatch = account ? await bcrypt.compare(password, account.password) : false;
@@ -390,7 +380,7 @@ export default class LoginServer {
                             }
 
                             if (nodeMembers && !account.members) {
-                                if (Environment.NODE_AUTO_SUBSCRIBE_MEMBERS) {
+                                if (Environment.node.autoSubscribeMembers) {
                                     // Set members=1 for the account and proceed with login
                                     await db.updateTable('account').where('id', '=', account.id).set('members', 1).executeTakeFirstOrThrow();
                                     account.members = 1;
@@ -422,14 +412,13 @@ export default class LoginServer {
                                 // Re-establish in-memory tracking on reconnect
                                 this.trackLogin(remoteAddress, account.id);
 
-                                const messageCount = await getUnreadMessageCount(account.id);
-
                                 if (!hasSave) {
                                     const save = await fsp.readFile(`data/players/${profile}/${username}.sav`);
                                     if (!save || !PlayerLoading.verify(new Packet(save))) {
                                         // Extreme safety check for savefile existing but having bad data on read:
                                         console.error('on reconnect, account_id %s had invalid save data on disk', account.id);
                                         this.rejectLoginForSafety(s, replyTo);
+                                        return; // was missing - fell through and sent a second (success) reply
                                     }
                                     s.send(
                                         JSON.stringify({
@@ -440,7 +429,7 @@ export default class LoginServer {
                                             muted_until: account.muted_until,
                                             save: save.toString('base64'),
                                             members: account.members,
-                                            messageCount
+                                            messageCount: 0
                                         })
                                     );
                                 } else {
@@ -452,7 +441,7 @@ export default class LoginServer {
                                             staffmodlevel: account.staffmodlevel,
                                             muted_until: account.muted_until,
                                             members: account.members,
-                                            messageCount
+                                            messageCount: 0
                                         })
                                     );
                                 }
@@ -474,20 +463,24 @@ export default class LoginServer {
                                 // Continue with normal login - don't return
                             }
 
-                            if (account.staffmodlevel < 2 
-                                && account.logged_out !== null 
-                                && account.logged_out !== 0 
-                                && account.logged_out !== nodeId 
-                                && account.logout_time !== null 
-                                && new Date(account.logout_time) >= new Date(Date.now() - 45000)) {
-                                // rate limited (hop timer)
-                                s.send(
-                                    JSON.stringify({
-                                        replyTo,
-                                        response: 6
-                                    })
-                                );
-                                return;
+                            if (account.staffmodlevel < 2
+                                && account.logged_out !== null
+                                && account.logged_out !== 0
+                                && account.logged_out !== nodeId
+                                && account.logout_time !== null
+                            ) {
+                                const remaining = new Date(account.logout_time).getTime() - new Date(Date.now() - Environment.node.hopTime).getTime();
+                                if (remaining > 0) {
+                                    // rate limited (hop timer)
+                                    s.send(
+                                        JSON.stringify({
+                                            replyTo,
+                                            response: 10,
+                                            remaining
+                                        })
+                                    );
+                                    return;
+                                }
                             }
 
                             await db
@@ -502,8 +495,6 @@ export default class LoginServer {
                                     ip: remoteAddress
                                 })
                                 .execute();
-
-                            const messageCount = await getUnreadMessageCount(account.id);
 
                             if (!fs.existsSync(`data/players/${profile}/${username}.sav`)) {
                                 // not an error - never logged in before
@@ -520,7 +511,7 @@ export default class LoginServer {
                                             account_id: account.id,
                                             staffmodlevel: account.staffmodlevel,
                                             muted_until: account.muted_until,
-                                            messageCount
+                                            messageCount: 0
                                         })
                                     );
                                 }
@@ -541,7 +532,7 @@ export default class LoginServer {
                                         save: save.toString('base64'),
                                         muted_until: account.muted_until,
                                         members: account.members,
-                                        messageCount
+                                        messageCount: 0
                                     })
                                 );
                             }
@@ -549,7 +540,8 @@ export default class LoginServer {
                             // Login is valid - update account table and track IP
                             this.trackLogin(remoteAddress, account.id);
                             if (account.account_id) {
-                                await db.updateTable('account_login')
+                                await db
+                                    .updateTable('account_login')
                                     .set({
                                         logged_in: nodeId,
                                         login_time: toDbDate(new Date())
@@ -558,7 +550,8 @@ export default class LoginServer {
                                     .where('profile', '=', profile)
                                     .executeTakeFirst();
                             } else {
-                                await db.insertInto('account_login')
+                                await db
+                                    .insertInto('account_login')
                                     .values({
                                         account_id: account.id,
                                         profile: profile,
@@ -584,15 +577,13 @@ export default class LoginServer {
                             console.error(username, 'Invalid save file');
                         }
 
-                        const account = await db.selectFrom('account')
-                            .leftJoin('account_login', join => join
-                                .onRef('account_id', '=', 'id')
-                                .on('profile', '=', profile)
-                            )
+                        const account = await db
+                            .selectFrom('account')
+                            .leftJoin('account_login', join => join.onRef('account_id', '=', 'id').on('profile', '=', profile))
                             .where('username', '=', username)
                             .selectAll()
                             .executeTakeFirst();
-                        
+
                         if (account?.account_id) {
                             this.untrackLogin(account.id);
                             await db
@@ -634,10 +625,7 @@ export default class LoginServer {
 
                         const account = await db
                             .selectFrom('account')
-                            .leftJoin('account_login', join => join
-                                .onRef('account_id', '=', 'id')
-                                .on('profile', '=', profile)
-                            )
+                            .leftJoin('account_login', join => join.onRef('account_id', '=', 'id').on('profile', '=', profile))
                             .where('username', '=', username)
                             .selectAll()
                             .executeTakeFirst();
@@ -654,7 +642,6 @@ export default class LoginServer {
                                 .where('profile', '=', profile)
                                 .executeTakeFirst();
                         }
-
                     } else if (type === 'player_ban') {
                         const { _staff, username, until } = msg;
 
@@ -681,7 +668,10 @@ export default class LoginServer {
                             .executeTakeFirst();
                     } else if (type === 'sdk_auth') {
                         // SDK/Gateway authentication - validates username/password for remote bot control
-                        const { replyTo, username, password } = msg;
+                        const { replyTo, password } = msg;
+                        // Normalize like player_login so case differences (e.g. "Bitty" vs "bitty")
+                        // resolve to the same account row.
+                        const username = toSafeName(msg.username);
 
                         let account = await db.selectFrom('account')
                             .where('username', '=', username)

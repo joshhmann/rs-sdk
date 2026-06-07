@@ -26,23 +26,12 @@ class TinyMidiPCM {
 
         this.renderTimer = undefined;
 
-        this.test = 0;
     }
 
     async init() {
         if (this.wasmModule) {
             return;
         }
-
-        // check if node
-        // http://philiplassen.com/2021/08/11/node-es6-emscripten.html
-        // if (typeof process !== 'undefined') {
-        //     const { dirname } = await import(/* webpackIgnore: true */ 'path');
-        //     const { createRequire } = await import(/* webpackIgnore: true */ 'module');
-
-        //     globalThis.__dirname = dirname(import.meta.url);
-        //     globalThis.require = createRequire(import.meta.url);
-        // }
 
         this.wasmModule = await loadTinyMidiPCM();
 
@@ -52,12 +41,12 @@ class TinyMidiPCM {
 
     // set buffer size based on seconds
     setBufferDuration(seconds) {
-        this.bufferSize = 4 * this.sampleRate * this.channels * seconds;
+        this.bufferSize = 2 * this.sampleRate * this.channels * seconds;
     }
 
     ensureInitialized() {
         if (!this.wasmModule) {
-            throw new Error(`${this.constructor.name} not initalized. call .init()`);
+            throw new Error(`${this.constructor.name} not initialized. call .init()`);
         }
     }
 
@@ -144,13 +133,19 @@ class TinyMidiPCM {
 // controlling tinymidipcm:
 (async () => {
     const channels = 2;
-    const sampleRate = 44100;
+    const sampleRate = 22050;
     const flushTime = 250;
     const renderInterval = 30;
-    const fadeseconds = 2;
+    const fadeInterval = 50;
+    const fadeStepDb = 0.25;
+    const fadeEndStep = 144;
+    const fadeResetStep = 200;
 
-    let midiTimeout = null;
-    let fadeTimeout = null;
+    let fadeTimer = null;
+    let fade = fadeResetStep;
+    let fadeMidiBuffer = null;
+    let fadeVolume = 0;
+    let midiFade = false;
     // let renderEndSeconds = 0;
     // let currentMidiBuffer = null;
     let samples = new Float32Array();
@@ -175,12 +170,13 @@ class TinyMidiPCM {
         onRenderEnd: ms => {
             // renderEndSeconds = Math.floor(startTime + Math.floor(ms / 1000));
         },
-        bufferSize: 1024 * 100
+        bufferSize: 1024 * 100,
+        sampleRate
     });
 
     await tinyMidiPCM.init();
 
-    const soundfontRes = await fetch(new URL('SCC1_Florestan.sf2', import.meta.url));
+    const soundfontRes = await fetch('/client/SCC1_Florestan.sf2');
     const soundfontBuffer = new Uint8Array(await soundfontRes.arrayBuffer());
     tinyMidiPCM.setSoundfont(soundfontBuffer);
 
@@ -232,11 +228,14 @@ class TinyMidiPCM {
 
     let flushInterval;
 
-    function fadeOut(callback) {
+    function decibelsToGain(volume = 0) {
+        return Math.pow(10, volume / 20);
+    }
+
+    function applyOutputVolumeDb(volume = 0) {
         const currentTime = window.audioContext.currentTime;
         gainNode.gain.cancelScheduledValues(currentTime);
-        gainNode.gain.setTargetAtTime(0, currentTime, 0.5);
-        return setTimeout(callback, fadeseconds * 1000);
+        gainNode.gain.setValueAtTime(decibelsToGain(volume), currentTime);
     }
 
     function stop() {
@@ -258,12 +257,8 @@ class TinyMidiPCM {
         }
     }
 
-    function start(vol, midiBuffer) {
-        // vol -1 = reuse last volume level
-        if (vol !== -1) {
-            window._tinyMidiVolume(vol);
-        }
-
+    function start(volume, midiBuffer) {
+        applyOutputVolumeDb(volume);
         // currentMidiBuffer = midiBuffer;
         // startTime = window.audioContext.currentTime;
         lastTime = window.audioContext.currentTime;
@@ -271,48 +266,91 @@ class TinyMidiPCM {
         tinyMidiPCM.render(midiBuffer);
     }
 
-    window._tinyMidiStop = async fade => {
-        if (fade) {
-            fadeTimeout = fadeOut(() => {
-                stop();
-            });
-        } else {
-            stop();
-            clearTimeout(midiTimeout);
-            clearTimeout(fadeTimeout);
+    function clearFadeTimer() {
+        if (fadeTimer) {
+            clearInterval(fadeTimer);
+            fadeTimer = null;
         }
+    }
+
+    function stepFade() {
+        if (!fadeMidiBuffer) {
+            clearFadeTimer();
+            return;
+        }
+
+        fade++;
+        applyOutputVolumeDb(-(fade * fadeStepDb));
+
+        if (fade >= fadeEndStep) {
+            const nextMidiBuffer = fadeMidiBuffer;
+            const nextVolume = fadeVolume;
+
+            fadeMidiBuffer = null;
+            clearFadeTimer();
+            stop();
+            start(nextVolume, nextMidiBuffer);
+            fade = -(nextVolume / fadeStepDb);
+        }
+    }
+
+    function startFadeTimer() {
+        clearFadeTimer();
+        stepFade();
+
+        if (fadeMidiBuffer) {
+            fadeTimer = setInterval(stepFade, fadeInterval);
+        }
+    }
+
+    window._tinyMidiStop = async () => {
+        midiFade = false;
+        fadeMidiBuffer = null;
+        clearFadeTimer();
+        stop();
+        fade = fadeResetStep;
     };
 
-    window._tinyMidiVolume = (vol = 1) => {
-        gainNode.gain.setValueAtTime(vol, window.audioContext.currentTime);
+    window._tinyMidiAdjustVolumeDb = (volume = 0) => {
+        if (fadeMidiBuffer) {
+            fadeVolume = volume;
+            return;
+        }
+
+        applyOutputVolumeDb(volume);
+        fade = midiFade ? -(volume / fadeStepDb) : fadeResetStep;
     };
 
-    window._tinyMidiPlay = async (midiBuffer, vol, fade) => {
+    window._tinyMidiPlay = async (midiBuffer, volume, useFade) => {
         if (!midiBuffer) {
             return;
         }
 
-        await window._tinyMidiStop(fade);
+        midiFade = useFade;
 
-        if (fade) {
-            midiTimeout = setTimeout(() => {
-                start(vol, midiBuffer);
-            }, fadeseconds * 1000);
+        if (useFade) {
+            fadeMidiBuffer = midiBuffer;
+            fadeVolume = volume;
+            startFadeTimer();
         } else {
-            start(vol, midiBuffer);
+            fadeMidiBuffer = null;
+            clearFadeTimer();
+            stop();
+            start(volume, midiBuffer);
+            fade = fadeResetStep;
         }
     };
 })();
 
-export function playMidi(data, vol, fade) {
+export function playMidi(data, volume, fade) {
     if (window._tinyMidiPlay) {
-        window._tinyMidiPlay(data, vol / 128, fade);
+        window._tinyMidiPlay(data, volume, fade);
     }
 }
 
-export function setMidiVolume(vol) {
-    if (window._tinyMidiVolume) {
-        window._tinyMidiVolume(vol / 128);
+export function setMidiVolume(volume) {
+    if (window._tinyMidiAdjustVolumeDb) {
+        window._tinyMidiAdjustVolumeDb(volume);
     }
 }
 

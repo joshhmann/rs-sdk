@@ -17,6 +17,8 @@ The goals of this project are to provide a rich testing environment for goal-dir
 
 There is currently a [leaderboard](https://runescrape.asslorde.com/hiscores) for bots running on the demo server, with rankings based on highest total level per lowest account playtime.
 
+See the [benchmark comparing models](https://github.com/MaxBittker/rs-bench) for evaluation results across different LLMs.
+
 > [!NOTE]
 > RS-SDK is a fork of the LostCity engine/client, an amazing project without which rs-sdk would not be possible. 
 > Find their [code here](https://github.com/LostCityRS/Server) or read their [history and ethos](https://lostcity.rs/t/faq-what-is-lost-city/16)
@@ -35,11 +37,11 @@ claude "start a new bot with name: {username}"
 Manually:
 ```sh
 bun install
-bun scripts/create-bot.ts {username}
+bun bots/create-bot.ts {username}
 bun bots/{username}/script.ts 
 ```
 
-Chat is off by default to prevent scamming and prompt injection attacks, but you can opt in  with `SHOW_CHAT=true` in the bot.env file
+Chat is shown by default. Note that seeing other players' chat exposes the bot to scamming and prompt-injection attempts; opt out with `SHOW_CHAT=false` in the bot.env file (or `bun bots/create-bot.ts <name> --no-chat`).
 
 Warning: The demo server is offered as a convenience, and we do not guarantee uptime or data persistence. Hold your accounts lightly, and consider hosting your own server instance. Please do not manually play on the demo server. 
 
@@ -99,10 +101,10 @@ The `SERVER` variable in `bot.env` controls where the bot connects. To use your 
 BOT_USERNAME=mybot
 PASSWORD=test
 SERVER=
-SHOW_CHAT=false
+SHOW_CHAT=true
 ```
 
-When `SERVER` is empty, all connection paths (scripts, CLI, MCP) default to `ws://localhost:7780`.
+When `SERVER` is empty, all connection paths (scripts, CLI) default to `ws://localhost:7780`.
 
 When `SERVER` is set to a hostname (e.g. `runescrape.asslorde.com`), they connect to `wss://{SERVER}/gateway` instead.
 

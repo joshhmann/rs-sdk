@@ -29,15 +29,14 @@ patrol2=0_45_46_0_10,1
 vislevel=hide
 name=Zadimus' spirit.
 desc=The animated spirit of a soul not at rest.
-hasalpha=yes
 walkanim=ghost_walk
 readyanim=ghost_ready
-hasalpha=yes
 op1=Talk-to
 model1=model_2962_npc
 model2=model_2964_npc
 model3=model_2965_npc
 head1=model_27_npc_head
+defaultmode=none
 wanderrange=0
 moverestrict=nomove
 param=death_anim,ghost_death
@@ -50,7 +49,7 @@ desc=It rattles when it walks.
 walkanim=skeleton_walk
 readyanim=skeleton_ready
 op2=Attack
-vislevel=55
+vislevel=68
 recol1s=29562
 recol1d=22218
 model1=model_2944_npc
@@ -74,7 +73,7 @@ param=undead,^true
 huntmode=cowardly
 huntrange=1
 category=undead_one
-// Stats match osrs version but our version Vislvl is different.
+// osrs stats and Vislvl match 1:1
 // https://raw.githubusercontent.com/Joshua-F/osrs-dumps/refs/heads/master/config/dump.npc npc_5342
 
 [zqskeleton_armed]
@@ -83,7 +82,7 @@ desc=A minion of Rashiliyia.
 walkanim=skeleton_walk
 readyanim=skeleton_ready
 op2=Attack
-vislevel=47
+vislevel=61
 recol1s=29562
 recol1d=26515
 model1=model_2944_npc
@@ -108,14 +107,14 @@ param=damagetype,^slash_style
 param=attack_anim,skeleton_attack
 param=defend_anim,skeleton_block
 param=death_anim,skeleton_death
-param=attack_sound,skeleton_attack
+param=attack_sound,stabsword_slash
 param=defend_sound,skelly_hit
 param=death_sound,skeleton_death
 param=undead,^true
 huntmode=cowardly
 huntrange=1
 category=undead_one
-// Stats match osrs version but our version Vislvl is different.
+// osrs stats and Vislvl match 1:1
 // https://raw.githubusercontent.com/Joshua-F/osrs-dumps/refs/heads/master/config/dump.npc npc_5344
 
 [zqzombie_unarmed]
@@ -124,7 +123,7 @@ desc=The animated dead, one of Rashiliyias' minions.
 walkanim=zombie_walk
 readyanim=zombie_ready
 op2=Attack
-vislevel=50
+vislevel=68
 recol1s=4526
 recol1d=12777
 recol2s=4322
@@ -155,7 +154,7 @@ param=death_drop,null
 huntmode=cowardly
 huntrange=1
 category=undead_one
-// Stats match osrs version but our version Vislvl is different.
+// osrs stats and Vislvl match 1:1
 // https://raw.githubusercontent.com/Joshua-F/osrs-dumps/refs/heads/master/config/dump.npc npc_5346
 
 [zqzombie_armed]
@@ -164,7 +163,7 @@ desc=The animated dead, one of Rashiliyias' minions.
 walkanim=zombie_walk
 readyanim=zombie_ready
 op2=Attack
-vislevel=62
+vislevel=73
 recol1s=4526
 recol1d=11690
 recol2s=4322
@@ -192,7 +191,7 @@ param=damagetype,^slash_style
 param=attack_anim,zombie_attack
 param=defend_anim,zombie_block
 param=death_anim,zombie_death
-param=attack_sound,zombie_attack
+param=attack_sound,baxe_crush
 param=defend_sound,zombie_hit
 param=death_sound,zombie_death
 param=undead,^true
@@ -200,7 +199,7 @@ param=death_drop,null
 huntmode=cowardly
 huntrange=1
 category=undead_one
-// Stats match osrs version but our version Vislvl is different.
+// osrs stats and Vislvl match 1:1
 // https://raw.githubusercontent.com/Joshua-F/osrs-dumps/refs/heads/master/config/dump.npc npc_5349
 
 [zqzombiequeen]
@@ -209,7 +208,6 @@ name=Rashiliyia
 desc=The animated spirit of Rashiliyia the Zombie Queen.
 walkanim=ghost_walk
 readyanim=ghost_ready
-hasalpha=yes
 op1=Talk-to
 recol1s=6144
 recol1d=3363
@@ -242,7 +240,7 @@ readyanim=zombie_ready
 resizev=190
 resizeh=190
 op2=Attack
-vislevel=86
+vislevel=91
 recol1s=4526
 recol1d=11690
 recol2s=4322
@@ -269,7 +267,7 @@ param=defend_sound,zombie_hit
 param=death_sound,zombie_death
 param=undead,^true
 param=death_drop,null
-// Stats match osrs version but our version Vislvl is different.
+// osrs stats and Vislvl match 1:1
 // https://raw.githubusercontent.com/Joshua-F/osrs-dumps/refs/heads/master/config/dump.npc npc_5353
 
 [zq_mainzombie2]
@@ -280,7 +278,7 @@ readyanim=skeleton_ready
 resizev=190
 resizeh=190
 op2=Attack
-vislevel=65
+vislevel=68
 recol1s=29562
 recol1d=26515
 model1=model_2944_npc
@@ -302,25 +300,23 @@ param=damagetype,^slash_style
 param=attack_anim,skeleton_attack
 param=defend_anim,skeleton_block
 param=death_anim,skeleton_death
-param=attack_sound,zombie_attack
+param=attack_sound,stabsword_slash
 param=defend_sound,zombie_hit
 param=death_sound,zombie_death
 param=undead,^true
 param=death_drop,null
-// osrs attack_sound stabsword_slash after graphics update
-// Stats match osrs version but our version Vislvl is different.
+// osrs stats and Vislvl match 1:1
 // https://raw.githubusercontent.com/Joshua-F/osrs-dumps/refs/heads/master/config/dump.npc npc_5354
 
 [zq_mainzombie3]
 name=Nazastarool
 desc=A giant ghost of huge strength and devastating power.
-hasalpha=yes
 walkanim=ghost_walk
 readyanim=ghost_ready
 resizev=190
 resizeh=190
 op2=Attack
-vislevel=88
+vislevel=93
 model1=model_2961_npc
 model2=model_2964_npc
 model3=model_2965_npc
@@ -340,5 +336,5 @@ param=defend_sound,ghost_hit
 param=death_sound,ghost_death
 param=undead,^true
 param=death_drop,null
-// Stats match osrs version but our version Vislvl is different.
+// osrs stats and Vislvl match 1:1
 // https://raw.githubusercontent.com/Joshua-F/osrs-dumps/refs/heads/master/config/dump.npc npc_5355

@@ -18,9 +18,16 @@ function formatAge(ms: number): string {
 }
 
 /**
- * Format world state as readable plaintext/markdown
+ * Format world state as readable plaintext/markdown.
+ * `options.sinceTick`: only render gameMessages with tick > sinceTick.
+ * The MCP server passes this to suppress chat the bot has already been shown
+ * across repeated execute_code calls. Omit for full-state snapshots.
  */
-export function formatWorldState(state: BotWorldState, stateAgeMs?: number): string {
+export function formatWorldState(
+    state: BotWorldState,
+    stateAgeMs?: number,
+    options?: { sinceTick?: number }
+): string {
     const lines: string[] = [];
 
     lines.push('# World State');
@@ -67,23 +74,24 @@ export function formatWorldState(state: BotWorldState, stateAgeMs?: number): str
     if (state.modalOpen) {
         lines.push('');
         lines.push(`## Modal Open (interface: ${state.modalInterface})`);
-        if (state.modalInterface === 269) {
+        if (state.modalInterface === 3559) {
             lines.push('(Character design screen - use acceptCharacterDesign to continue)');
         }
     }
 
-    if (state.dialog.isOpen) {
+    if (state.dialog?.isOpen) {
         lines.push('');
         lines.push('## Dialog');
         if (state.dialog.isWaiting) {
             lines.push('(Waiting for server response...)');
         } else if (state.dialog.options.length > 0) {
-            lines.push('Options:');
+            lines.push('Options (select with sendClickDialog(N) using the N below, or clickDialogByText("...")):');
             for (const opt of state.dialog.options) {
                 lines.push(`  ${opt.index}. ${opt.text}`);
             }
+            lines.push('(NOTE: N is the number shown above — NOT a 0-based array position. optionIndex 0 means "continue", not the first option.)');
         } else {
-            lines.push('(Click to continue - use optionIndex: 0)');
+            lines.push('(Click to continue - use sendClickDialog(0))');
         }
     }
 
@@ -96,6 +104,9 @@ export function formatWorldState(state: BotWorldState, stateAgeMs?: number): str
             for (const opt of state.interface.options) {
                 lines.push(`  ${opt.index}. ${opt.text}`);
             }
+        }
+        if (!state.shop?.isOpen && !state.bank?.isOpen) {
+            lines.push('(This modal blocks most actions - close it with bot.closeInterface() or sdk.sendCloseModal())');
         }
     }
 
@@ -124,21 +135,23 @@ export function formatWorldState(state: BotWorldState, stateAgeMs?: number): str
         }
     }
 
-    // Skills
+    // Skills (filter out unknown/placeholder skills like Stat18, Stat19)
     lines.push('');
     lines.push('## Skills');
-    for (const skill of state.skills) {
+    for (const skill of state.skills || []) {
+        if (/^Stat\d+$/i.test(skill.name)) continue;
         const boosted = skill.level !== skill.baseLevel ? `${skill.level}/` : '';
-        lines.push(`${skill.name}: ${boosted}${skill.baseLevel} (${skill.experience.toLocaleString()} xp)`);
+        const displayName = skill.name === 'Hitpoints' ? 'HP' : skill.name;
+        lines.push(`${displayName}: ${boosted}${skill.baseLevel} (${skill.experience.toLocaleString()} xp)`);
     }
 
     // Inventory
     lines.push('');
-    const usedSlots = state.inventory.length;
+    const usedSlots = (state.inventory || []).length;
     const maxSlots = 28;
     const emptySlots = maxSlots - usedSlots;
     lines.push(`## Inventory (${emptySlots} empty slots)`);
-    if (state.inventory.length === 0) {
+    if ((state.inventory || []).length === 0) {
         lines.push('(Empty)');
     } else {
         const itemCounts = new Map<string, { count: number; options: string[] }>();
@@ -160,7 +173,7 @@ export function formatWorldState(state: BotWorldState, stateAgeMs?: number): str
     }
 
     // Equipment
-    if (state.equipment.length > 0) {
+    if ((state.equipment || []).length > 0) {
         lines.push('');
         lines.push('## Equipment');
         for (const item of state.equipment) {
@@ -193,7 +206,7 @@ export function formatWorldState(state: BotWorldState, stateAgeMs?: number): str
     }
 
     // Nearby NPCs
-    if (state.nearbyNpcs.length > 0) {
+    if ((state.nearbyNpcs || []).length > 0) {
         lines.push('');
         lines.push('## Nearby NPCs');
         for (const npc of state.nearbyNpcs.slice(0, 10)) {
@@ -209,7 +222,7 @@ export function formatWorldState(state: BotWorldState, stateAgeMs?: number): str
     }
 
     // Nearby Players
-    if (state.nearbyPlayers.length > 0) {
+    if ((state.nearbyPlayers || []).length > 0) {
         lines.push('');
         lines.push('## Nearby Players');
         for (const pl of state.nearbyPlayers.slice(0, 5)) {
@@ -221,7 +234,7 @@ export function formatWorldState(state: BotWorldState, stateAgeMs?: number): str
     }
 
     // Nearby Locs
-    if (state.nearbyLocs.length > 0) {
+    if ((state.nearbyLocs || []).length > 0) {
         lines.push('');
         lines.push('## Nearby Objects');
         for (const loc of state.nearbyLocs.slice(0, 10)) {
@@ -234,7 +247,7 @@ export function formatWorldState(state: BotWorldState, stateAgeMs?: number): str
     }
 
     // Ground Items
-    if (state.groundItems.length > 0) {
+    if ((state.groundItems || []).length > 0) {
         lines.push('');
         lines.push('## Ground Items');
         for (const item of state.groundItems.slice(0, 10)) {
@@ -245,16 +258,43 @@ export function formatWorldState(state: BotWorldState, stateAgeMs?: number): str
         }
     }
 
-    // Recent messages
+    // Split chat from system messages so player speech is impossible to miss.
+    // Type 2 = public chat, Type 3 = received private message. Other types are
+    // server-generated text (welcomes, "you can't reach", level-up notices...).
     if (state.gameMessages && state.gameMessages.length > 0) {
-        lines.push('');
-        lines.push('## Recent Messages');
-        for (const msg of state.gameMessages.slice(-5)) {
-            const cleanText = msg.text.replace(/@\w+@/g, '');
-            if (msg.sender) {
-                lines.push(`- ${msg.sender}: ${cleanText}`);
-            } else {
-                lines.push(`- ${cleanText}`);
+        const ownName = state.player?.name?.toLowerCase() ?? '';
+        const stripCodes = (s: string) => s.replace(/@\w+@/g, '');
+        const sinceTick = options?.sinceTick ?? -1;
+        const fresh = state.gameMessages.filter(m => m.tick > sinceTick);
+
+        const playerChat = fresh.filter(m =>
+            (m.type === 2 || m.type === 3) &&
+            m.sender &&
+            m.sender.toLowerCase() !== ownName  // suppress own-speech echo
+        );
+        const systemMessages = fresh.filter(m =>
+            m.type !== 2 && m.type !== 3
+        );
+
+        if (playerChat.length > 0) {
+            lines.push('');
+            lines.push('## Player Chat');
+            for (const msg of playerChat.slice(-5)) {
+                const tag = msg.type === 3 ? ' [PM]' : '';
+                lines.push(`- ${msg.sender}${tag}: ${stripCodes(msg.text)}`);
+            }
+        }
+
+        if (systemMessages.length > 0) {
+            lines.push('');
+            lines.push('## Recent Messages');
+            for (const msg of systemMessages.slice(-5)) {
+                const cleanText = stripCodes(msg.text);
+                if (msg.sender) {
+                    lines.push(`- ${msg.sender}: ${cleanText}`);
+                } else {
+                    lines.push(`- ${cleanText}`);
+                }
             }
         }
     }

@@ -7,36 +7,22 @@ import Environment from '#/util/Environment.js';
 import { type GenericLoginThreadResponse } from './index.d.js';
 import { trackLoginAttempts, trackLoginTime } from './LoginMetrics.js';
 
-const client = new LoginClient(Environment.NODE_ID);
+const client = new LoginClient(Environment.node.id);
 
-if (Environment.STANDALONE_BUNDLE) {
-    self.onmessage = async msg => {
-        try {
-            await handleRequests(self, msg.data);
-        } catch (err) {
-            console.error(err);
-        }
-    };
+if (!parentPort) throw new Error('This file must be run as a worker thread.');
 
-    client.onMessage((opcode, data) => {
-        self.postMessage({ opcode, data });
-    });
-} else {
-    if (!parentPort) throw new Error('This file must be run as a worker thread.');
+parentPort.on('message', async msg => {
+    try {
+        if (!parentPort) throw new Error('This file must be run as a worker thread.');
+        await handleRequests(parentPort, msg);
+    } catch (err) {
+        console.error(err);
+    }
+});
 
-    parentPort.on('message', async msg => {
-        try {
-            if (!parentPort) throw new Error('This file must be run as a worker thread.');
-            await handleRequests(parentPort, msg);
-        } catch (err) {
-            console.error(err);
-        }
-    });
-
-    client.onMessage((opcode, data) => {
-        parentPort!.postMessage({ opcode, data });
-    });
-}
+client.onMessage((opcode, data) => {
+    parentPort!.postMessage({ opcode, data });
+});
 
 type ParentPort = {
     postMessage: (msg: GenericLoginThreadResponse) => void;
@@ -47,7 +33,7 @@ async function handleRequests(parentPort: ParentPort, msg: any) {
 
     switch (type) {
         case 'world_startup': {
-            if (Environment.LOGIN_SERVER) {
+            if (Environment.login.enabled) {
                 await client.worldStartup();
             }
             break;
@@ -55,7 +41,7 @@ async function handleRequests(parentPort: ParentPort, msg: any) {
         case 'player_login': {
             const { socket, remoteAddress, username, password, uid, lowMemory, reconnecting, hasSave } = msg;
 
-            if (Environment.LOGIN_SERVER) {
+            if (Environment.login.enabled) {
                 trackLoginAttempts.inc();
                 const stopTimer = trackLoginTime.startTimer();
                 const response = await client.playerLogin(username, password, uid, socket, remoteAddress, reconnecting, hasSave);
@@ -70,9 +56,10 @@ async function handleRequests(parentPort: ParentPort, msg: any) {
                 });
                 stopTimer();
             } else {
+                // rs-sdk: do not auto-grant dev staffmodlevel on non-production worlds (public server)
                 const staffmodlevel = 0;
 
-                const profile = Environment.NODE_PROFILE;
+                const profile = Environment.node.profile;
                 if (!fs.existsSync(`data/players/${profile}`)) {
                     fs.mkdirSync(`data/players/${profile}`, { recursive: true });
                 }
@@ -88,7 +75,7 @@ async function handleRequests(parentPort: ParentPort, msg: any) {
                         staffmodlevel,
                         save: null,
                         account_id: 1,
-                        members: Environment.NODE_MEMBERS
+                        members: Environment.node.members
                     });
                 } else {
                     parentPort.postMessage({
@@ -101,7 +88,7 @@ async function handleRequests(parentPort: ParentPort, msg: any) {
                         staffmodlevel,
                         save: fs.readFileSync(`data/players/${profile}/${username}.sav`),
                         account_id: 1,
-                        members: Environment.NODE_MEMBERS
+                        members: Environment.node.members
                     });
                 }
             }
@@ -110,7 +97,7 @@ async function handleRequests(parentPort: ParentPort, msg: any) {
         case 'player_logout': {
             const { username, save } = msg;
 
-            if (Environment.LOGIN_SERVER) {
+            if (Environment.login.enabled) {
                 const success = await client.playerLogout(username, save);
 
                 parentPort.postMessage({
@@ -119,7 +106,7 @@ async function handleRequests(parentPort: ParentPort, msg: any) {
                     success
                 });
             } else {
-                const profile = Environment.NODE_PROFILE;
+                const profile = Environment.node.profile;
                 if (!fs.existsSync(`data/players/${profile}`)) {
                     fs.mkdirSync(`data/players/${profile}`, { recursive: true });
                 }
@@ -137,10 +124,10 @@ async function handleRequests(parentPort: ParentPort, msg: any) {
         case 'player_autosave': {
             const { username, save } = msg;
 
-            if (Environment.LOGIN_SERVER) {
+            if (Environment.login.enabled) {
                 await client.playerAutosave(username, save);
             } else {
-                const profile = Environment.NODE_PROFILE;
+                const profile = Environment.node.profile;
                 if (!fs.existsSync(`data/players/${profile}`)) {
                     fs.mkdirSync(`data/players/${profile}`, { recursive: true });
                 }
@@ -150,14 +137,14 @@ async function handleRequests(parentPort: ParentPort, msg: any) {
             break;
         }
         case 'player_force_logout': {
-            if (Environment.LOGIN_SERVER) {
+            if (Environment.login.enabled) {
                 const { username } = msg;
                 await client.playerForceLogout(username);
             }
             break;
         }
         case 'player_ban': {
-            if (Environment.LOGIN_SERVER) {
+            if (Environment.login.enabled) {
                 // todo: wait for confirmation? resend?
                 const { staff, username, until } = msg;
                 await client.playerBan(staff, username, until);
@@ -165,7 +152,7 @@ async function handleRequests(parentPort: ParentPort, msg: any) {
             break;
         }
         case 'player_mute': {
-            if (Environment.LOGIN_SERVER) {
+            if (Environment.login.enabled) {
                 // todo: wait for confirmation? resend?
                 const { staff, username, until } = msg;
                 await client.playerMute(staff, username, until);

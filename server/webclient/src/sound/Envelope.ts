@@ -1,34 +1,39 @@
 import Packet from '#/io/Packet.js';
 
 export default class Envelope {
-    private length: number = 0;
-    private shapeDelta: Int32Array | null = null;
-    private shapePeak: Int32Array | null = null;
+    length: number = 0;
+    shapeDelta: Int32Array = new Int32Array(0);
+    shapePeak: Int32Array = new Int32Array(0);
+
     start: number = 0;
     end: number = 0;
     form: number = 0;
-    private threshold: number = 0;
-    private position: number = 0;
-    private delta: number = 0;
-    private amplitude: number = 0;
-    private ticks: number = 0;
+    threshold: number = 0;
+    position: number = 0;
+    delta: number = 0;
+    amplitude: number = 0;
+    ticks: number = 0;
 
-    unpack(dat: Packet): void {
-        this.form = dat.g1();
-        this.start = dat.g4();
-        this.end = dat.g4();
-        this.length = dat.g1();
+    load(buf: Packet): void {
+        this.form = buf.g1();
+        this.start = buf.g4();
+        this.end = buf.g4();
 
+        this.loadPoints(buf);
+    }
+
+    loadPoints(buf: Packet) {
+        this.length = buf.g1();
         this.shapeDelta = new Int32Array(this.length);
         this.shapePeak = new Int32Array(this.length);
 
-        for (let i: number = 0; i < this.length; i++) {
-            this.shapeDelta[i] = dat.g2();
-            this.shapePeak[i] = dat.g2();
+        for (let i = 0; i < this.length; i++) {
+            this.shapeDelta[i] = buf.g2();
+            this.shapePeak[i] = buf.g2();
         }
     }
 
-    reset(): void {
+    genInit(): void {
         this.threshold = 0;
         this.position = 0;
         this.delta = 0;
@@ -36,8 +41,8 @@ export default class Envelope {
         this.ticks = 0;
     }
 
-    evaluate(delta: number): number {
-        if (this.ticks >= this.threshold && this.shapePeak && this.shapeDelta) {
+    genNext(delta: number): number {
+        if (this.ticks >= this.threshold) {
             this.amplitude = this.shapePeak[this.position++] << 15;
 
             if (this.position >= this.length) {

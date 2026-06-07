@@ -1,6 +1,11 @@
 import fs from 'fs';
-import * as rsmod from '@2004scape/rsmod-pathfinder';
-import { CollisionFlag, LocLayer } from '@2004scape/rsmod-pathfinder';
+
+import { unzipSync } from 'fflate';
+// 274 replaced the @2004scape/rsmod-pathfinder WASM with an in-engine TypeScript
+// routefinder. Read collision from that module so the export reflects the actual
+// collision state the engine populates at startup (the WASM is no longer fed).
+import * as rsmod from '#/engine/routefinder/index.js';
+import { CollisionFlag, LocLayer } from '#/engine/routefinder/index.js';
 import LocType from '#/cache/config/LocType.js';
 import Packet from '#/io/Packet.js';
 
@@ -46,20 +51,53 @@ export function handleExportCollisionApi(url: URL): Response | null {
             CollisionFlag.WALL_SOUTH_EAST, CollisionFlag.WALL_SOUTH_WEST,
         ];
 
-        // Discover mapsquares from the same map files the server loaded,
-        // so we automatically cover every area including dungeons.
-        const mapDir = 'data/pack/server/maps/';
-        const mapsquares: Array<[number, number]> = [];
-        if (fs.existsSync(mapDir)) {
-            for (const file of fs.readdirSync(mapDir)) {
-                if (file[0] !== 'm') continue;
-                const parts = file.substring(1).split('_').map(Number);
-                if (parts.length >= 2 && !isNaN(parts[0]) && !isNaN(parts[1])) {
-                    mapsquares.push([parts[0], parts[1]]);
-                }
+        // Discover mapsquares the engine could have loaded. GameMap.init prefers the
+        // packed zip (data/pack/.cache/maps-server.zip) and only falls back to the raw
+        // maps dir when the zip is absent. The two sources don't fully overlap — the zip
+        // had ~41 mapsquares (e.g. the SW mainland around Yanille, Tirannwn) absent from
+        // the dir. Discovering from the dir alone silently dropped those from the export,
+        // leaving bots with no collision data there. Union both sources and let the
+        // isZoneAllocated() check below filter to the mapsquares actually loaded.
+        const mapsquareSet = new Set<string>();
+        const addMapsquare = (name: string): void => {
+            if (name[0] !== 'm') return;
+            const parts = name.substring(1).split('_').map(Number);
+            if (parts.length >= 2 && !isNaN(parts[0]) && !isNaN(parts[1])) {
+                mapsquareSet.add(`${parts[0]}_${parts[1]}`);
+            }
+        };
+
+        let zipEntries: Record<string, Uint8Array> | null = null;
+        const zipPath = 'data/pack/.cache/maps-server.zip';
+        if (fs.existsSync(zipPath)) {
+            try {
+                zipEntries = unzipSync(fs.readFileSync(zipPath));
+                for (const name of Object.keys(zipEntries)) addMapsquare(name);
+            } catch (e) {
+                console.warn('exportCollision: failed to read maps zip, falling back to dir only', e);
             }
         }
-        console.log(`Found ${mapsquares.length} mapsquares from ${mapDir}`);
+        const mapDir = 'data/pack/server/maps/';
+        if (fs.existsSync(mapDir)) {
+            for (const file of fs.readdirSync(mapDir)) addMapsquare(file);
+        }
+
+        // Load a map packet (e.g. "m37_71" / "l37_71") from whichever source has it —
+        // the raw dir or the zip. Mapsquares present only in the zip have no dir file,
+        // so reading from the dir alone throws ENOENT during the door scan below.
+        const loadMapPacket = (prefix: string, mx: number, mz: number): Packet | null => {
+            const file = `${mapDir}${prefix}${mx}_${mz}`;
+            if (fs.existsSync(file)) {
+                return Packet.load(file);
+            }
+            const bytes = zipEntries?.[`${prefix}${mx}_${mz}`];
+            return bytes ? new Packet(bytes) : null;
+        };
+        const mapsquares: Array<[number, number]> = [...mapsquareSet].map(k => {
+            const [mx, mz] = k.split('_').map(Number);
+            return [mx, mz];
+        });
+        console.log(`Found ${mapsquares.length} mapsquares (zip ∪ dir)`);
 
         const LEVELS = 4;
         const tiles: Array<[number, number, number, number]> = [];
@@ -118,9 +156,14 @@ export function handleExportCollisionApi(url: URL): Response | null {
             const mapsquareX = mx << 6;
             const mapsquareZ = mz << 6;
 
+            // Parse loc file (same format as GameMap.loadLocations). Skip squares with
+            // no loc data in either source — nothing to scan for doors.
+            const locPacket = loadMapPacket('l', mx, mz);
+            if (!locPacket) continue;
+
             // Load ground data for bridge level adjustments (same as GameMap.loadGround)
             const lands = new Int8Array(4 * MAPSQUARE_SIZE * MAPSQUARE_SIZE);
-            const groundPacket = Packet.load(`${mapDir}m${mx}_${mz}`);
+            const groundPacket = loadMapPacket('m', mx, mz) ?? new Packet(new Uint8Array());
             for (let level = 0; level < LEVELS; level++) {
                 for (let x = 0; x < MAPSQUARE_SIZE; x++) {
                     for (let z = 0; z < MAPSQUARE_SIZE; z++) {
@@ -137,8 +180,6 @@ export function handleExportCollisionApi(url: URL): Response | null {
                 }
             }
 
-            // Parse loc file (same format as GameMap.loadLocations)
-            const locPacket = Packet.load(`${mapDir}l${mx}_${mz}`);
             let locId = -1;
             let locIdOffset = locPacket.gsmarts();
             while (locIdOffset !== 0) {

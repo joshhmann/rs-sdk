@@ -6,6 +6,12 @@ import { getPublicPerDeploymentToken } from '#/io/PemUtil.js';
 import { tryParseInt } from '#/util/TryParse.js';
 import Environment from '#/util/Environment.js';
 
+// Cache-bust token appended to the client.js module import URL so browsers fetch the
+// fresh bundle after a deploy instead of a stale cached ES module. Changes every process
+// start (i.e. every deploy/restart). Without this, the import URL is static and the browser
+// caches the old client indefinitely (no version query + no cache headers historically).
+const CLIENT_CACHEBUST = Date.now().toString(36);
+
 export async function handleClientPage(url: URL): Promise<Response | null> {
     // Human player client at /play - no bot SDK, clean interface
     if (url.pathname === '/play' || url.pathname === '/play/') {
@@ -31,9 +37,10 @@ export async function handleClientPage(url: URL): Promise<Response | null> {
             lowmem,
             members: Environment.NODE_MEMBERS,
             botUsername,
+            cachebust: CLIENT_CACHEBUST,
             per_deployment_token: Environment.WEB_SOCKET_TOKEN_PROTECTION ? getPublicPerDeploymentToken() : ''
         }), {
-            headers: { 'Content-Type': 'text/html' }
+            headers: { 'Content-Type': 'text/html', 'Cache-Control': 'no-cache' }
         });
     }
 
@@ -45,9 +52,10 @@ export async function handleClientPage(url: URL): Promise<Response | null> {
             nodeid: Environment.NODE_ID,
             lowmem,
             members: Environment.NODE_MEMBERS,
+            cachebust: CLIENT_CACHEBUST,
             per_deployment_token: Environment.WEB_SOCKET_TOKEN_PROTECTION ? getPublicPerDeploymentToken() : ''
         }), {
-            headers: { 'Content-Type': 'text/html' }
+            headers: { 'Content-Type': 'text/html', 'Cache-Control': 'no-cache' }
         });
     }
 
@@ -62,16 +70,17 @@ export async function handleClientPage(url: URL): Promise<Response | null> {
                 members: Environment.NODE_MEMBERS,
                 portoff: Environment.NODE_PORT - 43594
             }), {
-                headers: { 'Content-Type': 'text/html' }
+                headers: { 'Content-Type': 'text/html', 'Cache-Control': 'no-cache' }
             });
         } else {
             return new Response(await ejs.renderFile('view/client.ejs', {
                 nodeid: Environment.NODE_ID,
                 lowmem,
                 members: Environment.NODE_MEMBERS,
+                cachebust: CLIENT_CACHEBUST,
                 per_deployment_token: Environment.WEB_SOCKET_TOKEN_PROTECTION ? getPublicPerDeploymentToken() : ''
             }), {
-                headers: { 'Content-Type': 'text/html' }
+                headers: { 'Content-Type': 'text/html', 'Cache-Control': 'no-cache' }
             });
         }
     }

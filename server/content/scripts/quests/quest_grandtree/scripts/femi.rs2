@@ -1,4 +1,10 @@
 [opnpc1,grandtree_femi]
+if(inv_total(inv, trail_clue_medium_anagram013) > 0) {
+    // https://www.youtube.com/watch?v=6C2FMez1F2E
+    ~chatnpc("<p,happy>Well done!");
+    ~progress_clue_medium(trail_clue_medium_anagram013, "Femi has given you another clue scroll!");
+    return;
+}
 if(%grandtree = ^grandtree_obtained_lumber_order) {
     if(coordz(npc_coord) > 3400) {
         ~chatnpc("<p,neutral>Now, to get this lot to the Grand Tree!");
@@ -47,7 +53,7 @@ mes("The little gnome is too busy to talk.");
 
 [label,grandtree_femi_sneakin]
 if_close;
-bas_running(null);
+runanim(null);
 p_walk(0_38_52_29_51); // respects clipping from my testing
 p_delay(4); // 5t
 facesquare(movecoord(coord, 1, 0, 0));

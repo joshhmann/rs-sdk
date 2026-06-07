@@ -1,19 +1,19 @@
-import DoublyLinkable from '#/datastruct/DoublyLinkable.js';
+import Linkable2 from '#/datastruct/Linkable2.js';
 import LinkList from '#/datastruct/LinkList.js';
 
 import Isaac from '#/io/Isaac.js';
 
 import { bigIntModPow, bigIntToBytes, bytesToBigInt } from '#/util/JsUtil.js';
 
-export default class Packet extends DoublyLinkable {
+export default class Packet extends Linkable2 {
     private static readonly CRC32_POLYNOMIAL: number = 0xedb88320;
 
     private static readonly crctable: Int32Array = new Int32Array(256);
     private static readonly bitmask: Uint32Array = new Uint32Array(33);
 
-    private static readonly cacheMin: LinkList = new LinkList();
-    private static readonly cacheMid: LinkList = new LinkList();
-    private static readonly cacheMax: LinkList = new LinkList();
+    private static readonly cacheMin: LinkList<Packet> = new LinkList();
+    private static readonly cacheMid: LinkList<Packet> = new LinkList();
+    private static readonly cacheMax: LinkList<Packet> = new LinkList();
 
     private static cacheMinCount: number = 0;
     private static cacheMidCount: number = 0;
@@ -52,11 +52,9 @@ export default class Packet extends DoublyLinkable {
         return Packet.getcrc(src, offset, length) == expected;
     }
 
-    // constructor
     private readonly view: DataView;
     readonly data: Uint8Array;
 
-    // runtime
     pos: number = 0;
     bitPos: number = 0;
     random: Isaac | null = null;
@@ -69,7 +67,7 @@ export default class Packet extends DoublyLinkable {
         super();
 
         if (src instanceof Int8Array) {
-            this.data = new Uint8Array(src);
+            this.data = new Uint8Array(src.buffer, src.byteOffset, src.byteLength);
         } else {
             this.data = src;
         }
@@ -89,13 +87,13 @@ export default class Packet extends DoublyLinkable {
         let cached: Packet | null = null;
         if (type === 0 && Packet.cacheMinCount > 0) {
             Packet.cacheMinCount--;
-            cached = Packet.cacheMin.pop() as Packet | null;
+            cached = Packet.cacheMin.popFront();
         } else if (type === 1 && Packet.cacheMidCount > 0) {
             Packet.cacheMidCount--;
-            cached = Packet.cacheMid.pop() as Packet | null;
+            cached = Packet.cacheMid.popFront();
         } else if (type === 2 && Packet.cacheMaxCount > 0) {
             Packet.cacheMaxCount--;
-            cached = Packet.cacheMax.pop() as Packet | null;
+            cached = Packet.cacheMax.popFront();
         }
 
         if (cached) {
@@ -167,12 +165,11 @@ export default class Packet extends DoublyLinkable {
         return result;
     }
 
-    gsmart(): number {
+    gsmarts(): number {
         return this.view.getUint8(this.pos) < 0x80 ? this.g1() - 0x40 : this.g2() - 0xc000;
     }
 
-    // signed
-    gsmarts(): number {
+    gsmart(): number {
         return this.view.getUint8(this.pos) < 0x80 ? this.g1() : this.g2() - 0x8000;
     }
 
@@ -192,7 +189,7 @@ export default class Packet extends DoublyLinkable {
         this.pos += length;
     }
 
-    p1isaac(opcode: number): void {
+    p1Enc(opcode: number): void {
         this.view.setUint8(this.pos++, (opcode + (this.random?.nextInt ?? 0)) & 0xff);
     }
 
@@ -240,20 +237,20 @@ export default class Packet extends DoublyLinkable {
         view.setUint8(this.pos++, 10);
     }
 
-    pdata(src: Uint8Array, length: number, offset: number): void {
+    pdata(src: Uint8Array, offset: number, length: number): void {
         this.data.set(src.subarray(offset, offset + length), this.pos);
-        this.pos += length - offset;
+        this.pos += length;
     }
 
     psize1(size: number): void {
         this.view.setUint8(this.pos - size - 1, size);
     }
 
-    bits(): void {
+    gBitStart(): void {
         this.bitPos = this.pos << 3;
     }
 
-    bytes(): void {
+    gBitEnd(): void {
         this.pos = (this.bitPos + 7) >>> 3;
     }
 
@@ -290,6 +287,6 @@ export default class Packet extends DoublyLinkable {
 
         this.pos = 0;
         this.p1(rawEnc.length);
-        this.pdata(rawEnc, rawEnc.length, 0);
+        this.pdata(rawEnc, 0, rawEnc.length);
     }
 }

@@ -46,6 +46,18 @@ import type {
 } from './types';
 import { PRAYER_INDICES, PRAYER_NAMES, PRAYER_LEVELS } from './types';
 
+// Modal interfaces dismissBlockingUI must never auto-close: closing these is
+// destructive (declines a two-party screen) or strands the player (must be
+// completed, not closed). Everything else is informational or re-openable.
+// Ids from server/content/pack/interface.pack.
+const NEVER_AUTO_CLOSE = new Set([
+    3323, // trademain - auto-close would silently decline a player trade
+    3443, // tradeconfirm - second trade screen, same risk
+    6412, // duel_confirm - same risk for duels
+    6554, // macro_cube - anti-macro random event, must be solved
+    3559, // player_kit - character design, must be accepted (see skipTutorial)
+]);
+
 export class BotActions {
     private helpers: ActionHelpers;
 
@@ -199,6 +211,17 @@ export class BotActions {
                 continue;
             }
 
+            // Modal interfaces (books, quest scrolls, level-up art) also block
+            // input. Skip deliberate sessions (shop/bank have their own close
+            // actions) and modals where auto-close is destructive — see
+            // NEVER_AUTO_CLOSE. Anything else is informational or re-openable.
+            if (state.interface?.isOpen && !state.shop?.isOpen && !state.bank?.isOpen
+                && !NEVER_AUTO_CLOSE.has(state.interface.interfaceId)) {
+                await this.sdk.sendCloseModal();
+                await this.sdk.waitForStateChange(2000).catch(() => {});
+                continue;
+            }
+
             break;
         }
     }
@@ -255,11 +278,12 @@ export class BotActions {
         const doorX = door.x;
         const doorZ = door.z;
         const startTick = this.sdk.getState()?.tick || 0;
+        const msgBaseline = this.helpers.getMessageTick();
 
         try {
             await this.sdk.waitForCondition(state => {
                 for (const msg of state.gameMessages) {
-                    if (msg.tick > startTick) {
+                    if (msg.tick > msgBaseline) {
                         const text = msg.text.toLowerCase();
                         if (text.includes("can't reach") || text.includes("cannot reach")) {
                             return true;
@@ -278,7 +302,7 @@ export class BotActions {
                 return hasClose && !hasOpen;
             }, 5000);
 
-            if (this.helpers.checkCantReachMessage(startTick)) {
+            if (this.helpers.checkCantReachMessage(msgBaseline)) {
                 return { success: false, message: `Cannot reach ${door.name} - still blocked`, reason: 'open_failed', door };
             }
 
@@ -307,6 +331,20 @@ export class BotActions {
      * Walks to the location first (handling doors), then uses the item.
      */
     async useItemOnLoc(
+        item: InventoryItem | string | RegExp,
+        loc: NearbyLoc | string | RegExp,
+        options: { timeout?: number } = {}
+    ): Promise<UseItemOnLocResult> {
+        const resolvedLoc = this.helpers.resolveLocation(loc, /./);
+        return this.helpers.withDoorRetry(
+            () => this._useItemOnLocOnce(item, loc, options),
+            (r) => r.reason === 'cant_reach',
+            2,
+            resolvedLoc ? { x: resolvedLoc.x, z: resolvedLoc.z } : undefined
+        );
+    }
+
+    private async _useItemOnLocOnce(
         item: InventoryItem | string | RegExp,
         loc: NearbyLoc | string | RegExp,
         options: { timeout?: number } = {}
@@ -343,6 +381,7 @@ export class BotActions {
         }
 
         const startTick = this.sdk.getState()?.tick || 0;
+        const msgBaseline = this.helpers.getMessageTick();
 
         // Use the item on the location
         const result = await this.sdk.sendUseItemOnLoc(resolvedItem.slot, locNow.x, locNow.z, locNow.id);
@@ -355,7 +394,7 @@ export class BotActions {
             await this.sdk.waitForCondition(state => {
                 // Check for "can't reach" messages
                 for (const msg of state.gameMessages) {
-                    if (msg.tick > startTick) {
+                    if (msg.tick > msgBaseline) {
                         const text = msg.text.toLowerCase();
                         if (text.includes("can't reach") || text.includes("cannot reach")) {
                             return true;
@@ -377,7 +416,7 @@ export class BotActions {
             }, timeout);
 
             // Check for failure
-            if (this.helpers.checkCantReachMessage(startTick)) {
+            if (this.helpers.checkCantReachMessage(msgBaseline)) {
                 return { success: false, message: `Cannot reach ${locNow.name}`, reason: 'cant_reach' };
             }
 
@@ -428,6 +467,7 @@ export class BotActions {
         }
 
         const startTick = this.sdk.getState()?.tick || 0;
+        const msgBaseline = this.helpers.getMessageTick();
 
         // Use the item on the NPC
         const result = await this.sdk.sendUseItemOnNpc(resolvedItem.slot, npcNow.index);
@@ -440,7 +480,7 @@ export class BotActions {
             await this.sdk.waitForCondition(state => {
                 // Check for "can't reach" messages
                 for (const msg of state.gameMessages) {
-                    if (msg.tick > startTick) {
+                    if (msg.tick > msgBaseline) {
                         const text = msg.text.toLowerCase();
                         if (text.includes("can't reach") || text.includes("cannot reach")) {
                             return true;
@@ -462,7 +502,7 @@ export class BotActions {
             }, timeout);
 
             // Check for failure
-            if (this.helpers.checkCantReachMessage(startTick)) {
+            if (this.helpers.checkCantReachMessage(msgBaseline)) {
                 return { success: false, message: `Cannot reach ${npcNow.name}`, reason: 'cant_reach' };
             }
 
@@ -526,6 +566,7 @@ export class BotActions {
         }
 
         const startTick = this.sdk.getState()?.tick || 0;
+        const msgBaseline = this.helpers.getMessageTick();
         let lastDialogClickTick = 0;
 
         try {
@@ -542,7 +583,7 @@ export class BotActions {
 
                 const failureMessages = ["can't light a fire", "you need to move", "can't do that here"];
                 for (const msg of state.gameMessages) {
-                    if (msg.tick > startTick) {
+                    if (msg.tick > msgBaseline) {
                         const text = msg.text.toLowerCase();
                         if (failureMessages.some(f => text.includes(f))) {
                             return true;
@@ -568,9 +609,12 @@ export class BotActions {
 
     /** Pick up an item from the ground. */
     async pickupItem(target: GroundItem | string | RegExp): Promise<PickupResult> {
+        const resolvedItem = this.helpers.resolveGroundItem(target);
         return this.helpers.withDoorRetry(
             () => this._pickupItemOnce(target),
-            (r) => r.reason === 'cant_reach'
+            (r) => r.reason === 'cant_reach',
+            2,
+            resolvedItem ? { x: resolvedItem.x, z: resolvedItem.z } : undefined
         );
     }
 
@@ -597,6 +641,7 @@ export class BotActions {
 
         // Capture startTick AFTER walk so we only check messages from the pickup, not the walk
         const startTick = this.sdk.getState()?.tick || 0;
+        const msgBaseline = this.helpers.getMessageTick();
 
         // Now send the pickup command
         const result = await this.sdk.sendPickup(item.x, item.z, item.id);
@@ -611,7 +656,7 @@ export class BotActions {
             const finalState = await this.sdk.waitForCondition(state => {
                 // Check for failure messages
                 for (const msg of state.gameMessages) {
-                    if (msg.tick > startTick) {
+                    if (msg.tick > msgBaseline) {
                         const text = msg.text.toLowerCase();
                         if (text.includes("can't reach") || text.includes("cannot reach")) {
                             return true;
@@ -634,7 +679,7 @@ export class BotActions {
 
             // Check for failure reasons
             for (const msg of finalState.gameMessages) {
-                if (msg.tick > startTick) {
+                if (msg.tick > msgBaseline) {
                     const text = msg.text.toLowerCase();
                     if (text.includes("can't reach") || text.includes("cannot reach")) {
                         return { success: false, message: `Cannot reach ${item.name} - path blocked`, reason: 'cant_reach' };
@@ -681,6 +726,7 @@ export class BotActions {
         }
 
         const startTick = this.sdk.getState()?.tick || 0;
+        const msgBaseline = this.helpers.getMessageTick();
         let lastMoveTick = startTick;
         let lastX = this.sdk.getState()?.player?.x ?? 0;
         let lastZ = this.sdk.getState()?.player?.z ?? 0;
@@ -694,7 +740,7 @@ export class BotActions {
             const finalState = await this.sdk.waitForCondition(state => {
                 // Check for can't-reach messages
                 for (const msg of state.gameMessages) {
-                    if (msg.tick > startTick) {
+                    if (msg.tick > msgBaseline) {
                         const text = msg.text.toLowerCase();
                         if (text.includes("can't reach") || text.includes("cannot reach")) return true;
                     }
@@ -716,7 +762,7 @@ export class BotActions {
                 return false;
             }, 30000); // safety net only
 
-            if (this.helpers.checkCantReachMessage(startTick)) {
+            if (this.helpers.checkCantReachMessage(msgBaseline)) {
                 return { success: false, message: `Cannot reach ${npcNow.name}` };
             }
 
@@ -748,7 +794,8 @@ export class BotActions {
         const MAX_DOOR_RETRIES = 3;
         let doorRetryCount = 0;
         let poorProgressCount = 0;
-        const blockedDoors = new Set<string>(); // Doors we failed to open (locked etc.)
+        const blockedDoors = new Set<string>(); // Doors confirmed locked
+        const doorFailCounts = new Map<string, number>(); // Tracks reach failures per door
 
         // Try to open a blocking door. Returns true if door was opened.
         const tryOpenDoor = async (): Promise<boolean> => {
@@ -767,7 +814,10 @@ export class BotActions {
             if (nearest) {
                 const level = this.sdk.getState()?.player?.level ?? 0;
                 const key = `${nearest.x},${nearest.z}`;
-                if (!blockedDoors.has(key)) {
+                const fails = (doorFailCounts.get(key) ?? 0) + 1;
+                doorFailCounts.set(key, fails);
+                // Only permanently block after 3 reach failures
+                if (fails >= 3 && !blockedDoors.has(key)) {
                     blockedDoors.add(key);
                     blockDoor(level, nearest.x, nearest.z);
                     console.log(`[walkTo] Blocked impassable door at (${nearest.x}, ${nearest.z}) — re-routing`);
@@ -811,20 +861,33 @@ export class BotActions {
                         if (dist <= 15) {
                             // Find which required door is closest to this waypoint
                             for (const door of requiredDoors) {
-                                const doorKey = `${door.x},${door.z}`;
-                                if (blockedDoors.has(doorKey)) break; // Already known locked
+                                const dk = `${door.x},${door.z}`;
+                                if (blockedDoors.has(dk)) break; // Already known locked
                                 const doorDist = Math.abs(door.x - wp.x) + Math.abs(door.z - wp.z);
                                 if (doorDist <= 1) {
-                                    const opened = await this.helpers.openDoorAt(door.x, door.z);
-                                    if (opened) {
-                                        requiredDoorKeys.delete(doorKey);
+                                    const result = await this.helpers.openDoorAt(door.x, door.z);
+                                    if (result === 'opened' || result === 'already_open') {
+                                        requiredDoorKeys.delete(dk);
                                         await this.sdk.waitForTicks(1);
-                                    } else {
-                                        // Door failed to open (locked, etc.) — block in pathfinder
-                                        blockedDoors.add(doorKey);
+                                    } else if (result === 'locked') {
+                                        // Definitely locked — block permanently in pathfinder
+                                        blockedDoors.add(dk);
                                         blockDoor(door.level, door.x, door.z);
-                                        requiredDoorKeys.delete(doorKey);
-                                        console.log(`[walkTo] Blocked impassable door at (${door.x}, ${door.z}) — re-routing`);
+                                        requiredDoorKeys.delete(dk);
+                                        console.log(`[walkTo] Blocked locked door at (${door.x}, ${door.z}) — re-routing`);
+                                        break; // Re-query path on next iteration
+                                    } else {
+                                        // cant_reach or not_found — transient failure, track attempts
+                                        const fails = (doorFailCounts.get(dk) ?? 0) + 1;
+                                        doorFailCounts.set(dk, fails);
+                                        if (fails >= 3) {
+                                            blockedDoors.add(dk);
+                                            blockDoor(door.level, door.x, door.z);
+                                            requiredDoorKeys.delete(dk);
+                                            console.log(`[walkTo] Blocked impassable door at (${door.x}, ${door.z}) after ${fails} failures — re-routing`);
+                                        } else {
+                                            console.log(`[walkTo] Door at (${door.x}, ${door.z}) ${result} (attempt ${fails}/3) — retrying`);
+                                        }
                                         break; // Re-query path on next iteration
                                     }
                                     break;
@@ -1019,9 +1082,10 @@ export class BotActions {
         }
 
         const startTick = this.sdk.getState()?.tick || 0;
+        const msgBaseline = this.helpers.getMessageTick();
 
         if (amount === 'all') {
-            return this.sellAllToShop(sellItem, startTick);
+            return this.sellAllToShop(sellItem, startTick, msgBaseline);
         }
 
         const getTotalCount = (playerItems: typeof shop.playerItems) =>
@@ -1053,7 +1117,7 @@ export class BotActions {
             try {
                 const finalState = await this.sdk.waitForCondition(state => {
                     for (const msg of state.gameMessages) {
-                        if (msg.tick > startTick) {
+                        if (msg.tick > msgBaseline) {
                             const text = msg.text.toLowerCase();
                             if (text.includes("can't sell this item")) {
                                 return true;
@@ -1066,7 +1130,7 @@ export class BotActions {
                 }, 5000);
 
                 for (const msg of finalState.gameMessages) {
-                    if (msg.tick > startTick) {
+                    if (msg.tick > msgBaseline) {
                         const text = msg.text.toLowerCase();
                         if (text.includes("can't sell this item to this shop")) {
                             return { success: false, message: `Shop doesn't buy ${sellItem.name}`, rejected: true };
@@ -1094,7 +1158,7 @@ export class BotActions {
         return { success: true, message: `Sold ${sellItem.name} x${totalSold}`, amountSold: totalSold };
     }
 
-    private async sellAllToShop(sellItem: ShopItem, startTick: number): Promise<ShopSellResult> {
+    private async sellAllToShop(sellItem: ShopItem, startTick: number, msgBaseline: number): Promise<ShopSellResult> {
         let totalSold = 0;
 
         const getTotalCount = (playerItems: ShopItem[]) => {
@@ -1124,7 +1188,7 @@ export class BotActions {
             try {
                 const finalState = await this.sdk.waitForCondition(s => {
                     for (const msg of s.gameMessages) {
-                        if (msg.tick > startTick) {
+                        if (msg.tick > msgBaseline) {
                             if (msg.text.toLowerCase().includes("can't sell this item")) {
                                 return true;
                             }
@@ -1136,7 +1200,7 @@ export class BotActions {
                 }, 3000);
 
                 for (const msg of finalState.gameMessages) {
-                    if (msg.tick > startTick) {
+                    if (msg.tick > msgBaseline) {
                         const text = msg.text.toLowerCase();
                         if (text.includes("can't sell this item to this shop")) {
                             return {
@@ -1183,6 +1247,19 @@ export class BotActions {
 
     /** Open a bank booth or talk to a banker. */
     async openBank(timeout: number = 10000): Promise<OpenBankResult> {
+        const bankBooth = this.sdk.getNearbyLocs()
+            .filter(l => /bank booth|bank chest/i.test(l.name) && l.optionsWithIndex.length > 0)
+            .sort((a, b) => a.distance - b.distance)[0] || null;
+
+        return this.helpers.withDoorRetry(
+            () => this._openBankOnce(timeout),
+            (r) => r.reason === 'cant_reach',
+            2,
+            bankBooth ? { x: bankBooth.x, z: bankBooth.z } : undefined
+        );
+    }
+
+    private async _openBankOnce(timeout: number): Promise<OpenBankResult> {
         const state = this.sdk.getState();
         if (state?.interface?.isOpen) {
             return { success: true, message: 'Bank already open' };
@@ -1191,14 +1268,18 @@ export class BotActions {
         await this.dismissBlockingUI();
 
         const banker = this.sdk.findNearbyNpc(/banker/i);
-        const bankBooth = this.sdk.findNearbyLoc(/bank booth|bank chest/i);
+        // Filter bank booths/chests to only those with usable options (excludes "Closed bank booth" etc.)
+        const bankBooth = this.sdk.getNearbyLocs()
+            .filter(l => /bank booth|bank chest/i.test(l.name) && l.optionsWithIndex.length > 0)
+            .sort((a, b) => a.distance - b.distance)[0] || null;
 
         if (!banker && !bankBooth) {
             return { success: false, message: 'No banker NPC or bank booth found nearby', reason: 'no_bank_found' };
         }
 
-        // Walk near the bank target first - this handles doors
-        const target = banker || bankBooth!;
+        // Prefer booth over banker — booths are stationary so walkAdjacentTo
+        // can reliably position around them, while bankers stand behind counters
+        const target = bankBooth || banker!;
         if (target.distance > 2) {
             const walkResult = await this.walkTo(target.x, target.z, 2);
             if (!walkResult.success) {
@@ -1207,24 +1288,27 @@ export class BotActions {
         }
 
         // Re-find targets after walking (they may have changed)
+        const bankBoothNow = this.sdk.getNearbyLocs()
+            .filter(l => /bank booth|bank chest/i.test(l.name) && l.optionsWithIndex.length > 0)
+            .sort((a, b) => a.distance - b.distance)[0] || null;
         const bankerNow = this.sdk.findNearbyNpc(/banker/i);
-        const bankBoothNow = this.sdk.findNearbyLoc(/bank booth|bank chest/i);
 
         let interactSuccess = false;
 
-        if (bankerNow) {
-            const bankOpt = bankerNow.optionsWithIndex.find(o => /^bank$/i.test(o.text));
+        if (bankBoothNow) {
+            const bankOpt = bankBoothNow.optionsWithIndex.find(o => /^bank$/i.test(o.text)) ||
+                           bankBoothNow.optionsWithIndex.find(o => /use.quickly/i.test(o.text)) ||
+                           bankBoothNow.optionsWithIndex.find(o => /use/i.test(o.text));
             if (bankOpt) {
-                await this.sdk.sendInteractNpc(bankerNow.index, bankOpt.opIndex);
+                await this.sdk.sendInteractLoc(bankBoothNow.x, bankBoothNow.z, bankBoothNow.id, bankOpt.opIndex);
                 interactSuccess = true;
             }
         }
 
-        if (!interactSuccess && bankBoothNow) {
-            const bankOpt = bankBoothNow.optionsWithIndex.find(o => /^bank$/i.test(o.text)) ||
-                           bankBoothNow.optionsWithIndex.find(o => /use/i.test(o.text));
+        if (!interactSuccess && bankerNow) {
+            const bankOpt = bankerNow.optionsWithIndex.find(o => /^bank$/i.test(o.text));
             if (bankOpt) {
-                await this.sdk.sendInteractLoc(bankBoothNow.x, bankBoothNow.z, bankBoothNow.id, bankOpt.opIndex);
+                await this.sdk.sendInteractNpc(bankerNow.index, bankOpt.opIndex);
                 interactSuccess = true;
             }
         }
@@ -1233,19 +1317,29 @@ export class BotActions {
             return { success: false, message: 'No banker NPC or bank booth found nearby', reason: 'no_bank_found' };
         }
 
+        const startTick = this.sdk.getState()?.tick || 0;
+        const msgBaseline = this.helpers.getMessageTick();
         const startTime = Date.now();
 
         while (Date.now() - startTime < timeout) {
             try {
-                const finalState = await this.sdk.waitForCondition(s => {
+                await this.sdk.waitForCondition(s => {
                     if (s.interface?.isOpen === true || s.dialog?.isOpen === true) return true;
+                    // Detect "can't reach" early instead of waiting for full timeout
+                    if (this.helpers.checkCantReachMessage(msgBaseline)) return true;
                     return false;
                 }, Math.min(2000, timeout - (Date.now() - startTime)));
 
                 const currentState = this.sdk.getState();
 
+                // Check success before can't-reach — the interface may have opened
+                // on a retry even if a prior attempt generated a can't-reach message
                 if (currentState?.interface?.isOpen) {
                     return { success: true, message: `Bank opened (interfaceId: ${currentState.interface.interfaceId})` };
+                }
+
+                if (this.helpers.checkCantReachMessage(msgBaseline)) {
+                    return { success: false, message: "Can't reach bank", reason: 'cant_reach' };
                 }
 
                 if (currentState?.dialog?.isOpen) {
@@ -1267,29 +1361,34 @@ export class BotActions {
         return { success: false, message: 'Timeout waiting for bank interface to open', reason: 'timeout' };
     }
 
-    /** Close the bank interface. */
-    async closeBank(timeout: number = 5000): Promise<ActionResult> {
+    /** Close any open modal interface (bank, book, quest scroll, etc.). */
+    async closeInterface(timeout: number = 5000): Promise<ActionResult> {
         const state = this.sdk.getState();
         if (!state?.interface?.isOpen) {
-            return { success: true, message: 'Bank already closed' };
+            return { success: true, message: 'Interface already closed' };
         }
 
         await this.sdk.sendCloseModal();
 
         try {
             await this.sdk.waitForCondition(s => !s.interface?.isOpen, timeout);
-            return { success: true, message: 'Bank closed' };
+            return { success: true, message: 'Interface closed' };
         } catch {
             await this.sdk.sendCloseModal();
             await this.sdk.waitForTicks(1);
 
             const finalState = this.sdk.getState();
             if (!finalState?.interface?.isOpen) {
-                return { success: true, message: 'Bank closed (second attempt)' };
+                return { success: true, message: 'Interface closed (second attempt)' };
             }
 
-            return { success: false, message: `Bank close timeout - interface.isOpen=${finalState?.interface?.isOpen}` };
+            return { success: false, message: `Interface close timeout - interface.isOpen=${finalState?.interface?.isOpen}` };
         }
+    }
+
+    /** Close the bank interface. */
+    async closeBank(timeout: number = 5000): Promise<ActionResult> {
+        return this.closeInterface(timeout);
     }
 
     /** Deposit an item into the bank. Use -1 for all. */
@@ -1519,6 +1618,7 @@ export class BotActions {
         }
 
         const startTick = this.sdk.getState()?.tick || 0;
+        const msgBaseline = this.helpers.getMessageTick();
         const result = await this.sdk.sendInteractNpc(npc.index, attackOpt.opIndex);
         if (!result.success) {
             return { success: false, message: result.message };
@@ -1527,7 +1627,7 @@ export class BotActions {
         try {
             const finalState = await this.sdk.waitForCondition(state => {
                 for (const msg of state.gameMessages) {
-                    if (msg.tick > startTick) {
+                    if (msg.tick > msgBaseline) {
                         const text = msg.text.toLowerCase();
                         if (text.includes("someone else is fighting") || text.includes("already under attack")) {
                             return true;
@@ -1549,7 +1649,7 @@ export class BotActions {
 
             // Check for "already in combat"
             for (const msg of finalState.gameMessages) {
-                if (msg.tick > startTick) {
+                if (msg.tick > msgBaseline) {
                     const text = msg.text.toLowerCase();
                     if (text.includes("someone else is fighting") || text.includes("already under attack")) {
                         return { success: false, message: `${npc.name} is already in combat`, reason: 'already_in_combat' };
@@ -1577,6 +1677,7 @@ export class BotActions {
             return { success: false, message: 'No game state available' };
         }
         const startTick = startState.tick;
+        const msgBaseline = this.helpers.getMessageTick();
         const startMagicXp = startState.skills.find(s => s.name === 'Magic')?.experience ?? 0;
 
         const result = await this.sdk.sendSpellOnNpc(npc.index, spellComponent);
@@ -1587,7 +1688,7 @@ export class BotActions {
         try {
             const finalState = await this.sdk.waitForCondition(state => {
                 for (const msg of state.gameMessages) {
-                    if (msg.tick > startTick) {
+                    if (msg.tick > msgBaseline) {
                         const text = msg.text.toLowerCase();
                         if (text.includes("can't reach") || text.includes("cannot reach")) {
                             return true;
@@ -1608,7 +1709,7 @@ export class BotActions {
 
             // Check for "not enough runes" first
             for (const msg of finalState.gameMessages) {
-                if (msg.tick > startTick) {
+                if (msg.tick > msgBaseline) {
                     const text = msg.text.toLowerCase();
                     if (text.includes("do not have enough") || text.includes("don't have enough")) {
                         return { success: false, message: `Not enough runes to cast spell`, reason: 'no_runes' };
@@ -1616,7 +1717,7 @@ export class BotActions {
                 }
             }
 
-            if (this.helpers.checkCantReachMessage(startTick)) {
+            if (this.helpers.checkCantReachMessage(msgBaseline)) {
                 return { success: false, message: `Cannot reach ${npc.name} - obstacle in the way`, reason: 'out_of_reach' };
             }
 
@@ -1691,7 +1792,12 @@ export class BotActions {
             } else {
                 const regex = typeof choice === 'string' ? new RegExp(choice, 'i') : choice;
                 const match = dialog?.options.find(o => regex.test(o.text));
-                optionIndex = match?.index ?? 0;
+                if (!match) {
+                    const available = dialog?.options.map(o => `"${o.text}"`).join(', ') || 'none';
+                    console.warn(`[navigateDialog] No option matching ${regex} — available: ${available}`);
+                    continue;
+                }
+                optionIndex = match.index;
             }
 
             await this.sdk.sendClickDialog(optionIndex);
@@ -1720,6 +1826,7 @@ export class BotActions {
 
         const fletchingBefore = this.sdk.getSkill('Fletching')?.experience || 0;
         const startTick = this.sdk.getState()?.tick || 0;
+        const msgBaseline = this.helpers.getMessageTick();
 
         // Use knife on logs to open fletching dialog
         const result = await this.sdk.sendUseItemOnItem(knife.slot, logs.slot);
@@ -1893,7 +2000,7 @@ export class BotActions {
 
             // Check for failure messages
             for (const msg of state.gameMessages) {
-                if (msg.tick > startTick) {
+                if (msg.tick > msgBaseline) {
                     const text = msg.text.toLowerCase();
                     if (text.includes("need a higher") || text.includes("level to")) {
                         return { success: false, message: 'Fletching level too low' };
@@ -1940,6 +2047,7 @@ export class BotActions {
 
         const craftingBefore = this.sdk.getSkill('Crafting')?.experience || 0;
         const startTick = this.sdk.getState()?.tick || 0;
+        const msgBaseline = this.helpers.getMessageTick();
 
         // Use needle on leather to open crafting interface
         const result = await this.sdk.sendUseItemOnItem(needle.slot, leather.slot);
@@ -2035,7 +2143,7 @@ export class BotActions {
 
             // Check for failure messages
             for (const msg of state.gameMessages) {
-                if (msg.tick > startTick) {
+                if (msg.tick > msgBaseline) {
                     const text = msg.text.toLowerCase();
                     if (text.includes("need a crafting level") || text.includes("level to")) {
                         return { success: false, message: 'Crafting level too low', reason: 'level_too_low' };
@@ -2127,8 +2235,10 @@ export class BotActions {
         'dart tips': { component: 1123, slot: 0 },
         'arrowheads': { component: 1123, slot: 1 },
         'arrow tips': { component: 1123, slot: 1 },
+        'arrowtips': { component: 1123, slot: 1 },
         'throwing knives': { component: 1123, slot: 2 },
         'knives': { component: 1123, slot: 2 },
+        'nails': { component: 1123, slot: 3 },
     };
 
     /**
@@ -2201,6 +2311,7 @@ export class BotActions {
 
         const smithingBefore = this.sdk.getSkill('Smithing')?.experience || 0;
         const startTick = this.sdk.getState()?.tick || 0;
+        const msgBaseline = this.helpers.getMessageTick();
 
         // Use bar on anvil
         const useResult = await this.sdk.sendUseItemOnLoc(bar.slot, anvil.x, anvil.z, anvil.id);
@@ -2238,7 +2349,7 @@ export class BotActions {
             const currentXp = state.skills.find(s => s.name === 'Smithing')?.experience || 0;
             if (currentXp > smithingBefore) {
                 // Find the smithed item
-                const smithedItem = this.sdk.findInventoryItem(/dagger|axe|mace|helm|sword|shield|body|legs|skirt|claws|knives|bolts|arrowtips|arrowheads|arrow|dart/i);
+                const smithedItem = this.sdk.findInventoryItem(/dagger|axe|mace|helm|sword|shield|body|legs|skirt|claws|knives|bolts|arrowtips|arrowheads|arrow|dart|nails/i);
                 return {
                     success: true,
                     message: 'Smithed item successfully',
@@ -2250,7 +2361,7 @@ export class BotActions {
 
             // Check for failure messages
             for (const msg of state.gameMessages) {
-                if (msg.tick > startTick) {
+                if (msg.tick > msgBaseline) {
                     const text = msg.text.toLowerCase();
                     if (text.includes("need a smithing level") || text.includes("level to")) {
                         return { success: false, message: 'Smithing level too low', reason: 'level_too_low' };
@@ -2265,7 +2376,7 @@ export class BotActions {
             if (!state.interface?.isOpen) {
                 const finalXp = this.sdk.getSkill('Smithing')?.experience || 0;
                 if (finalXp > smithingBefore) {
-                    const smithedItem = this.sdk.findInventoryItem(/dagger|axe|mace|helm|sword|shield|body|legs|skirt|claws|knives|bolts|arrowtips|arrowheads|arrow|dart/i);
+                    const smithedItem = this.sdk.findInventoryItem(/dagger|axe|mace|helm|sword|shield|body|legs|skirt|claws|knives|bolts|arrowtips|arrowheads|arrow|dart|nails/i);
                     return {
                         success: true,
                         message: 'Smithed item successfully',
@@ -2309,6 +2420,19 @@ export class BotActions {
         target: NearbyLoc | string | RegExp,
         option: number | string | RegExp = 1,
     ): Promise<InteractLocResult> {
+        const resolvedLoc = this.helpers.resolveLocation(target, /./);
+        return this.helpers.withDoorRetry(
+            () => this._interactLocOnce(target, option),
+            (r) => r.reason === 'cant_reach',
+            2,
+            resolvedLoc ? { x: resolvedLoc.x, z: resolvedLoc.z } : undefined
+        );
+    }
+
+    private async _interactLocOnce(
+        target: NearbyLoc | string | RegExp,
+        option: number | string | RegExp = 1,
+    ): Promise<InteractLocResult> {
         await this.dismissBlockingUI();
 
         const loc = this.helpers.resolveLocation(target, /./);
@@ -2345,6 +2469,7 @@ export class BotActions {
         }
 
         const startTick = this.sdk.getState()?.tick || 0;
+        const msgBaseline = this.helpers.getMessageTick();
         let lastMoveTick = startTick;
         let lastX = this.sdk.getState()?.player?.x ?? 0;
         let lastZ = this.sdk.getState()?.player?.z ?? 0;
@@ -2358,7 +2483,7 @@ export class BotActions {
             const finalState = await this.sdk.waitForCondition(state => {
                 // Check for can't-reach messages
                 for (const msg of state.gameMessages) {
-                    if (msg.tick > startTick) {
+                    if (msg.tick > msgBaseline) {
                         const text = msg.text.toLowerCase();
                         if (text.includes("can't reach") || text.includes("cannot reach")) return true;
                     }
@@ -2381,7 +2506,7 @@ export class BotActions {
                 return false;
             }, 30000); // safety net only
 
-            if (this.helpers.checkCantReachMessage(startTick)) {
+            if (this.helpers.checkCantReachMessage(msgBaseline)) {
                 return { success: false, message: `Can't reach ${locNow.name}`, reason: 'cant_reach' };
             }
 
@@ -2405,6 +2530,16 @@ export class BotActions {
      * @param option - Option index or name regex to match (default: 1, the first option)
      */
     async interactNpc(
+        target: NearbyNpc | string | RegExp,
+        option: number | string | RegExp = 1,
+    ): Promise<InteractNpcResult> {
+        return this.helpers.withDoorRetry(
+            () => this._interactNpcOnce(target, option),
+            (r) => r.reason === 'cant_reach'
+        );
+    }
+
+    private async _interactNpcOnce(
         target: NearbyNpc | string | RegExp,
         option: number | string | RegExp = 1,
     ): Promise<InteractNpcResult> {
@@ -2444,6 +2579,7 @@ export class BotActions {
         }
 
         const startTick = this.sdk.getState()?.tick || 0;
+        const msgBaseline = this.helpers.getMessageTick();
         let lastMoveTick = startTick;
         let lastX = this.sdk.getState()?.player?.x ?? 0;
         let lastZ = this.sdk.getState()?.player?.z ?? 0;
@@ -2457,7 +2593,7 @@ export class BotActions {
             const finalState = await this.sdk.waitForCondition(state => {
                 // Check for can't-reach messages
                 for (const msg of state.gameMessages) {
-                    if (msg.tick > startTick) {
+                    if (msg.tick > msgBaseline) {
                         const text = msg.text.toLowerCase();
                         if (text.includes("can't reach") || text.includes("cannot reach")) return true;
                     }
@@ -2480,7 +2616,7 @@ export class BotActions {
                 return false;
             }, 30000); // safety net only
 
-            if (this.helpers.checkCantReachMessage(startTick)) {
+            if (this.helpers.checkCantReachMessage(msgBaseline)) {
                 return { success: false, message: `Can't reach ${npcNow.name}`, reason: 'cant_reach' };
             }
 
@@ -2520,6 +2656,7 @@ export class BotActions {
 
         const thievingBefore = this.sdk.getSkill('Thieving')?.experience || 0;
         const startTick = this.sdk.getState()?.tick || 0;
+        const msgBaseline = this.helpers.getMessageTick();
 
         const result = await this.sdk.sendInteractNpc(npc.index, pickOpt.opIndex);
         if (!result.success) {
@@ -2534,7 +2671,7 @@ export class BotActions {
 
                 // Check game messages for stun/catch or can't reach
                 for (const msg of state.gameMessages) {
-                    if (msg.tick > startTick) {
+                    if (msg.tick > msgBaseline) {
                         const text = msg.text.toLowerCase();
                         if (text.includes('stunned') || text.includes('caught') || text.includes('stun')) return true;
                         if (text.includes("can't reach") || text.includes('cannot reach')) return true;
@@ -2546,7 +2683,7 @@ export class BotActions {
 
             // Check what happened
             for (const msg of finalState.gameMessages) {
-                if (msg.tick > startTick) {
+                if (msg.tick > msgBaseline) {
                     const text = msg.text.toLowerCase();
                     if (text.includes("can't reach") || text.includes('cannot reach')) {
                         return { success: false, message: `Can't reach ${npc.name}`, reason: 'cant_reach' };
@@ -2800,6 +2937,7 @@ export class BotActions {
 
         const craftingBefore = this.sdk.getSkill('Crafting')?.experience || 0;
         const startTick = this.sdk.getState()?.tick || 0;
+        const msgBaseline = this.helpers.getMessageTick();
 
         // Walk to furnace if needed
         if (furnace.distance > 2) {
@@ -2855,7 +2993,7 @@ export class BotActions {
 
             // Check for failure messages
             for (const msg of state.gameMessages) {
-                if (msg.tick > startTick) {
+                if (msg.tick > msgBaseline) {
                     const text = msg.text.toLowerCase();
                     if (text.includes("need a crafting level") || text.includes("level to")) {
                         return { success: false, message: 'Crafting level too low', reason: 'level_too_low' };
@@ -2930,6 +3068,7 @@ export class BotActions {
 
         const magicBefore = this.sdk.getSkill('Magic')?.experience || 0;
         const startTick = this.sdk.getState()?.tick || 0;
+        const msgBaseline = this.helpers.getMessageTick();
 
         // Cast the enchant spell on the item
         const castResult = await this.sdk.sendSpellOnItem(item.slot, spellComponent);
@@ -2961,7 +3100,7 @@ export class BotActions {
 
             // Check for failure messages
             for (const msg of state.gameMessages) {
-                if (msg.tick > startTick) {
+                if (msg.tick > msgBaseline) {
                     const text = msg.text.toLowerCase();
                     if (text.includes("do not have enough") || text.includes("don't have enough") || text.includes("need runes")) {
                         return { success: false, message: 'Not enough runes', reason: 'no_runes' };
@@ -3034,6 +3173,7 @@ export class BotActions {
 
         const craftingBefore = this.sdk.getSkill('Crafting')?.experience || 0;
         const startTick = this.sdk.getState()?.tick || 0;
+        const msgBaseline = this.helpers.getMessageTick();
 
         // Use string on amulet
         const useResult = await this.sdk.sendUseItemOnItem(string.slot, amulet.slot);
@@ -3064,7 +3204,7 @@ export class BotActions {
 
             // Check for failure messages
             for (const msg of state.gameMessages) {
-                if (msg.tick > startTick) {
+                if (msg.tick > msgBaseline) {
                     const text = msg.text.toLowerCase();
                     if (text.includes("need a crafting level") || text.includes("level to")) {
                         return { success: false, message: 'Crafting level too low', reason: 'level_too_low' };

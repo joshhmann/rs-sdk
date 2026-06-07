@@ -7,7 +7,7 @@ length=3
 category=rc_ruins
 param=rune_type,1
 
-[rc_air_altar]
+[air_altar]
 name=Altar
 desc=A mysterious power emanates from this shrine.
 model=model_loc_1887
@@ -15,11 +15,10 @@ width=3
 length=3
 op1=Craft-rune
 anim=rune_altar
-hasalpha=yes
 category=rc_altar
 param=rune_type,1
 
-[rc_air_altar_exit_portal]
+[airtemple_exit_portal]
 name=Portal
 desc=A portal from this mystical place.
 model=model_loc_740
@@ -27,7 +26,6 @@ anim=glowingcircle
 op1=Use
 ambient=100
 contrast=100
-hasalpha=yes
 category=rc_exit_portal
 param=rune_type,1
 
@@ -40,7 +38,7 @@ length=3
 category=rc_ruins
 param=rune_type,2
 
-[rc_mind_altar]
+[mind_altar]
 name=Altar
 desc=A mysterious power emanates from this shrine.
 model=model_loc_2479
@@ -48,11 +46,10 @@ width=3
 length=3
 op1=Craft-rune
 anim=rune_altar
-hasalpha=yes
 category=rc_altar
 param=rune_type,2
 
-[rc_mind_altar_exit_portal]
+[mindtemple_exit_portal]
 name=Portal
 desc=A portal from this mystical place.
 model=model_loc_740
@@ -60,7 +57,6 @@ anim=glowingcircle
 op1=Use
 ambient=100
 contrast=100
-hasalpha=yes
 category=rc_exit_portal
 param=rune_type,2
 
@@ -73,7 +69,7 @@ length=3
 category=rc_ruins
 param=rune_type,3
 
-[rc_water_altar]
+[water_altar]
 name=Altar
 desc=A mysterious power emanates from this shrine.
 model=model_loc_2480
@@ -81,11 +77,10 @@ width=3
 length=3
 op1=Craft-rune
 anim=rune_altar
-hasalpha=yes
 category=rc_altar
 param=rune_type,3
 
-[rc_water_altar_exit_portal]
+[watertemple_exit_portal]
 name=Portal
 desc=A portal from this mystical place.
 model=model_loc_740
@@ -93,7 +88,6 @@ anim=glowingcircle
 op1=Use
 ambient=100
 contrast=100
-hasalpha=yes
 recol1s=31658
 recol1d=15871
 category=rc_exit_portal
@@ -108,7 +102,7 @@ length=3
 category=rc_ruins
 param=rune_type,4
 
-[rc_earth_altar]
+[earth_altar]
 name=Altar
 desc=A mysterious power emanates from this shrine.
 model=model_loc_2481
@@ -116,11 +110,10 @@ width=3
 length=3
 op1=Craft-rune
 anim=rune_altar
-hasalpha=yes
 category=rc_altar
 param=rune_type,4
 
-[rc_earth_altar_exit_portal]
+[earthtemple_exit_portal]
 name=Portal
 desc=A portal from this mystical place.
 model=model_loc_740
@@ -128,7 +121,6 @@ anim=glowingcircle
 op1=Use
 ambient=100
 contrast=100
-hasalpha=yes
 category=rc_exit_portal
 param=rune_type,4
 
@@ -141,7 +133,7 @@ length=3
 category=rc_ruins
 param=rune_type,5
 
-[rc_fire_altar]
+[fire_altar]
 name=Altar
 desc=A mysterious power emanates from this shrine.
 model=model_loc_2482
@@ -149,11 +141,10 @@ width=3
 length=3
 op1=Craft-rune
 anim=rune_altar
-hasalpha=yes
 category=rc_altar
 param=rune_type,5
 
-[rc_fire_altar_exit_portal]
+[firetemple_exit_portal]
 name=Portal
 desc=A portal from this mystical place.
 model=model_loc_740
@@ -161,7 +152,6 @@ anim=glowingcircle
 op1=Use
 ambient=100
 contrast=100
-hasalpha=yes
 recol1s=31658
 recol1d=18465
 category=rc_exit_portal
@@ -176,7 +166,7 @@ length=3
 category=rc_ruins
 param=rune_type,6
 
-[rc_body_altar]
+[body_altar]
 name=Altar
 desc=A mysterious power emanates from this shrine.
 model=model_loc_2483
@@ -184,11 +174,10 @@ width=3
 length=3
 op1=Craft-rune
 anim=rune_altar
-hasalpha=yes
 category=rc_altar
 param=rune_type,6
 
-[rc_body_altar_exit_portal]
+[bodytemple_exit_portal]
 name=Portal
 desc=A portal from this mystical place.
 model=model_loc_740
@@ -196,7 +185,6 @@ anim=glowingcircle
 op1=Use
 ambient=100
 contrast=100
-hasalpha=yes
 recol1s=31658
 recol1d=12488
 category=rc_exit_portal
@@ -211,7 +199,7 @@ length=3
 category=rc_ruins
 param=rune_type,7
 
-[rc_cosmic_altar]
+[cosmic_altar]
 name=Altar
 desc=A mysterious power emanates from this shrine.
 model=model_loc_2484
@@ -219,11 +207,10 @@ width=3
 length=3
 op1=Craft-rune
 anim=rune_altar
-hasalpha=yes
 category=rc_altar
 param=rune_type,7
 
-[rc_cosmic_altar_exit_portal]
+[cosmictemple_exit_portal]
 name=Portal
 desc=A portal from this mystical place.
 model=model_loc_740
@@ -231,7 +218,6 @@ anim=glowingcircle
 op1=Use
 ambient=100
 contrast=100
-hasalpha=yes
 category=rc_exit_portal
 param=rune_type,7
 
@@ -244,7 +230,7 @@ length=3
 category=rc_ruins
 param=rune_type,8
 
-[rc_death_altar]
+[death_altar]
 name=Altar
 desc=A mysterious power emanates from this shrine.
 model=model_loc_2488
@@ -252,7 +238,6 @@ width=3
 length=3
 op1=Craft-rune
 anim=rune_altar
-hasalpha=yes
 category=rc_altar
 param=rune_type,11
 
@@ -265,7 +250,7 @@ length=3
 category=rc_ruins
 param=rune_type,9
 
-[rc_nature_altar]
+[nature_altar]
 name=Altar
 desc=A mysterious power emanates from this shrine.
 model=model_loc_2486
@@ -273,11 +258,10 @@ width=3
 length=3
 op1=Craft-rune
 anim=rune_altar
-hasalpha=yes
 category=rc_altar
 param=rune_type,9
 
-[rc_nature_altar_exit_portal]
+[naturetemple_exit_portal]
 name=Portal
 desc=A portal from this mystical place.
 model=model_loc_740
@@ -285,7 +269,6 @@ anim=glowingcircle
 op1=Use
 ambient=100
 contrast=100
-hasalpha=yes
 category=rc_exit_portal
 param=rune_type,9
 
@@ -295,6 +278,8 @@ desc=There is a powerful presence about these ruins...
 model=model_loc_1888
 width=3
 length=3
+category=rc_ruins
+param=rune_type,10
 
 [deathtemple_ruined]
 name=Mysterious ruins
@@ -317,7 +302,7 @@ model=model_loc_1888
 width=3
 length=3
 
-[loc_2472]
+[lawtemple_exit_portal]
 name=Portal
 desc=A portal from this mystical place.
 model=model_loc_740
@@ -325,9 +310,10 @@ anim=glowingcircle
 op1=Use
 ambient=100
 contrast=100
-hasalpha=yes
+category=rc_exit_portal
+param=rune_type,10
 
-[rc_chaos_altar_exit_portal]
+[chaostemple_exit_portal]
 name=Portal
 desc=A portal from this mystical place.
 model=model_loc_740
@@ -335,11 +321,10 @@ anim=glowingcircle
 op1=Use
 ambient=100
 contrast=100
-hasalpha=yes
 category=rc_exit_portal
 param=rune_type,8
 
-[rc_death_altar_exit_portal]
+[deathtemple_exit_portal]
 name=Portal
 desc=A portal from this mystical place.
 model=model_loc_740
@@ -347,11 +332,10 @@ anim=glowingcircle
 op1=Use
 ambient=100
 contrast=100
-hasalpha=yes
 category=rc_exit_portal
 param=rune_type,11
 
-[loc_2476]
+[soultemple_exit_portal]
 name=Portal
 desc=A portal from this mystical place.
 model=model_loc_740
@@ -359,9 +343,8 @@ anim=glowingcircle
 op1=Use
 ambient=100
 contrast=100
-hasalpha=yes
 
-[loc_2477]
+[bloodtemple_exit_portal]
 name=Portal
 desc=A portal from this mystical place.
 model=model_loc_740
@@ -369,9 +352,8 @@ anim=glowingcircle
 op1=Use
 ambient=100
 contrast=100
-hasalpha=yes
 
-[loc_2485]
+[law_altar]
 name=Altar
 desc=A mysterious power emanates from this shrine.
 model=model_loc_2485
@@ -379,9 +361,10 @@ width=3
 length=3
 op1=Craft-rune
 anim=rune_altar
-hasalpha=yes
+category=rc_altar
+param=rune_type,10
 
-[rc_chaos_altar]
+[chaos_altar]
 name=Altar
 desc=A mysterious power emanates from this shrine.
 model=model_loc_2487
@@ -389,11 +372,10 @@ width=3
 length=3
 op1=Craft-rune
 anim=rune_altar
-hasalpha=yes
 category=rc_altar
 param=rune_type,8
 
-[loc_2489]
+[soul_altar]
 name=Altar
 desc=A mysterious power emanates from this shrine.
 model=model_loc_2489
@@ -401,9 +383,8 @@ width=3
 length=3
 op1=Craft-rune
 anim=rune_altar
-hasalpha=yes
 
-[loc_2490]
+[blood_altar]
 name=Altar
 desc=A mysterious power emanates from this shrine.
 model=model_loc_2490
@@ -411,9 +392,8 @@ width=3
 length=3
 op1=Craft-rune
 anim=rune_altar
-hasalpha=yes
 
-[loc_2492]
+[essencemine_portal]
 name=Portal
 desc=A portal from this mystical place.
 model=model_loc_740
@@ -421,4 +401,3 @@ anim=glowingcircle
 op1=Use
 ambient=100
 contrast=100
-hasalpha=yes

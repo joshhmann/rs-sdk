@@ -4,7 +4,6 @@ import ObjType from '#/cache/config/ObjType.js';
 import { CoordGrid } from '#/engine/CoordGrid.js';
 import { ObjDelayedRequest } from '#/engine/entity/ObjDelayedRequest.js';
 import { EntityLifeCycle } from '#/engine/entity/EntityLifeCycle.js';
-import { isClientConnected } from '#/engine/entity/NetworkPlayer.js';
 import Obj from '#/engine/entity/Obj.js';
 import Player from '#/engine/entity/Player.js';
 import { WealthEventItem } from '#/engine/entity/tracking/WealthEvent.js';
@@ -71,7 +70,7 @@ const InvOps: CommandHandlers = {
         }
 
         const player = state.activePlayer;
-        const overflow = count - player.invAdd(invType.id, objType.id, count, false);
+        const overflow = count - player.invAdd(invType.id, objType.id, count);
         if (overflow > 0) {
             if (!objType.stackable || overflow === 1) {
                 for (let i = 0; i < overflow; i++) {
@@ -231,9 +230,9 @@ const InvOps: CommandHandlers = {
         if (invType.scope === InvType.SCOPE_PERM) {
             // ammo drops are temp, without checking scope this spams in ranged combat
             state.activePlayer.addWealthEvent({
-                event_type: WealthEventType.DROP, 
-                account_items: [{ id: obj.id, name: objType.debugname, count: obj.count }], 
-                account_value: (obj.count * objType.cost)
+                event_type: WealthEventType.DROP,
+                account_items: [{ id: obj.id, name: objType.debugname, count: obj.count }],
+                account_value: obj.count * objType.cost
             });
         }
 
@@ -421,7 +420,7 @@ const InvOps: CommandHandlers = {
 
             const count = obj.count;
             const type = ObjType.get(obj.id);
-            const overflow = count - toPlayer.invAdd(toInv.type, type.id, count, false);
+            const overflow = count - toPlayer.invAdd(toInv.type, type.id, count);
             if (overflow > 0) {
                 if (!type.stackable || overflow === 1) {
                     for (let i = 0; i < overflow; i++) {
@@ -435,63 +434,57 @@ const InvOps: CommandHandlers = {
             const event = fromLogs.get(type.id);
             if (event) {
                 event.count += obj.count;
-            }
-            else {
+            } else {
                 fromLogs.set(obj.id, { id: obj.id, name: type.debugname, count: obj.count, cost: type.cost });
             }
 
             fromTotal += type.cost * obj.count;
         }
 
-        const toSession = isClientConnected(toPlayer) ? toPlayer.client.uuid : 'disconnected';
         const fromItems = Array.from(fromLogs.values().map(item => (({ cost: _cost, ...event }) => event)(item)));
 
         // Log wealth events
         if (fromInvType.debugname === 'dueloffer') {
             if (fromItems.length > 0) {
                 fromPlayer.addWealthEvent({
-                    event_type: WealthEventType.STAKE, 
-                    account_items: fromItems, 
-                    account_value: fromTotal, 
-                    recipient_id: toPlayer.account_id, 
-                    recipient_session: toSession
+                    event_type: WealthEventType.STAKE,
+                    account_items: fromItems,
+                    account_value: fromTotal,
+                    recipient_session: toPlayer.session
                 });
             }
-        }
-        else if (!secondary) {
+        } else if (!secondary) {
             let toTotal = 0;
             const toLogs: Map<number, WealthEventItem> = new Map();
 
             // log opposite side of trade
             const tradeInv = toPlayer.getInventory(from);
-            if (tradeInv) {       
+            if (tradeInv) {
                 for (let slot = 0; slot < tradeInv.capacity; slot++) {
                     const obj = tradeInv.get(slot);
                     if (!obj) {
                         continue;
-                    }   
-                    
+                    }
+
                     const type = ObjType.get(obj.id);
                     const event = toLogs.get(type.id);
                     if (event) {
                         event.count += obj.count;
-                    }
-                    else {
+                    } else {
                         toLogs.set(obj.id, { id: obj.id, name: type.debugname, count: obj.count });
                     }
                     toTotal += type.cost * obj.count;
                 }
             }
-            
+
             if (fromItems.length > 0 || toLogs.size > 0) {
                 const toItems = Array.from(toLogs.values());
                 fromPlayer.addWealthEvent({
-                    event_type: WealthEventType.TRADE, 
-                    account_items: fromItems, 
-                    account_value: fromTotal, 
-                    recipient_id: toPlayer.account_id, 
-                    recipient_session: toSession, 
-                    recipient_items: toItems, 
+                    event_type: WealthEventType.TRADE,
+                    account_items: fromItems,
+                    account_value: fromTotal,
+                    recipient_session: toPlayer.session,
+                    recipient_items: toItems,
                     recipient_value: toTotal
                 });
             }
@@ -522,7 +515,7 @@ const InvOps: CommandHandlers = {
             return;
         }
 
-        const overflow = count - player.invAdd(toInvType.id, objType.id, completed, false);
+        const overflow = count - player.invAdd(toInvType.id, objType.id, completed);
         if (overflow > 0) {
             if (!objType.stackable || overflow === 1) {
                 for (let i = 0; i < overflow; i++) {
@@ -562,7 +555,7 @@ const InvOps: CommandHandlers = {
         if (objType.certtemplate === -1 && objType.certlink >= 0) {
             finalObj = objType.certlink;
         }
-        const overflow = count - player.invAdd(toInvType.id, finalObj, completed, false);
+        const overflow = count - player.invAdd(toInvType.id, finalObj, completed);
         if (overflow > 0) {
             // should be a stackable cert already!
             World.addObj(new Obj(player.level, player.x, player.z, EntityLifeCycle.DESPAWN, finalObj, overflow), player.hash64, 200);
@@ -704,13 +697,11 @@ const InvOps: CommandHandlers = {
 
         const objType: ObjType = ObjType.get(obj.id);
         if (invType.scope === InvType.SCOPE_PERM) {
-            const p2Session = isClientConnected(toPlayer) ? toPlayer.client.uuid : 'disconnected';
             state.activePlayer.addWealthEvent({
-                event_type: WealthEventType.PVP, 
-                account_items: [{ id: obj.id, name: objType.debugname, count: obj.count }], 
-                account_value: (obj.count * objType.cost), 
-                recipient_id: toPlayer.account_id, 
-                recipient_session: p2Session
+                event_type: WealthEventType.PVP,
+                account_items: [{ id: obj.id, name: objType.debugname, count: obj.count }],
+                account_value: obj.count * objType.cost,
+                recipient_session: toPlayer.session
             });
         }
 
@@ -719,11 +710,13 @@ const InvOps: CommandHandlers = {
             return;
         }
 
+        const dropObj: Obj = new Obj(position.level, position.x, position.z, EntityLifeCycle.DESPAWN, obj.id, completed);
         if (!objType.tradeable) {
-            return; // stop untradables after delete.
+            // untradeables still drop to the primary player
+            World.addObj(dropObj, fromPlayer.hash64, duration);
+        } else {
+            World.addObj(dropObj, toPlayer.hash64, duration);
         }
-
-        World.addObj(new Obj(position.level, position.x, position.z, EntityLifeCycle.DESPAWN, obj.id, completed), toPlayer.hash64, duration);
     }),
 
     // https://x.com/JagexAsh/status/1778879334167548366
@@ -756,25 +749,25 @@ const InvOps: CommandHandlers = {
             const objType: ObjType = ObjType.get(obj.id);
 
             if (invType.scope === InvType.SCOPE_PERM) {
-
                 const event = wealthLog.get(obj.id);
                 if (event) {
                     event.count += obj.count;
-                }
-                else {
+                } else {
                     wealthLog.set(obj.id, { id: obj.id, name: objType.debugname, count: obj.count, cost: objType.cost });
                 }
-                
-                totalValue += obj.count * objType.cost; 
+
+                totalValue += obj.count * objType.cost;
             }
 
             inventory.delete(slot);
 
+            const dropObj: Obj = new Obj(position.level, position.x, position.z, EntityLifeCycle.DESPAWN, obj.id, obj.count);
             if (!objType.tradeable) {
-                continue; // stop untradables after delete.
+                // untradeables still drop to the primary player
+                World.addObj(dropObj, state.activePlayer.hash64, duration);
+            } else {
+                World.addObj(dropObj, Obj.NO_RECEIVER, duration);
             }
-
-            World.addObj(new Obj(position.level, position.x, position.z, EntityLifeCycle.DESPAWN, obj.id, obj.count), Obj.NO_RECEIVER, duration);
         }
 
         if (wealthLog.size > 0) {

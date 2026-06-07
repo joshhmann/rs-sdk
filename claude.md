@@ -1,7 +1,7 @@
 # RS-Agent Bot Guide
 
 You're here to play the mmo game through the progressive development of botting scripts, starting small then adapting to your desires and ideas.
-
+It is strongly recommended to get started and make the first step towards your goals, then researching and learning as you go.
 ## First Time Setup
 
 **Create a new bot using the setup script:**
@@ -10,16 +10,16 @@ Ask the user for a bot name (max 12 chars, alphanumeric). If they skip, use the 
 
 ```bash
 # With custom username
-bun scripts/create-bot.ts {username}
+bun bots/create-bot.ts {username}
 
 # Auto-generate random username
-bun scripts/create-bot.ts
+bun bots/create-bot.ts
 
 # Use local server (sets SERVER=localhost in bot.env)
-bun scripts/create-bot.ts {username} --local
+bun bots/create-bot.ts {username} --local
 
 # Use a custom server
-bun scripts/create-bot.ts {username} --server=myserver.example.com
+bun bots/create-bot.ts {username} --server=myserver.example.com
 ```
 
 This automatically creates:
@@ -27,14 +27,12 @@ This automatically creates:
 - `bots/{username}/lab_log.md` - Session notes template
 - `bots/{username}/script.ts` - Ready-to-run starter script
 
-## MCP Integration (Interactive Mode)
 
-The MCP server auto-discovers via `.mcp.json` when you open the project in Claude Code.
 
 ### Quick Start
 
 1. Install dependencies: `bun install` (from project root)
-2. Open project in Claude Code — approve the MCP server when prompted
+2. Open project in your AI coding tool — the MCP server will be available automatically
 3. Control your bot with suggestions.
 
 ### Tools
@@ -67,88 +65,9 @@ execute_code({
 })
 ```
 
-
-**When to use MCP vs Scripts:**
-- **MCP**: One-off fixes, probing, experimenting, quick state checks
-- **Scripts**: Anything running in a loop, long-running automation, reproducible tasks, version control
-
 See `mcp/README.md` for detailed API reference.
 
-## Script Runner API
-
-Scripts should leverage `runScript` to manage their connections, initialization, and timeouts.
-Make new scripts for different skills, for instance fishing.ts, woodcutting.ts, combat.ts, etc.
-You may also wish to import or re-use code between them.
-
-**Run scripts:**
-```bash
-bun bots/{username}/script.ts
-```
-
-The runner automatically finds `bot.env` in the same directory as the script. Alternative methods:
-- `bun script.ts {botname}` - loads `bots/{botname}/bot.env`
-- `bun --env-file=bots/{name}/bot.env script.ts` - explicit env file
-
-```typescript
-// bots/mybot/woodcutter.ts
-import { runScript } from '../../sdk/runner';
-
-const result = await runScript(async (ctx) => {
-  const { bot, sdk, log } = ctx;
-
-  let logsChopped = 0;
-
-  while (logsChopped < 50) {
-    const tree = sdk.findNearbyLoc(/^tree$/i);
-    if (tree) {
-      const r = await bot.chopTree(tree);
-      if (r.success) logsChopped++;
-    }
-  }
-
-  log(`Chopped ${logsChopped} logs`);
-  return { logsChopped };
-}, {
-  timeout: 3 * 60_000,  // 3 minute timeout
-});
-
-console.log(`Success: ${result.success}`);
-```
-
-### ScriptContext
-
-Scripts receive a context object with:
-
-| Property | Description |
-|----------|-------------|
-| `bot` | BotActions instance (high-level actions) |
-| `sdk` | BotSDK instance (low-level SDK) |
-| `log` | Captured logging (like console.log) |
-| `warn` | Captured warnings |
-| `error` | Captured errors |
-
-### RunOptions
-
-| Option | Default | Description |
-|--------|---------|-------------|
-| `timeout` | none | Overall timeout in ms |
-| `autoConnect` | true | Connect if not connected |
-| `disconnectAfter` | false | Disconnect when done |
-
-### RunResult
-
-```typescript
-interface RunResult {
-  success: boolean;
-  result?: any;           // Return value from script
-  error?: Error;          // If failed
-  duration: number;       // Total ms
-  logs: LogEntry[];       // Captured logs
-  finalState: BotWorldState;
-}
-```
-
-The runner automatically prints formatted world state after execution 
+Code runs in an async context with `bot` (BotActions) and `sdk` (BotSDK) available as globals.
 
 ## Session Workflow
 
@@ -194,16 +113,15 @@ Record observations in `lab_log.md`, then improve the script.
 
 | Duration | Use When |
 |----------|----------|
-| **10-30s** | New script, single actions, untested logic, debugging |
-| **2-5 min** | Validated approach, building confidence |
-| **10+ min** | Proven strategy, grinding runs. USE SPARINGLY |
+| **10s** | New script, single actions, untested logic, debugging |
+| **30s-1 min** | Validated approach, building confidence |
+| **5+ min** | Proven strategy, grinding runs. USE SPARINGLY |
 
 A failed 5-minute run wastes more time than five 30 second diagnostic runs. **Fail fast and start simple.**
 
-Be extremely cognizant of pathing issues. It's very common to have issues because of closed doors and gates.
-Look out for "I can't reach" messages - the solution is often to open closed gates. 
+Look out for "I can't reach" messages - the solution is often to open closed gates or that the item isn't accessible. 
 
-Read and grep in the learnings folder for tips.
+Read and grep in the learnings/ and wiki/ folder for tips, skill guides, item and npc locations, and shop information.
 
 ## SDK API Reference
 
@@ -310,10 +228,13 @@ sdk/
 
 learnings/
 ├── banking.md
-├── combat.md
-├── shops.md
-├── fletching.md
 └── ...etc
+
+wiki/
+├── npcs/
+├── items/
+├── skills/
+└── shops/
 
 ```
 
@@ -326,3 +247,6 @@ learnings/
 **"Can't reach"** - Path is blocked. Try walking closer first, or find a different target.
 
 **Wrong target** - Use more specific regex patterns: `/^tree$/i` not `/tree/i` (which matches "tree stump").
+
+
+Start small and build up!

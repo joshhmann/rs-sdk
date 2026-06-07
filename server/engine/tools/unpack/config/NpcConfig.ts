@@ -10,7 +10,7 @@ import { ConfigIdx } from './Common.js';
 import { listFilesExt } from '#tools/pack/Parse.js';
 
 function renameModel(id: number, name: string) {
-    const existingFiles = listFilesExt(`${Environment.BUILD_SRC_DIR}/models`, '.ob2');
+    const existingFiles = listFilesExt(`${Environment.build.srcDir}/models`, '.ob2');
 
     let model = ModelPack.getById(id);
     if (model.startsWith('model_')) {
@@ -26,7 +26,7 @@ function renameModel(id: number, name: string) {
 
         const filePath = existingFiles.find(x => x.endsWith(`/${model}.ob2`));
         if (filePath) {
-            fs.renameSync(filePath, `${Environment.BUILD_SRC_DIR}/models/npc/${name}.ob2`);
+            fs.renameSync(filePath, `${Environment.build.srcDir}/models/npc/${name}.ob2`);
         } else {
             console.error('Model not found on filesystem', 'npc', model);
         }
@@ -38,7 +38,7 @@ function renameModel(id: number, name: string) {
     return model;
 }
 
-export function unpackNpcConfig(config: ConfigIdx, id: number): string[] {
+export function unpackNpcConfig(config: ConfigIdx, id: number, compare?: ConfigIdx, modelRenameOffset?: number): string[] {
     const { dat, pos, len } = config;
     dat.pos = pos[id];
 
@@ -65,8 +65,13 @@ export function unpackNpcConfig(config: ConfigIdx, id: number): string[] {
 
                 modelIds.push(modelId);
 
-                const model = renameModel(modelId, debugname);
-                def.push(`model${index}=${model}`);
+                if ((compare && id < compare.size) || modelId < modelRenameOffset!) {
+                    const model = ModelPack.getById(modelId);
+                    def.push(`model${index}=${model}`);
+                } else {
+                    const model = renameModel(modelId, debugname);
+                    def.push(`model${index}=${model}`);
+                }
             }
         } else if (code === 2) {
             const name = dat.gjstr();
@@ -102,7 +107,7 @@ export function unpackNpcConfig(config: ConfigIdx, id: number): string[] {
 
             def.push(`walkanim=${walkanim},${walkanim_b},${walkanim_l},${walkanim_r}`);
         } else if (code >= 30 && code < 35) {
-            const index = (code - 30) + 1;
+            const index = code - 30 + 1;
             const op = dat.gjstr();
             def.push(`op${index}=${op}`);
         } else if (code === 40) {
@@ -121,8 +126,13 @@ export function unpackNpcConfig(config: ConfigIdx, id: number): string[] {
 
                 modelIds.push(modelId);
 
-                const model = renameModel(modelId, `${debugname}_head`);
-                def.push(`head${index}=${model}`);
+                if ((compare && id < compare.size) || modelId < modelRenameOffset!) {
+                    const model = ModelPack.getById(modelId);
+                    def.push(`head${index}=${model}`);
+                } else {
+                    const model = renameModel(modelId, `${debugname}_head`);
+                    def.push(`head${index}=${model}`);
+                }
             }
         } else if (code === 93) {
             def.push('minimap=no');
@@ -150,6 +160,9 @@ export function unpackNpcConfig(config: ConfigIdx, id: number): string[] {
         } else if (code === 102) {
             const headicon = dat.g2();
             def.push(`headicon=${headicon}`);
+        } else if (code === 103) {
+            const turnspeed = dat.g2();
+            def.push(`turnspeed=${turnspeed}`);
         } else {
             printWarning(`unknown npc code ${code}`);
         }

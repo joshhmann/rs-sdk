@@ -16,26 +16,33 @@ export class ActionHelpers {
     // ============ Door Retry Wrapper ============
 
     /**
-     * Wraps an action with automatic door-opening retry logic.
+     * Wraps an action with automatic door-opening and side-repositioning retry logic.
      * If the action fails due to "can't reach", tries to open a nearby door and retries.
+     * If no door is found and adjacentTarget is provided, tries approaching from different
+     * cardinal sides (N/S/E/W) before retrying — useful for wall-adjacent locations like
+     * fireplaces, ranges, and furnaces.
      *
      * @param action - Function that performs the action and returns a result
      * @param shouldRetry - Function that checks if the result indicates a "can't reach" failure
-     * @param maxRetries - Maximum number of door-open retries (default 2)
+     * @param maxRetries - Maximum number of retries (default 2)
+     * @param adjacentTarget - Optional coords to try approaching from different sides
      * @returns The action result (either successful or final failure)
      *
      * @example
      * ```ts
      * return this.helpers.withDoorRetry(
      *   () => this._pickupItemOnce(target),
-     *   (r) => r.reason === 'cant_reach'
+     *   (r) => r.reason === 'cant_reach',
+     *   2,
+     *   { x: loc.x, z: loc.z }
      * );
      * ```
      */
     async withDoorRetry<T extends { success: boolean }>(
         action: () => Promise<T>,
         shouldRetry: (result: T) => boolean,
-        maxRetries: number = 2
+        maxRetries: number = 2,
+        adjacentTarget?: { x: number; z: number }
     ): Promise<T> {
         for (let attempt = 0; attempt <= maxRetries; attempt++) {
             const result = await action();
@@ -45,16 +52,27 @@ export class ActionHelpers {
                 return result;
             }
 
-            // Try opening a door before retrying
             if (attempt < maxRetries) {
-                const doorOpened = await this.tryOpenBlockingDoor();
+                // Try approaching from a different side (common case for
+                // wall-adjacent locs like fireplaces, bank booths, furnaces)
+                if (adjacentTarget) {
+                    const repositioned = await this.walkAdjacentTo(adjacentTarget.x, adjacentTarget.z);
+                    if (repositioned) {
+                        await this.sdk.waitForTicks(1);
+                        continue;
+                    }
+                }
+
+                // Only try doors if repositioning didn't help, with a tight radius
+                // to avoid walking to random distant doors
+                const doorOpened = await this.tryOpenBlockingDoor(5);
                 if (doorOpened) {
                     await this.sdk.waitForTicks(1);
                     continue;
                 }
             }
 
-            // No door to open or max retries reached
+            // Nothing worked or max retries reached
             return result;
         }
 
@@ -82,78 +100,33 @@ export class ActionHelpers {
         }
 
         const door = openables[0]!;
-        const doorX = door.x;
-        const doorZ = door.z;
-        const doorId = door.id;
+        const result = await this.openDoorAt(door.x, door.z);
+        return result === 'opened' || result === 'already_open';
+    }
 
-        const openOpt = door.optionsWithIndex.find(o => /^open$/i.test(o.text));
-        if (!openOpt) {
-            return true; // Already open (has Close option instead)
-        }
-
-        // Walk to an adjacent tile first — sendInteractLoc uses server-side
-        // pathfinding which enforces closed door collision, so it can't route
-        // through the very door we're trying to open.
-        await this.walkAdjacentTo(door.x, door.z);
-
-        const startTick = this.sdk.getState()?.tick || 0;
-        await this.sdk.sendInteractLoc(door.x, door.z, door.id, openOpt.opIndex);
-
-        // Wait for door to open (with longer timeout to allow for walking)
-        try {
-            await this.sdk.waitForCondition(state => {
-                // Check for failure messages - locked doors, can't reach, etc.
-                for (const msg of state.gameMessages) {
-                    if (msg.tick > startTick) {
-                        const text = msg.text.toLowerCase();
-                        if (text.includes("can't reach") || text.includes("cannot reach") || text.includes("locked")) {
-                            return true; // Exit early — door can't be opened
-                        }
-                    }
-                }
-
-                const doorNow = state.nearbyLocs.find(l =>
-                    l.x === doorX && l.z === doorZ && l.id === doorId
-                );
-                if (!doorNow) return true; // Door gone = opened
-                return !doorNow.optionsWithIndex.some(o => /^open$/i.test(o.text)); // No "Open" option = opened
-            }, 8000); // Longer timeout to allow walking + opening
-
-            // Check if we got a "can't reach" message
-            const finalState = this.sdk.getState();
-            for (const msg of finalState?.gameMessages ?? []) {
-                if (msg.tick > startTick) {
-                    const text = msg.text.toLowerCase();
-                    if (text.includes("can't reach") || text.includes("cannot reach")) {
-                        return false;
-                    }
-                }
-            }
-
-            // Verify door actually opened
-            const doorAfter = finalState?.nearbyLocs.find(l =>
-                l.x === doorX && l.z === doorZ && l.id === doorId
-            );
-            if (!doorAfter || !doorAfter.optionsWithIndex.some(o => /^open$/i.test(o.text))) {
-                return true;
-            }
-
-            return false;
-        } catch {
-            return false;
-        }
+    /**
+     * Get the tick of the most recent game message (using server tick from messages,
+     * NOT state.tick which is a different counter). Use this before an action to
+     * establish a baseline for checkCantReachMessage.
+     */
+    getMessageTick(): number {
+        const state = this.sdk.getState();
+        if (!state?.gameMessages?.length) return 0;
+        // Messages are newest-first, so [0] has the highest tick
+        return state.gameMessages[0]!.tick;
     }
 
     /**
      * Check recent game messages for "can't reach" indicators.
-     * @param startTick - Only check messages after this tick
+     * @param sinceMessageTick - Only check messages with tick > this value.
+     *   IMPORTANT: Use getMessageTick() to get this value, NOT state.tick (different counter).
      */
-    checkCantReachMessage(startTick: number): boolean {
+    checkCantReachMessage(sinceMessageTick: number): boolean {
         const state = this.sdk.getState();
         if (!state) return false;
 
         for (const msg of state.gameMessages) {
-            if (msg.tick > startTick) {
+            if (msg.tick > sinceMessageTick) {
                 const text = msg.text.toLowerCase();
                 if (text.includes("can't reach") || text.includes("cannot reach") || text.includes("i can't reach")) {
                     return true;
@@ -172,7 +145,7 @@ export class ActionHelpers {
      * through the very door we're trying to open.
      * @returns true if already adjacent or successfully walked adjacent
      */
-    private async walkAdjacentTo(targetX: number, targetZ: number): Promise<boolean> {
+    async walkAdjacentTo(targetX: number, targetZ: number): Promise<boolean> {
         const playerState = this.sdk.getState()?.player;
         if (!playerState) return false;
 
@@ -184,6 +157,7 @@ export class ActionHelpers {
 
         if (isAdjacent) return true;
 
+        // Sort candidates by distance from player (closest first)
         const candidates = [
             { x: targetX, z: targetZ - 1 },
             { x: targetX, z: targetZ + 1 },
@@ -195,10 +169,21 @@ export class ActionHelpers {
             return da - db;
         });
 
-        const target = candidates[0]!;
-        await this.sdk.sendWalk(target.x, target.z, true);
-        await this.waitForMovementComplete(target.x, target.z, 1);
-        return true;
+        // Try each candidate — the closest one may be on the other side of a wall
+        for (const target of candidates) {
+            await this.sdk.sendWalk(target.x, target.z, true);
+            const result = await this.waitForMovementComplete(target.x, target.z, 1);
+            if (result.arrived) return true;
+
+            // Check if we ended up adjacent to the target even if not at the candidate tile
+            const nowX = result.x;
+            const nowZ = result.z;
+            const adjDx = Math.abs(nowX - targetX);
+            const adjDz = Math.abs(nowZ - targetZ);
+            if ((adjDx <= 1 && adjDz <= 1) && (adjDx + adjDz > 0)) return true;
+        }
+
+        return false;
     }
 
     // ============ Movement Helpers ============
@@ -345,46 +330,69 @@ export class ActionHelpers {
      * Used by proactive door-opening when the pathfinder identifies doors along the route.
      * @returns true if the door was opened (or was already open)
      */
-    async openDoorAt(doorX: number, doorZ: number): Promise<boolean> {
+    /**
+     * Try to open a door at the given coordinates.
+     * Returns: 'opened' | 'already_open' | 'locked' | 'cant_reach' | 'not_found'
+     */
+    async openDoorAt(doorX: number, doorZ: number): Promise<'opened' | 'already_open' | 'locked' | 'cant_reach' | 'not_found'> {
         const locs = this.sdk.getNearbyLocs();
         const door = locs.find(l => l.x === doorX && l.z === doorZ);
-        if (!door) return false;
+        if (!door) return 'not_found';
 
         const openOpt = door.optionsWithIndex.find(o => /^open$/i.test(o.text));
-        if (!openOpt) return true; // Already open (has Close option instead)
+        if (!openOpt) return 'already_open'; // Already open (has Close option instead)
 
-        // Walk to an adjacent tile using raw sendWalk to avoid recursion
-        await this.walkAdjacentTo(doorX, doorZ);
+        // Helper: attempt interact and wait for result
+        const tryInteract = async (): Promise<'opened' | 'locked' | 'cant_reach' | 'timeout'> => {
+            const msgBaseline = this.getMessageTick();
+            await this.sdk.sendInteractLoc(doorX, doorZ, door.id, openOpt.opIndex);
 
-        const startTick = this.sdk.getState()?.tick || 0;
-        await this.sdk.sendInteractLoc(doorX, doorZ, door.id, openOpt.opIndex);
-
-        try {
-            await this.sdk.waitForCondition(state => {
-                // Check for failure messages (locked, can't reach, etc.)
-                for (const msg of state.gameMessages) {
-                    if (msg.tick > startTick) {
-                        const text = msg.text.toLowerCase();
-                        if (text.includes("locked") || text.includes("can't reach") || text.includes("cannot reach")) {
-                            return true; // Exit early — door can't be opened
+            try {
+                let failReason: 'locked' | 'cant_reach' | null = null;
+                await this.sdk.waitForCondition(state => {
+                    for (const msg of state.gameMessages) {
+                        if (msg.tick > msgBaseline) {
+                            const text = msg.text.toLowerCase();
+                            if (text.includes("locked")) { failReason = 'locked'; return true; }
+                            if (text.includes("can't reach") || text.includes("cannot reach")) { failReason = 'cant_reach'; return true; }
                         }
                     }
-                }
-                const doorNow = state.nearbyLocs.find(l =>
+                    const doorNow = state.nearbyLocs.find(l =>
+                        l.x === doorX && l.z === doorZ && l.id === door.id
+                    );
+                    if (!doorNow) return true; // Door gone = opened
+                    return !doorNow.optionsWithIndex.some(o => /^open$/i.test(o.text));
+                }, 8000);
+
+                if (failReason) return failReason;
+
+                // Verify door actually opened
+                const doorAfter = this.sdk.getState()?.nearbyLocs.find(l =>
                     l.x === doorX && l.z === doorZ && l.id === door.id
                 );
-                if (!doorNow) return true; // Door gone = opened
-                return !doorNow.optionsWithIndex.some(o => /^open$/i.test(o.text));
-            }, 8000);
+                if (!doorAfter || !doorAfter.optionsWithIndex.some(o => /^open$/i.test(o.text))) {
+                    return 'opened';
+                }
+                return 'timeout';
+            } catch {
+                return 'timeout';
+            }
+        };
 
-            // Verify door actually opened
-            const doorAfter = this.sdk.getState()?.nearbyLocs.find(l =>
-                l.x === doorX && l.z === doorZ && l.id === door.id
-            );
-            return !doorAfter || !doorAfter.optionsWithIndex.some(o => /^open$/i.test(o.text));
-        } catch {
-            return false;
-        }
+        // Attempt 1: interact directly — let the game server walk us to the door
+        const result1 = await tryInteract();
+        if (result1 === 'opened') return 'opened';
+        if (result1 === 'locked') return 'locked';
+
+        // Attempt 2: walk adjacent manually then retry interact
+        // This handles cases where server-side pathfinding can't route through the closed door
+        const adjacent = await this.walkAdjacentTo(doorX, doorZ);
+        if (!adjacent) return 'cant_reach';
+
+        const result2 = await tryInteract();
+        if (result2 === 'opened') return 'opened';
+        if (result2 === 'locked') return 'locked';
+        return 'cant_reach';
     }
 
     // ============ Resolution Helpers ============

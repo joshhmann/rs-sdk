@@ -4,8 +4,8 @@ import zlib from 'zlib';
 
 import forge from 'node-forge';
 
-import DoublyLinkable from '#/util/DoublyLinkable.js';
-import LinkList from '#/util/LinkList.js';
+import DoublyLinkable from '#/datastruct/DoublyLinkable.js';
+import LinkList from '#/datastruct/LinkList.js';
 
 import PrivateKey = forge.pki.rsa.PrivateKey;
 import BigInteger = forge.jsbn.BigInteger;
@@ -14,7 +14,7 @@ export default class Packet extends DoublyLinkable {
     private static readonly CRC32_POLYNOMIAL: number = 0xedb88320;
 
     private static readonly crctable: Int32Array = new Int32Array(256);
-    private static readonly bitmask: Uint32Array = new Uint32Array(33);
+    static readonly bitmask: Uint32Array = new Uint32Array(33);
 
     private static readonly cacheMin: LinkList<Packet> = new LinkList();
     private static readonly cacheMid: LinkList<Packet> = new LinkList();
@@ -288,6 +288,18 @@ export default class Packet extends DoublyLinkable {
         this.pos += length;
     }
 
+    gVarInt(): number {
+        let byte = this.view.getUint8(this.pos++);
+        let result = 0;
+
+        while ((byte & 0x80) !== 0) {
+            result = (result | (byte & 0x7F)) << 7;
+            byte = this.view.getUint8(this.pos++);
+        }
+
+        return (result | byte) >>> 0;
+    }
+
     p1(value: number): void {
         this.view.setUint8(this.pos++, value);
     }
@@ -371,6 +383,26 @@ export default class Packet extends DoublyLinkable {
         } else {
             throw new Error('Error psmart out of range: ' + value);
         }
+    }
+
+    pVarInt(value: number) {
+        if ((value & 0xFFFFFF80) != 0) {
+            if ((value & 0xFFFFC000) != 0) {
+                if ((value & 0xFFE00000) != 0) {
+                    if ((value & 0xF0000000) != 0) {
+                        this.view.setUint8(this.pos++, (value >>> 28) | 0x80);
+                    }
+
+                    this.view.setUint8(this.pos++, (value >>> 21) | 0x80);
+                }
+
+                this.view.setUint8(this.pos++, (value >>> 14) | 0x80);
+            }
+
+            this.view.setUint8(this.pos++, (value >>> 7) | 0x80);
+        }
+
+        this.view.setUint8(this.pos++, value & 0x7F);
     }
 
     bitStart(): void {

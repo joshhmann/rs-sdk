@@ -34,7 +34,7 @@ walkanim=human_walk_f,human_walk_b,human_walk_l,human_walk_r
 readyanim=human_ready
 op1=Talk-to
 op2=Attack
-vislevel=42
+vislevel=47
 recol1s=15855
 recol1d=5285
 recol2s=10570
@@ -58,9 +58,12 @@ defence=40
 param=stabdefence,79
 param=slashdefence,63
 param=crushdefence,47
+param=attack_anim,human_unarmedkick
+param=attack_sound,unarmed_kick
 param=damagetype,^crush_style
 param=defend_sound,brassclash2
-// Stats match osrs version but our version Vislvl is different.
+// osrs stats and Vislvl match 1:1
+// attack anim https://web.archive.org/web/20221001173148/http://runers2.fc2web.com/taverlydungeon.htm
 // https://raw.githubusercontent.com/Joshua-F/osrs-dumps/refs/heads/master/config/dump.npc npc_300
 
 [lord_daquarius]
@@ -70,7 +73,7 @@ walkanim=human_walk_f,human_walk_b,human_walk_l,human_walk_r
 readyanim=human_ready
 op1=Talk-to
 op2=Attack
-vislevel=59
+vislevel=68
 recol1s=15855
 recol1d=3171
 recol2s=10570
@@ -105,8 +108,11 @@ param=slashdefence,64
 param=crushdefence,50
 // param=rangedefence,
 param=damagetype,^crush_style
+param=attack_anim,human_unarmedkick
+param=attack_sound,unarmed_kick
 // param=defend_sound,
 // huntmode=
 // huntrange=
 // TODO
+// attack anim guesses
 // https://raw.githubusercontent.com/Joshua-F/osrs-dumps/refs/heads/master/config/dump.npc npc_4929

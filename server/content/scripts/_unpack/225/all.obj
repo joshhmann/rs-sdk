@@ -9,6 +9,8 @@ model=model_2559_obj
 2dyan=1260
 2dxan=444
 weight=1lb
+manwear=model_4045,0
+womanwear=model_4045,0
 
 [fur]
 name=Fur
@@ -246,6 +248,7 @@ model=model_2724_obj
 2dzan=260
 2dxan=460
 weight=1lb
+param=party_clean_exempt,^true
 
 [edgevilledungeonkey]
 name=Brass key
@@ -607,7 +610,6 @@ desc=A highly magical staff.
 cost=42500
 iop2=Wield
 wearpos=righthand
-wearpos2=lefthand
 category=weapon_staff
 manwear=model_514_obj_wear,0
 womanwear=model_514_obj_wear,6
@@ -623,10 +625,18 @@ param=magicdefence,10
 param=strengthbonus,50
 param=attackrate,5
 param=ready_baseanim,human_staffready
+param=walk_f_baseanim,human_halberdwalk_f
+param=walk_b_baseanim,human_halberdwalk_b
+param=walk_l_baseanim,human_halberdwalk_l
+param=walk_r_baseanim,human_halberdwalk_r
+param=running_baseanim,human_halberdrunning
+param=turnonspot_baseanim,human_halberdturnonspot
 param=crushattack_anim,human_blunt_pound
 param=defend_anim,human_blunt_block
-// param=crushattack_anim,human_axe_chop
+param=crush_sound,staff_hit
 tradeable=no
+// param=crushattack_anim,human_axe_chop
+// osrs crush attack sound newstaff / crush attack sound is a guess.
 
 [brokenibanstaff]
 name=Broken iban staff
@@ -708,9 +718,9 @@ param=slashattack_anim,human_scythe_sweep
 param=crushattack_anim,human_scythe_lunge
 param=stabattack_anim,human_scythe_slash
 param=defend_anim,human_scythe_block
-param=stab_sound,scythe_slash
+param=stab_sound,scythe_stab
 param=slash_sound,scythe_slash
-param=crush_sound,scythe_slash
+param=crush_sound,scythe_double
 tradeable=no
 
 [archery_ticket]

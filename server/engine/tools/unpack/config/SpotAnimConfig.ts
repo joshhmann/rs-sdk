@@ -10,7 +10,7 @@ import { ConfigIdx } from './Common.js';
 import { listFilesExt } from '#tools/pack/Parse.js';
 
 function renameModel(id: number, name: string) {
-    const existingFiles = listFilesExt(`${Environment.BUILD_SRC_DIR}/models`, '.ob2');
+    const existingFiles = listFilesExt(`${Environment.build.srcDir}/models`, '.ob2');
 
     let model = ModelPack.getById(id);
     if (model.startsWith('model_')) {
@@ -26,7 +26,7 @@ function renameModel(id: number, name: string) {
 
         const filePath = existingFiles.find(x => x.endsWith(`/${model}.ob2`));
         if (filePath) {
-            fs.renameSync(filePath, `${Environment.BUILD_SRC_DIR}/models/spot/${name}.ob2`);
+            fs.renameSync(filePath, `${Environment.build.srcDir}/models/spot/${name}.ob2`);
         } else {
             console.error('Model not found on filesystem', 'spot', model);
         }
@@ -38,7 +38,7 @@ function renameModel(id: number, name: string) {
     return model;
 }
 
-export function unpackSpotAnimConfig(config: ConfigIdx, id: number): string[] {
+export function unpackSpotAnimConfig(config: ConfigIdx, id: number, compare?: ConfigIdx, modelRenameOffset?: number): string[] {
     const { dat, pos, len } = config;
 
     const debugname = SpotAnimPack.getById(id);
@@ -61,8 +61,13 @@ export function unpackSpotAnimConfig(config: ConfigIdx, id: number): string[] {
 
             modelIds.push(modelId);
 
-            const model = renameModel(modelId, debugname);
-            def.push(`model=${model}`);
+            if ((compare && id < compare.size) || modelId < modelRenameOffset!) {
+                const model = ModelPack.getById(modelId);
+                def.push(`model=${model}`);
+            } else {
+                const model = renameModel(modelId, debugname);
+                def.push(`model=${model}`);
+            }
         } else if (code === 2) {
             const seqId = dat.g2();
 

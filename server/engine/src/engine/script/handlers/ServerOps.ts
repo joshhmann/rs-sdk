@@ -1,25 +1,16 @@
-import { LocLayer, LocAngle } from '@2004scape/rsmod-pathfinder';
+import { LocLayer, LocAngle } from '#/engine/routefinder/index.js';
 
-import MesanimType from '#/cache/config/MesanimType.js';
-import { ParamHelper } from '#/cache/config/ParamHelper.js';
-import ParamType from '#/cache/config/ParamType.js';
 import SpotanimType from '#/cache/config/SpotanimType.js';
-import StructType from '#/cache/config/StructType.js';
 import { CoordGrid } from '#/engine/CoordGrid.js';
-import { HuntModeType } from '#/engine/entity/hunt/HuntModeType.js';
-import { HuntVis } from '#/engine/entity/hunt/HuntVis.js';
 import { MapFindSquareType } from '#/engine/entity/MapFindSquareType.js';
-import Npc from '#/engine/entity/Npc.js';
-import Player from '#/engine/entity/Player.js';
 import { isIndoors, isLineOfSight, isLineOfWalk, isMapBlocked } from '#/engine/GameMap.js';
-import { HuntIterator, NpcHuntAllCommandIterator } from '#/engine/script/ScriptIterators.js';
 import { ScriptOpcode } from '#/engine/script/ScriptOpcode.js';
-import { ActiveNpc, ActivePlayer } from '#/engine/script/ScriptPointer.js';
 import { CommandHandlers } from '#/engine/script/ScriptRunner.js';
 import ScriptState from '#/engine/script/ScriptState.js';
-import { check, CoordValid, FontTypeValid, HuntVisValid, LocTypeValid, MesanimValid, NumberNotNull, NumberPositive, ParamTypeValid, SeqTypeValid, SpotAnimTypeValid, StructTypeValid, FindSquareValid } from '#/engine/script/ScriptValidators.js';
+import { check, CoordValid, LocTypeValid, NumberPositive, SeqTypeValid, SpotAnimTypeValid, FindSquareValid } from '#/engine/script/ScriptValidators.js';
 import World from '#/engine/World.js';
 import Environment from '#/util/Environment.js';
+import Midi from '#/cache/midi/Midi.js';
 
 const ServerOps: CommandHandlers = {
     [ScriptOpcode.MAP_CLOCK]: state => {
@@ -27,7 +18,11 @@ const ServerOps: CommandHandlers = {
     },
 
     [ScriptOpcode.MAP_MEMBERS]: state => {
-        state.pushInt(Environment.NODE_MEMBERS ? 1 : 0);
+        state.pushInt(Environment.node.members ? 1 : 0);
+    },
+
+    [ScriptOpcode.MAP_LIVE]: state => {
+        state.pushInt(Environment.node.production ? 1 : 0);
     },
 
     [ScriptOpcode.MAP_PLAYERCOUNT]: state => {
@@ -48,93 +43,6 @@ const ServerOps: CommandHandlers = {
         }
 
         state.pushInt(count);
-    },
-
-    [ScriptOpcode.HUNTALL]: state => {
-        const [coord, distance, checkVis] = state.popInts(3);
-
-        const position: CoordGrid = check(coord, CoordValid);
-        check(distance, NumberNotNull);
-        const huntvis: HuntVis = check(checkVis, HuntVisValid);
-
-        state.huntIterator = new HuntIterator(World.currentTick, position.level, position.x, position.z, distance, huntvis, -1, -1, HuntModeType.PLAYER);
-    },
-
-    [ScriptOpcode.HUNTNEXT]: state => {
-        const result = state.huntIterator?.next();
-        if (!result || result.done) {
-            state.pushInt(0);
-            return;
-        }
-
-        if (!(result.value instanceof Player)) {
-            throw new Error('[ServerOps] huntnext command must result instance of Player.');
-        }
-
-        state.activePlayer = result.value;
-        state.pointerAdd(ActivePlayer[state.intOperand]);
-        state.pushInt(1);
-    },
-
-    [ScriptOpcode.NPC_HUNT]: state => {
-        const [coord, distance, checkVis] = state.popInts(3);
-
-        const position: CoordGrid = check(coord, CoordValid);
-        // const npcType: NpcType = check(npc, NpcTypeValid);
-        check(distance, NumberNotNull);
-        const huntvis: HuntVis = check(checkVis, HuntVisValid);
-
-        let closestNpc: Npc | null = null;
-        let closestDistance = Number.MAX_SAFE_INTEGER;
-
-        const npcs = new NpcHuntAllCommandIterator(World.currentTick, position.level, position.x, position.z, distance, huntvis);
-
-        for (const npc of npcs) {
-            if (npc) {
-                // Picks the smallest euclidean distance
-                const npcDistance = CoordGrid.euclideanSquaredDistance(position, npc);
-                if (npcDistance <= closestDistance) {
-                    closestNpc = npc;
-                    closestDistance = npcDistance;
-                }
-            }
-        }
-        if (!closestNpc) {
-            state.pushInt(0);
-            return;
-        }
-
-        state.activeNpc = closestNpc;
-        state.pointerAdd(ActiveNpc[state.intOperand]);
-        state.pushInt(1);
-    },
-
-    // https://x.com/JagexAsh/status/1796460129430433930
-    // https://x.com/JagexAsh/status/1821236327150710829
-    [ScriptOpcode.NPC_HUNTALL]: state => {
-        const [coord, distance, checkVis] = state.popInts(3);
-
-        const position: CoordGrid = check(coord, CoordValid);
-        check(distance, NumberNotNull);
-        const huntvis: HuntVis = check(checkVis, HuntVisValid);
-
-        state.huntIterator = new NpcHuntAllCommandIterator(World.currentTick, position.level, position.x, position.z, distance, huntvis);
-    },
-
-    [ScriptOpcode.NPC_HUNTNEXT]: state => {
-        const result = state.huntIterator?.next();
-        if (!result || result.done) {
-            state.pushInt(0);
-            return;
-        }
-
-        if (!(result.value instanceof Npc)) {
-            throw new Error('[ServerOps] npc_huntnext command must result instance of Npc.');
-        }
-
-        state.activeNpc = result.value;
-        state.pointerAdd(ActiveNpc[state.intOperand]);
-        state.pushInt(1);
     },
 
     [ScriptOpcode.INZONE]: state => {
@@ -166,7 +74,7 @@ const ServerOps: CommandHandlers = {
             return;
         }
 
-        if (!Environment.NODE_MEMBERS && !World.gameMap.isFreeToPlay(to.x, to.z)) {
+        if (!Environment.node.members && !World.gameMap.isFreeToPlay(to.x, to.z)) {
             state.pushInt(0);
             return;
         }
@@ -203,66 +111,6 @@ const ServerOps: CommandHandlers = {
         state.pushInt(check(state.popInt(), SeqTypeValid).duration);
     },
 
-    [ScriptOpcode.SPLIT_INIT]: state => {
-        const [maxWidth, linesPerPage, fontId] = state.popInts(3);
-        let text = state.popString();
-
-        const font = check(fontId, FontTypeValid);
-
-        // todo: later this needs to lookup by <p=id> instead of <p,name>
-        if (text.startsWith('<p,') && text.indexOf('>') !== -1) {
-            const mesanim = text.substring(3, text.indexOf('>'));
-            state.splitMesanim = MesanimType.getId(mesanim);
-            text = text.substring(text.indexOf('>') + 1);
-        } else {
-            state.splitMesanim = -1;
-        }
-
-        state.splitPages = [];
-        const lines = font.split(text, maxWidth);
-        while (lines.length > 0) {
-            state.splitPages.push(lines.splice(0, linesPerPage));
-        }
-    },
-
-    [ScriptOpcode.SPLIT_GET]: state => {
-        const [page, line] = state.popInts(2);
-
-        state.pushString(state.splitPages[page][line]);
-    },
-
-    [ScriptOpcode.SPLIT_PAGECOUNT]: state => {
-        state.pushInt(state.splitPages.length);
-    },
-
-    [ScriptOpcode.SPLIT_LINECOUNT]: state => {
-        const page = state.popInt();
-
-        state.pushInt(state.splitPages[page].length);
-    },
-
-    [ScriptOpcode.SPLIT_GETANIM]: state => {
-        const page = state.popInt();
-        if (state.splitMesanim === -1) {
-            state.pushInt(-1);
-            return;
-        }
-
-        state.pushInt(check(state.splitMesanim, MesanimValid).len[state.splitPages[page].length - 1]);
-    },
-
-    [ScriptOpcode.STRUCT_PARAM]: state => {
-        const [structId, paramId] = state.popInts(2);
-
-        const paramType: ParamType = check(paramId, ParamTypeValid);
-        const structType: StructType = check(structId, StructTypeValid);
-        if (paramType.isString()) {
-            state.pushString(ParamHelper.getStringParam(paramType.id, structType, paramType.defaultString));
-        } else {
-            state.pushInt(ParamHelper.getIntParam(paramType.id, structType, paramType.defaultInt));
-        }
-    },
-
     [ScriptOpcode.COORDX]: state => {
         state.pushInt(check(state.popInt(), CoordValid).x);
     },
@@ -282,6 +130,10 @@ const ServerOps: CommandHandlers = {
     [ScriptOpcode.MAP_BLOCKED]: state => {
         const coord: CoordGrid = check(state.popInt(), CoordValid);
 
+        if (!Environment.node.members && !World.gameMap.isFreeToPlay(coord.x, coord.z)) {
+            state.pushInt(1);
+            return;
+        }
         state.pushInt(isMapBlocked(coord.x, coord.z, coord.level) ? 1 : 0);
     },
 
@@ -302,7 +154,7 @@ const ServerOps: CommandHandlers = {
             return;
         }
 
-        if (!Environment.NODE_MEMBERS && !World.gameMap.isFreeToPlay(to.x, to.z)) {
+        if (!Environment.node.members && !World.gameMap.isFreeToPlay(to.x, to.z)) {
             state.pushInt(0);
             return;
         }
@@ -328,7 +180,7 @@ const ServerOps: CommandHandlers = {
             throw new Error(`attempted to use invalid player uid: ${uid}`);
         }
 
-        World.mapProjAnim(srcPos.level, srcPos.x, srcPos.z, player.x, player.z, -player.pid - 1, spotanimType.id, srcHeight * 4, dstHeight * 4, delay, duration, peak, arc);
+        World.mapProjAnim(srcPos.level, srcPos.x, srcPos.z, player.x, player.z, -player.slot - 1, spotanimType.id, srcHeight, dstHeight, delay, duration, peak, arc);
     },
 
     [ScriptOpcode.PROJANIM_NPC]: state => {
@@ -345,7 +197,7 @@ const ServerOps: CommandHandlers = {
             throw new Error(`attempted to use invalid npc uid: ${npcUid}`);
         }
 
-        World.mapProjAnim(srcPos.level, srcPos.x, srcPos.z, npc.x, npc.z, npc.nid + 1, spotanimType.id, srcHeight * 4, dstHeight * 4, delay, duration, peak, arc);
+        World.mapProjAnim(srcPos.level, srcPos.x, srcPos.z, npc.x, npc.z, npc.nid + 1, spotanimType.id, srcHeight, dstHeight, delay, duration, peak, arc);
     },
 
     [ScriptOpcode.PROJANIM_MAP]: state => {
@@ -355,65 +207,66 @@ const ServerOps: CommandHandlers = {
         const srcPos: CoordGrid = check(srcCoord, CoordValid);
         const dstPos: CoordGrid = check(dstCoord, CoordValid);
 
-        World.mapProjAnim(srcPos.level, srcPos.x, srcPos.z, dstPos.x, dstPos.z, 0, spotanimType.id, srcHeight * 4, dstHeight * 4, delay, duration, peak, arc);
+        World.mapProjAnim(srcPos.level, srcPos.x, srcPos.z, dstPos.x, dstPos.z, 0, spotanimType.id, srcHeight, dstHeight, delay, duration, peak, arc);
     },
 
     [ScriptOpcode.MAP_LOCADDUNSAFE]: state => {
         const coord: CoordGrid = check(state.popInt(), CoordValid);
+        // check south and west neighboring zones for big locs that bleed over...
+        // Maybe theres a smarter way to do this?
+        for (let x = -8; x <= 0; x += 8) {
+            for (let z = -8; z <= 0; z += 8) {
+                for (const loc of World.gameMap.getZone(coord.x + x, coord.z + z, coord.level).getAllLocsUnsafe()) {
+                    const type = check(loc.type, LocTypeValid);
 
-        for (const loc of World.gameMap.getZone(coord.x, coord.z, coord.level).getAllLocsUnsafe()) {
-            const type = check(loc.type, LocTypeValid);
-
-            if (type.active !== 1) {
-                continue;
-            }
-
-            const layer = loc.layer;
-
-            if (!loc.isActive && layer === LocLayer.WALL) {
-                continue;
-            }
-
-            if (layer === LocLayer.WALL) {
-                if (loc.x === coord.x && loc.z === coord.z) {
-                    state.pushInt(1);
-                    return;
-                }
-            } else if (layer === LocLayer.GROUND) {
-                const width = loc.angle === LocAngle.NORTH || loc.angle === LocAngle.SOUTH ? loc.length : loc.width;
-                const length = loc.angle === LocAngle.NORTH || loc.angle === LocAngle.SOUTH ? loc.width : loc.length;
-                for (let index = 0; index < width * length; index++) {
-                    const deltaX = loc.x + (index % width);
-                    const deltaZ = loc.z + ((index / width) | 0);
-                    if (deltaX === coord.x && deltaZ === coord.z) {
-                        state.pushInt(1);
-                        return;
+                    if (type.active !== 1) {
+                        continue;
                     }
-                }
-            } else if (layer === LocLayer.GROUND_DECOR) {
-                if (loc.x === coord.x && loc.z === coord.z) {
-                    state.pushInt(1);
-                    return;
+
+                    if (!loc.isActive && loc.layer === LocLayer.WALL) {
+                        continue;
+                    }
+                    const width = loc.angle === LocAngle.NORTH || loc.angle === LocAngle.SOUTH ? loc.length : loc.width;
+                    const length = loc.angle === LocAngle.NORTH || loc.angle === LocAngle.SOUTH ? loc.width : loc.length;
+                    for (let index = 0; index < width * length; index++) {
+                        const deltaX = loc.x + (index % width);
+                        const deltaZ = loc.z + ((index / width) | 0);
+                        if (deltaX === coord.x && deltaZ === coord.z) {
+                            state.pushInt(1);
+                            return;
+                        }
+                    }
                 }
             }
         }
         state.pushInt(0);
     },
 
-    [ScriptOpcode.NPCCOUNT]: state => {
-        state.pushInt(World.getTotalNpcs());
-    },
+    [ScriptOpcode.MAP_LOC]: state => {
+        const coord: CoordGrid = check(state.popInt(), CoordValid);
+        for (let x = -8; x <= 0; x += 8) {
+            for (let z = -8; z <= 0; z += 8) {
+                for (const loc of World.gameMap.getZone(coord.x + x, coord.z + z, coord.level).getAllLocsSafe()) {
+                    const type = check(loc.type, LocTypeValid);
 
-    [ScriptOpcode.ZONECOUNT]: state => {
-        state.pushInt(World.gameMap.getTotalZones());
-    },
+                    if (type.active !== 1) {
+                        continue;
+                    }
 
-    [ScriptOpcode.LOCCOUNT]: state => {
-        state.pushInt(World.gameMap.getTotalLocs());
-    },
-
-    [ScriptOpcode.OBJCOUNT]: state => {
-        state.pushInt(World.gameMap.getTotalObjs());
+                    const width = loc.angle === LocAngle.NORTH || loc.angle === LocAngle.SOUTH ? loc.length : loc.width;
+                    const length = loc.angle === LocAngle.NORTH || loc.angle === LocAngle.SOUTH ? loc.width : loc.length;
+                    for (let index = 0; index < width * length; index++) {
+                        const deltaX = loc.x + (index % width);
+                        const deltaZ = loc.z + ((index / width) | 0);
+                        if (deltaX === coord.x && deltaZ === coord.z) {
+                            state.pushInt(1);
+                            return;
+                        }
+                    }
+                }
+            }
+        }
+        state.pushInt(0);
     },
 
     [ScriptOpcode.MAP_FINDSQUARE]: state => {
@@ -422,7 +275,7 @@ const ServerOps: CommandHandlers = {
         check(maxRadius, NumberPositive);
         check(type, FindSquareValid);
         const origin: CoordGrid = check(coord, CoordValid);
-        const freeWorld = !Environment.NODE_MEMBERS;
+        const freeWorld = !Environment.node.members;
         if (maxRadius < 10) {
             if (type === MapFindSquareType.NONE) {
                 for (let i = 0; i < 50; i++) {
@@ -542,6 +395,12 @@ const ServerOps: CommandHandlers = {
         const coord = state.popInt();
 
         state.pushInt(World.gameMap.isMulti(coord) ? 1 : 0);
+    },
+
+    [ScriptOpcode.MIDI_LENGTH]: state => {
+        const track = state.popInt();
+
+        state.pushInt(Midi.getTickLength(track));
     }
 };
 

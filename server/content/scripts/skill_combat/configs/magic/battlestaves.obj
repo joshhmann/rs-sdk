@@ -25,9 +25,16 @@ param=magicdefence,10
 param=strengthbonus,32
 param=attackrate,5
 param=ready_baseanim,human_staffready
+param=walk_f_baseanim,human_halberdwalk_f
+param=walk_b_baseanim,human_halberdwalk_b
+param=walk_l_baseanim,human_halberdwalk_l
+param=walk_r_baseanim,human_halberdwalk_r
+param=running_baseanim,human_halberdrunning
+param=turnonspot_baseanim,human_halberdturnonspot
 param=crushattack_anim,human_staff_pummel
 param=defend_anim,human_staff_block
 param=crush_sound,staff_hit
+// osrs crush attack sound newstaff / crush attack sound is a guess.
 
 [fire_battlestaff]
 members=yes
@@ -61,9 +68,16 @@ param=magicdefence,10
 param=strengthbonus,35
 param=attackrate,5
 param=ready_baseanim,human_staffready
+param=walk_f_baseanim,human_halberdwalk_f
+param=walk_b_baseanim,human_halberdwalk_b
+param=walk_l_baseanim,human_halberdwalk_l
+param=walk_r_baseanim,human_halberdwalk_r
+param=running_baseanim,human_halberdrunning
+param=turnonspot_baseanim,human_halberdturnonspot
 param=crushattack_anim,human_stafforb_pummel
 param=defend_anim,human_stafforb_block
 param=crush_sound,staff_hit
+// osrs crush attack sound newstaff / crush attack sound is a guess.
 
 [water_battlestaff]
 members=yes
@@ -97,9 +111,16 @@ param=magicdefence,10
 param=strengthbonus,35
 param=attackrate,5
 param=ready_baseanim,human_staffready
+param=walk_f_baseanim,human_halberdwalk_f
+param=walk_b_baseanim,human_halberdwalk_b
+param=walk_l_baseanim,human_halberdwalk_l
+param=walk_r_baseanim,human_halberdwalk_r
+param=running_baseanim,human_halberdrunning
+param=turnonspot_baseanim,human_halberdturnonspot
 param=crushattack_anim,human_stafforb_pummel
 param=defend_anim,human_stafforb_block
 param=crush_sound,staff_hit
+// osrs crush attack sound newstaff / crush attack sound is a guess.
 
 [air_battlestaff]
 members=yes
@@ -131,9 +152,16 @@ param=magicdefence,10
 param=strengthbonus,35
 param=attackrate,5
 param=ready_baseanim,human_staffready
+param=walk_f_baseanim,human_halberdwalk_f
+param=walk_b_baseanim,human_halberdwalk_b
+param=walk_l_baseanim,human_halberdwalk_l
+param=walk_r_baseanim,human_halberdwalk_r
+param=running_baseanim,human_halberdrunning
+param=turnonspot_baseanim,human_halberdturnonspot
 param=crushattack_anim,human_stafforb_pummel
 param=defend_anim,human_stafforb_block
 param=crush_sound,staff_hit
+// osrs crush attack sound newstaff / crush attack sound is a guess.
 
 [earth_battlestaff]
 members=yes
@@ -167,6 +195,95 @@ param=magicdefence,10
 param=strengthbonus,35
 param=attackrate,5
 param=ready_baseanim,human_staffready
+param=walk_f_baseanim,human_halberdwalk_f
+param=walk_b_baseanim,human_halberdwalk_b
+param=walk_l_baseanim,human_halberdwalk_l
+param=walk_r_baseanim,human_halberdwalk_r
+param=running_baseanim,human_halberdrunning
+param=turnonspot_baseanim,human_halberdturnonspot
 param=crushattack_anim,human_stafforb_pummel
 param=defend_anim,human_stafforb_block
 param=crush_sound,staff_hit
+// osrs crush attack sound newstaff / crush attack sound is a guess.
+
+[lava_battlestaff]
+name=Lava battlestaff
+desc=It's a slightly magical stick.
+cost=17000
+model=obj_3053
+2dxof=-5
+2dyof=2
+2dzoom=1490
+2dyan=1400
+2dxan=148
+iop2=Wield
+manwear=model_534_obj_wear,0
+manwear2=obj_3053_manwear2
+womanwear=model_534_obj_wear,6
+womanwear2=obj_3053_manwear2
+members=yes
+wearpos=righthand
+category=weapon_staff
+weight=5lb
+param=stabattack,7
+param=slashattack,-1
+param=crushattack,28
+param=magicattack,10
+param=stabdefence,2
+param=slashdefence,3
+param=crushdefence,1
+param=magicdefence,10
+param=strengthbonus,35
+param=attackrate,5
+param=ready_baseanim,human_staffready
+param=walk_f_baseanim,human_halberdwalk_f
+param=walk_b_baseanim,human_halberdwalk_b
+param=walk_l_baseanim,human_halberdwalk_l
+param=walk_r_baseanim,human_halberdwalk_r
+param=running_baseanim,human_halberdrunning
+param=turnonspot_baseanim,human_halberdturnonspot
+param=crushattack_anim,human_stafforb_pummel
+param=defend_anim,human_stafforb_block
+param=crush_sound,staff_hit
+// osrs crush attack sound newstaff / crush attack sound is a guess.
+
+[mystic_lava_staff]
+name=Mystic lava staff
+desc=It's a slightly magical stick.
+cost=45000
+model=obj_3053
+2dxof=-5
+2dyof=2
+2dzoom=1490
+2dyan=1400
+2dxan=148
+iop2=Wield
+manwear=model_534_obj_wear,0
+manwear2=obj_3053_manwear2
+womanwear=model_534_obj_wear,6
+womanwear2=obj_3053_manwear2
+members=yes
+wearpos=righthand
+category=weapon_staff
+weight=5lb
+param=stabattack,10
+param=slashattack,-1
+param=crushattack,40
+param=magicattack,10
+param=stabdefence,2
+param=slashdefence,3
+param=crushdefence,1
+param=magicdefence,10
+param=strengthbonus,50
+param=attackrate,5
+param=ready_baseanim,human_staffready
+param=walk_f_baseanim,human_halberdwalk_f
+param=walk_b_baseanim,human_halberdwalk_b
+param=walk_l_baseanim,human_halberdwalk_l
+param=walk_r_baseanim,human_halberdwalk_r
+param=running_baseanim,human_halberdrunning
+param=turnonspot_baseanim,human_halberdturnonspot
+param=crushattack_anim,human_stafforb_pummel
+param=defend_anim,human_stafforb_block
+param=crush_sound,staff_hit
+// osrs crush attack sound newstaff / crush attack sound is a guess.

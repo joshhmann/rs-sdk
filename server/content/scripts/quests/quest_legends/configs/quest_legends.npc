@@ -2,7 +2,6 @@
 name=Death wing
 desc=A shadowy, barely visible flying entity from some evil place.
 size=2
-hasalpha=yes
 walkanim=bat_walk
 readyanim=bat_ready
 op2=Attack
@@ -142,11 +141,10 @@ param=strengthbonus,3
 param=damagetype,^crush_style
 param=attack_anim,human_staff_pummel
 param=defend_anim,human_staff_block
-param=attack_sound,staff_hit
-// osrs attack_sound staff_double
+param=attack_sound,staff_double
 // TODO: check respawn time.
 // osrs stats and Vislvl match 1:1
-// stats taken here https://raw.githubusercontent.com/Joshua-F/osrs-dumps/refs/heads/master/config/dump.npc npc_
+// https://raw.githubusercontent.com/Joshua-F/osrs-dumps/refs/heads/master/config/dump.npc npc_3957
 
 [ungadulu_bad]
 name=Ungadulu
@@ -157,7 +155,7 @@ resizeh=150
 resizev=150
 op1=Talk-to
 op2=Attack
-vislevel=179
+vislevel=169
 recol1s=24075
 recol1d=16609
 recol2s=14724
@@ -182,7 +180,7 @@ head1=model_52_idk_head
 head2=model_82_idk_head
 wanderrange=3
 maxrange=5
-// TODO respawnrate?
+// respawnrate=TODO
 hitpoints=150
 attack=147
 strength=147
@@ -194,10 +192,9 @@ param=strengthbonus,3
 param=damagetype,^crush_style
 param=attack_anim,human_staff_pummel
 param=defend_anim,human_staff_block
-param=attack_sound,staff_hit
-// osrs attack_sound staff_double
-// stats taken here https://raw.githubusercontent.com/Joshua-F/osrs-dumps/refs/heads/master/config/dump.npc npc_3958
-// Stats match osrs version but our version Vislvl is different.
+param=attack_sound,staff_double
+// osrs stats and Vislvl match 1:1
+// https://raw.githubusercontent.com/Joshua-F/osrs-dumps/refs/heads/master/config/dump.npc npc_3958
 
 [jungle_savage]
 name=Jungle Savage
@@ -205,7 +202,7 @@ desc=An aggresive native of the Kharazi jungle.
 walkanim=human_walk_f,human_walk_b,human_walk_l,human_walk_r
 readyanim=human_staffready
 op2=Attack
-vislevel=84
+vislevel=90
 recol1s=24075
 recol1d=18822
 recol2s=14801
@@ -242,8 +239,8 @@ param=damagetype,^stab_style
 param=attack_anim,human_spear_spike
 param=defend_anim,human_spear_def
 param=attack_sound,staff_stab
-// Stats match osrs version but our version Vislvl is different.
-// stats taken here https://raw.githubusercontent.com/Joshua-F/osrs-dumps/refs/heads/master/config/dump.npc npc_
+// osrs stats and Vislvl match 1:1
+// https://raw.githubusercontent.com/Joshua-F/osrs-dumps/refs/heads/master/config/dump.npc npc_3959
 
 [nezikchened]
 name=Nezikchened
@@ -282,7 +279,7 @@ param=death_drop,null
 huntmode=nezikchened
 huntrange=5
 // osrs stats and Vislvl match 1:1
-// stats taken here https://raw.githubusercontent.com/Joshua-F/osrs-dumps/refs/heads/master/config/dump.npc npc_3962
+// https://raw.githubusercontent.com/Joshua-F/osrs-dumps/refs/heads/master/config/dump.npc npc_3962
 
 [viyeldi]
 name=Viyeldi
@@ -318,16 +315,17 @@ param=strengthbonus,3
 param=damagetype,^crush_style
 param=attack_anim,human_staff_pummel
 param=defend_anim,human_staff_block
-param=attack_sound,staff_hit
-// osrs attack_sound staff_double
-// defend animation https://discord.com/channels/953326730632904844/1126857544523063367/1300620868782788709
+param=attack_sound,staff_double
+param=defend_sound,otherworld_hit
+param=death_sound,otherworld_death
+// osrs stats and Vislvl match 1:1
+// https://raw.githubusercontent.com/Joshua-F/osrs-dumps/refs/heads/master/config/dump.npc npc_3963
 
 [san_tojalon]
 name=San Tojalon
 desc=The spirit of a long dead warrior.
 walkanim=skeleton_trans_walk
 readyanim=skeleton_trans_ready
-hasalpha=yes
 op1=Talk-to
 op2=Attack
 vislevel=106
@@ -368,15 +366,14 @@ param=death_sound,skeleton_death
 param=death_drop,null
 huntmode=aggressive_melee
 huntrange=1
-// Stats match osrs version but our version Vislvl is different.
-// stats taken here https://raw.githubusercontent.com/Joshua-F/osrs-dumps/refs/heads/master/config/dump.npc npc_3964
+// osrs stats and Vislvl match 1:1
+// https://raw.githubusercontent.com/Joshua-F/osrs-dumps/refs/heads/master/config/dump.npc npc_3964
 
 [irvig_senay]
 name=Irvig Senay
 desc=The spirit of a long dead warrior.
 walkanim=skeleton_trans_walk
 readyanim=skeleton_trans_ready
-hasalpha=yes
 op1=Talk-to
 op2=Attack
 vislevel=100
@@ -417,17 +414,16 @@ param=death_drop,null
 huntmode=aggressive_melee
 huntrange=1
 // osrs stats and Vislvl match 1:1
-// stats taken here https://raw.githubusercontent.com/Joshua-F/osrs-dumps/refs/heads/master/config/dump.npc npc_3965
+// https://raw.githubusercontent.com/Joshua-F/osrs-dumps/refs/heads/master/config/dump.npc npc_3965
 
 [ranalph_devere]
 name=Ranalph Devere
 desc=The spirit of a long dead warrior.
 walkanim=skeleton_trans_walk
 readyanim=skeleton_trans_ready
-hasalpha=yes
 op1=Talk-to
 op2=Attack
-vislevel=95
+vislevel=92
 recol1s=15853
 recol1d=13609
 recol2s=7296
@@ -465,14 +461,14 @@ param=death_sound,skeleton_death
 param=death_drop,null
 huntmode=aggressive_melee
 huntrange=1
-// Stats match osrs version but our version Vislvl is different.
-// stats taken here https://raw.githubusercontent.com/Joshua-F/osrs-dumps/refs/heads/master/config/dump.npc npc_3966
+// osrs stats and Vislvl match 1:1
+// https://raw.githubusercontent.com/Joshua-F/osrs-dumps/refs/heads/master/config/dump.npc npc_3966
 
 [boulder_legends]
 name=Boulder
 desc=I wonder what this is doing here.
 size=2
-walkanim=rock_ready
+walkanim=boulder_rolling
 op1=Push
 vislevel=hide
 minimap=no
@@ -484,10 +480,8 @@ defaultmode=none
 [echned_zekin]
 name=Echned Zekin
 desc=A spirit of the underworld.
-hasalpha=yes
 walkanim=ghost_walk
 readyanim=ghost_ready
-hasalpha=yes
 op1=Talk-to
 vislevel=187
 model1=model_2961_npc
@@ -504,4 +498,4 @@ param=undead,^true
 param=death_anim,ghost_death
 param=death_sound,ghost_death
 param=death_drop,null
-// stats taken here https://raw.githubusercontent.com/Joshua-F/osrs-dumps/refs/heads/master/config/dump.npc npc_3968
+// https://raw.githubusercontent.com/Joshua-F/osrs-dumps/refs/heads/master/config/dump.npc npc_3968

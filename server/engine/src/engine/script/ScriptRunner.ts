@@ -19,6 +19,7 @@ import ObjOps from '#/engine/script/handlers/ObjOps.js';
 import PlayerOps from '#/engine/script/handlers/PlayerOps.js';
 import ServerOps from '#/engine/script/handlers/ServerOps.js';
 import StringOps from '#/engine/script/handlers/StringOps.js';
+import StructOps from '#/engine/script/handlers/StructOps.js';
 import ScriptFile from '#/engine/script/ScriptFile.js';
 import { ScriptOpcode, ScriptOpcodeNameMap } from '#/engine/script/ScriptOpcode.js';
 import ScriptPointer from '#/engine/script/ScriptPointer.js';
@@ -49,6 +50,7 @@ export default class ScriptRunner {
         ...EnumOps,
         ...StringOps,
         ...NumberOps,
+        ...StructOps,
         ...DbOps,
         ...DebugOps
     };
@@ -128,7 +130,7 @@ export default class ScriptRunner {
             state.execution = ScriptState.RUNNING;
 
             let start = 0;
-            if (Environment.NODE_DEBUG_PROFILE) {
+            if (Environment.node.debugProfile) {
                 start = performance.now() * 1000;
             }
 
@@ -148,13 +150,13 @@ export default class ScriptRunner {
                 const opcode = opcodes[++state.pc];
                 const handler = ScriptRunner.HANDLERS[opcode];
                 if (!handler) {
-                    throw new Error(`Unknown opcode ${opcode}`);
+                    throw new Error(`Unhandled command ${ScriptOpcodeNameMap.get(opcode) ?? opcode}`);
                 }
 
                 handler(state);
             }
 
-            if (Environment.NODE_DEBUG_PROFILE) {
+            if (Environment.node.debugProfile) {
                 const time: number = (performance.now() * 1000 - start) | 0;
                 if (time > 1000) {
                     const message: string = `Warning [cpu time]: Script: ${state.script.name}, time: ${time}us, opcount: ${state.opcount}`;
@@ -184,7 +186,7 @@ export default class ScriptRunner {
             }
 
             if (state.self instanceof Player) {
-                printError(`Player script error - pid:${state.self.pid} name:${state.self.username}`);
+                printError(`Player script error - username:${state.self.username}`);
 
                 state.self.wrappedMessageGame(`script error: ${err.message}`);
                 state.self.wrappedMessageGame(`file: ${state.script.fileName}`);
@@ -193,12 +195,12 @@ export default class ScriptRunner {
                 state.self.wrappedMessageGame(`    1: ${state.script.name} - ${state.script.fileName}:${state.script.lineNumber(state.pc)}`);
 
                 let trace = 1;
-                for (let i = state.debugFp - 1; i > 0; i--) {
+                for (let i = state.debugFp - 1; i >= 0; i--) {
                     const frame = state.debugFrames[i];
                     state.self.wrappedMessageGame(`    ${++trace}: ${frame.script.name} - ${frame.script.fileName}:${frame.script.lineNumber(frame.pc)}`);
                 }
 
-                if (Environment.NODE_PRODUCTION) {
+                if (Environment.node.production) {
                     console.warn(`[LOGOUT DEBUG] ScriptRunner: Script error caused logout for ${state.self.username} - script: ${state.script.name}`);
                     state.self.logout();
                     state.self.loggingOut = true;
@@ -206,7 +208,7 @@ export default class ScriptRunner {
             } else if (state.self instanceof Npc) {
                 printError(`NPC script error - nid:${state.self.nid} type:${state.self.type}`);
 
-                if (Environment.NODE_PRODUCTION) {
+                if (Environment.node.production) {
                     World.removeNpc(state.self, 0);
                 }
             }
@@ -219,7 +221,7 @@ export default class ScriptRunner {
             console.error(`    1: ${state.script.name} - ${state.script.fileName}:${state.script.lineNumber(state.pc)}`);
 
             let trace = 1;
-            for (let i = state.debugFp - 1; i > 0; i--) {
+            for (let i = state.debugFp - 1; i >= 0; i--) {
                 const frame = state.debugFrames[i];
                 console.error(`    ${++trace}: ${frame.script.name} - ${frame.script.fileName}:${frame.script.lineNumber(frame.pc)}`);
             }
